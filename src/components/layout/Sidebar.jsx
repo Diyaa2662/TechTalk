@@ -1,56 +1,82 @@
 import { useState } from "react";
 import {
   HomeIcon,
-  CompassIcon,
+  NewspaperIcon,
+  SearchIcon,
   UserIcon,
-  SettingsIcon,
+  BellIcon,
+  PlusCircleIcon,
   LogOutIcon,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import logo from "/src/assets/logo.png"; // غير المسار حسب مكان اللوجو
 
 const navItems = [
   { name: "Home", icon: HomeIcon, href: "/" },
-  { name: "Explore", icon: CompassIcon, href: "/explore" },
+  { name: "Blogs", icon: NewspaperIcon, href: "/blogs" },
+  { name: "Search", icon: SearchIcon, href: "/search" },
   { name: "Profile", icon: UserIcon, href: "/profile" },
-  { name: "Settings", icon: SettingsIcon, href: "/settings" },
+  { name: "Notifications", icon: BellIcon, href: "/notifications" },
 ];
 
 const Sidebar = () => {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div
-      className={`fixed left-0 top-0 h-screen z-50 transition-all duration-300 ${
-        isHovered ? "w-48" : "w-16"
-      }`}
+      className="fixed left-0 top-0 h-screen z-50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="h-full bg-darkShade text-white flex flex-col shadow-lg">
-        {/* Logo */}
-        <div className="p-4 border-b border-gray-700 mb-4">
-          <span
-            className={`font-bold text-xl text-yellowShade ${!isHovered && "hidden"}`}
-          >
-            TechTalk
-          </span>
-          {!isHovered && (
-            <span className="text-xl block text-center text-yellowShade">
-              💬
+      <div
+        className={`h-full bg-darkShade text-white flex flex-col shadow-lg transition-all duration-300 ease-out ${
+          isHovered ? "w-48" : "w-16"
+        }`}
+      >
+        {/* Logo - مثل باقي الأزرار أيقونة ثابتة ونص يظهر عند hover */}
+        <div className="px-2 py-4 border-b border-gray-700 mb-4">
+          <div className="flex items-center gap-4 px-2 py-2 rounded-lg group relative">
+            {/* اللوغو ثابت */}
+            <div className="min-w-[24px] flex justify-center">
+              <img src={logo} alt="TechTalk Logo" className="h-6 w-auto" />
+            </div>
+
+            {/* اسم المنصة يظهر عند hover */}
+            <span
+              className={`
+                text-base whitespace-nowrap font-bold text-yellowShade
+                transition-all duration-300 ease-out
+                ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+              `}
+            >
+              TechTalk
             </span>
-          )}
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1">
-          <ul className="space-y-2">
+        <nav className="flex-1 px-2">
+          <ul className="space-y-1">
             {navItems.map((item) => (
               <li key={item.name}>
                 <a
                   href={item.href}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors text-gray-300 hover:text-yellowShade"
+                  className="flex items-center gap-4 px-2 py-3 rounded-lg hover:bg-gray-800 transition-colors group relative"
                 >
-                  <item.icon size={24} />
-                  <span className={`${!isHovered && "hidden"} text-base`}>
+                  <div className="min-w-[24px]">
+                    <item.icon
+                      size={24}
+                      className="text-gray-300 group-hover:text-yellowShade transition-colors"
+                    />
+                  </div>
+                  <span
+                    className={`
+                      text-base whitespace-nowrap
+                      transition-all duration-300 ease-out
+                      ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+                    `}
+                  >
                     {item.name}
                   </span>
                 </a>
@@ -59,11 +85,43 @@ const Sidebar = () => {
           </ul>
         </nav>
 
+        {/* Create Post Button */}
+        <div className="px-2 pb-2">
+          <button className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-gray-800 transition-colors group relative">
+            <div className="min-w-[24px]">
+              <PlusCircleIcon size={24} className="text-yellowShade" />
+            </div>
+            <span
+              className={`
+                text-base whitespace-nowrap text-yellowShade font-medium
+                transition-all duration-300 ease-out
+                ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+              `}
+            >
+              Create Post
+            </span>
+          </button>
+        </div>
+
         {/* Logout button */}
         <div className="p-4 border-t border-gray-700">
-          <button className="flex items-center gap-4 px-4 py-3 w-full hover:bg-gray-800 rounded-lg transition-colors text-gray-300 hover:text-yellowShade">
-            <LogOutIcon size={24} />
-            <span className={`${!isHovered && "hidden"} text-base`}>
+          <button
+            onClick={() => navigate("/login")}
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-gray-800 transition-colors group relative"
+          >
+            <div className="min-w-[24px]">
+              <LogOutIcon
+                size={24}
+                className="text-gray-300 group-hover:text-yellowShade transition-colors"
+              />
+            </div>
+            <span
+              className={`
+                text-base whitespace-nowrap
+                transition-all duration-300 ease-out
+                ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+              `}
+            >
               Logout
             </span>
           </button>
