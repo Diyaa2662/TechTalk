@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "/src/assets/logo.png"; // غير المسار حسب مكان اللوجو
+import logo from "/src/assets/logo.png";
 
 const SplashScreen = ({ onFinish }) => {
   const [fadeOut, setFadeOut] = useState(false);

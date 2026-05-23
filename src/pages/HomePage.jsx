@@ -82,6 +82,15 @@ const HomePage = () => {
     );
   };
 
+  // تحديث حالة التعليقات في قائمة البوستات
+  const handleCommentUpdate = (postId, newCount) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, comments_count: newCount } : post,
+      ),
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -128,7 +137,12 @@ const HomePage = () => {
 
       <div className="space-y-5">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onLikeUpdate={handleLikeUpdate} />
+          <PostCard
+            key={post.id}
+            post={post}
+            onLikeUpdate={handleLikeUpdate}
+            onCommentUpdate={handleCommentUpdate}
+          />
         ))}
       </div>
 
