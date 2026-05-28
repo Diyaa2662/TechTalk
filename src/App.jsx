@@ -7,6 +7,7 @@ import SignupPage from "./pages/SignupPage";
 import OtpPage from "./pages/OtpPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SplashScreen from "./components/common/SplashScreen";
+import BlogsPage from "./pages/BlogsPage";
 
 // مكون لحماية الصفحات
 const PrivateRoute = ({ children }) => {
@@ -73,6 +74,16 @@ function App() {
             <PrivateRoute>
               <MainLayout>
                 <HomePage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/blogs"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <BlogsPage />
               </MainLayout>
             </PrivateRoute>
           }

@@ -1,14 +1,42 @@
-import { useState } from "react";
-import { Heart, MessageCircle, Share2, Code, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, MessageCircle, Bookmark, Code, Eye } from "lucide-react";
 import api from "../../services/api";
 import CommentsModal from "../comments/CommentsModal";
 
 const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
-  const [isLiked, setIsLiked] = useState(post.is_liked_by_user);
-  const [likesCount, setLikesCount] = useState(post.likes_count);
+  const [isLiked, setIsLiked] = useState(post.is_liked_by_user || false);
+  const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [liking, setLiking] = useState(false);
-  const [commentsCount, setCommentsCount] = useState(post.comments_count);
+  const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [viewRecorded, setViewRecorded] = useState(false);
+
+  // تسجيل مشاهدة البوست (مرة واحدة فقط)
+  useEffect(() => {
+    const recordView = async () => {
+      // نتحقق إذا كان البوست تمت مشاهدته قبل هيك في هذه الجلسة
+      const viewedKey = `post_viewed_${post.id}`;
+      const hasViewed = sessionStorage.getItem(viewedKey);
+
+      if (!hasViewed && !viewRecorded) {
+        try {
+          const response = await api.post("/views", {
+            type: "post",
+            id: post.id,
+          });
+          console.log("View recorded:", response.data);
+          setViewRecorded(true);
+          sessionStorage.setItem(viewedKey, "true");
+        } catch (error) {
+          console.error("Error recording view:", error);
+        }
+      }
+    };
+
+    recordView();
+  }, [post.id, viewRecorded]);
 
   // تنسيق التاريخ
   const formatDate = (dateString) => {
@@ -31,7 +59,6 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
     if (liking) return;
     setLiking(true);
 
-    // تحديث الواجهة فوراً (optimistic update)
     const newLikedState = !isLiked;
     const newLikesCount = newLikedState ? likesCount + 1 : likesCount - 1;
 
@@ -39,19 +66,41 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
     setLikesCount(newLikesCount);
 
     try {
-      // استدعاء endpoint toggle-like
       await api.post(`/posts/${post.id}/toggle-like`, {});
-
       if (onLikeUpdate) onLikeUpdate(post.id, newLikedState);
     } catch (error) {
-      // في حالة الخطأ، نرجع القيم كما كانت
       console.error("Like error:", error);
       setIsLiked(isLiked);
       setLikesCount(likesCount);
-
       alert("Failed to update like. Please try again.");
     } finally {
       setLiking(false);
+    }
+  };
+
+  // معالجة الحفظ
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+
+    try {
+      const response = await api.post("/saves", {
+        type: "post",
+        id: post.id,
+      });
+
+      if (response.data?.data?.saved) {
+        setIsSaved(true);
+      } else {
+        setIsSaved(false);
+      }
+
+      console.log("Save response:", response.data);
+    } catch (error) {
+      console.error("Save error:", error);
+      alert("Failed to save post. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -60,18 +109,6 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
     const newCount = commentsCount + 1;
     setCommentsCount(newCount);
     if (onCommentUpdate) onCommentUpdate(post.id, newCount);
-  };
-
-  // نسخ الرابط
-  const handleShare = async () => {
-    const url = `${window.location.origin}/post/${post.id}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard!");
-    } catch (err) {
-      console.error("Failed to copy:", err);
-      alert("Failed to copy link");
-    }
   };
 
   return (
@@ -106,7 +143,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
           {/* Views count */}
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <Eye size={14} />
-            <span>{post.views_count}</span>
+            <span>{post.views_count || 0}</span>
           </div>
         </div>
 
@@ -117,7 +154,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
 
         {/* Body */}
         <p className="text-gray-300 mb-3 leading-relaxed">
-          {post.body.length > 200
+          {post.body && post.body.length > 200
             ? `${post.body.substring(0, 200)}...`
             : post.body}
         </p>
@@ -199,12 +236,20 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
             <span className="text-sm">{commentsCount}</span>
           </button>
 
-          {/* Share Button */}
+          {/* Save Button */}
           <button
-            onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-500/10 transition-all duration-200"
+            onClick={handleSave}
+            disabled={saving}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all duration-200 ${
+              isSaved
+                ? "text-yellowShade bg-yellowShade/10"
+                : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"
+            } ${saving ? "scale-90" : "scale-100"} active:scale-75`}
           >
-            <Share2 size={18} />
+            <Bookmark
+              size={18}
+              className={`${isSaved ? "fill-yellowShade" : ""} transition-all duration-200`}
+            />
           </button>
         </div>
       </div>
