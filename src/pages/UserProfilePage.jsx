@@ -1,24 +1,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   MapPin,
   Link as LinkIcon,
   Calendar,
   BookOpen,
   FileText,
-  Edit3,
   Heart,
-  MoreHorizontal,
-  Activity,
-  Settings,
-  Shield,
-  UserX,
+  UserPlus,
+  UserCheck,
   Eye,
   MessageCircle,
-  Code,
+  Shield,
+  ShieldOff,
+  MoreHorizontal,
+  Flag,
+  UserX,
   X,
+  Code,
 } from "lucide-react";
 import api from "../services/api";
 
@@ -73,100 +74,78 @@ const LinkedInIcon = () => (
   </svg>
 );
 
-const ProfilePage = () => {
+const UserProfilePage = () => {
+  const { username } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("posts");
-  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followingLoading, setFollowingLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
 
-  // States for posts
+  // Posts states
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsPage, setPostsPage] = useState(1);
   const [postsHasMore, setPostsHasMore] = useState(false);
   const [postsLoadingMore, setPostsLoadingMore] = useState(false);
 
-  // States for blogs
+  // Blogs states
   const [blogs, setBlogs] = useState([]);
   const [blogsLoading, setBlogsLoading] = useState(false);
   const [blogsPage, setBlogsPage] = useState(1);
   const [blogsHasMore, setBlogsHasMore] = useState(false);
   const [blogsLoadingMore, setBlogsLoadingMore] = useState(false);
 
-  // States for saved
-  const [savedItems, setSavedItems] = useState([]);
-  const [savedLoading, setSavedLoading] = useState(false);
-  const [savedPage, setSavedPage] = useState(1);
-  const [savedHasMore, setSavedHasMore] = useState(false);
-  const [savedLoadingMore, setSavedLoadingMore] = useState(false);
-
-  // States for blocked users
-  const [blockedUsers, setBlockedUsers] = useState([]);
-  const [blockedLoading, setBlockedLoading] = useState(false);
-  const [unblockLoading, setUnblockLoading] = useState({});
-  const [showBlockedList, setShowBlockedList] = useState(false);
+  // Report states
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   const isLoadingRef = useRef(false);
-  const menuRef = useRef(null);
 
+  // جلب بيانات المستخدم
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/show-me");
-      setProfile(response.data.data);
+      const response = await api.get(`/users/${username}/profile`);
+      const profileData = response.data.data;
+      setProfile(profileData);
+      setIsFollowing(profileData.is_following || false);
+      setFollowersCount(profileData.followers_count || 0);
+      setFollowingCount(profileData.following_count || 0);
+
+      // تسجيل مشاهدة المستخدم
+      const viewedKey = `user_profile_viewed_${username}`;
+      const hasViewed = sessionStorage.getItem(viewedKey);
+
+      if (!hasViewed && profileData.id) {
+        try {
+          await api.post("/views", {
+            type: "profile",
+            id: profileData.id,
+          });
+          sessionStorage.setItem(viewedKey, "true");
+        } catch (error) {
+          console.error("Error recording view:", error);
+        }
+      }
     } catch (err) {
       console.error("Error fetching profile:", err);
-      setError("Failed to load profile. Please refresh the page.");
+      setError("User not found");
     } finally {
       setLoading(false);
     }
   };
 
-  // جلب قائمة المحظورين
-  const fetchBlockedUsers = async () => {
-    setBlockedLoading(true);
-    try {
-      const response = await api.get("/blocks");
-      setBlockedUsers(response.data.data || []);
-    } catch (err) {
-      console.error("Error fetching blocked users:", err);
-    } finally {
-      setBlockedLoading(false);
-    }
-  };
-
-  // إلغاء الحظر
-  const handleUnblock = async (userId, username) => {
-    if (!confirm(`Are you sure you want to unblock @${username}?`)) return;
-
-    setUnblockLoading((prev) => ({ ...prev, [userId]: true }));
-
-    try {
-      await api.delete(`/users/${username}/block`);
-      setBlockedUsers((prev) => prev.filter((user) => user.id !== userId));
-      alert(`@${username} has been unblocked.`);
-    } catch (error) {
-      console.error("Unblock error:", error);
-      alert("Failed to unblock user.");
-    } finally {
-      setUnblockLoading((prev) => ({ ...prev, [userId]: false }));
-    }
-  };
-
-  // إغلاق القائمة عند الضغط خارجها
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setShowOptionsMenu(false);
-      }
-    };
-    window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
-  }, []);
-
-  // جلب البوستات المنشورة
+  // جلب بوستات المستخدم
   const fetchUserPosts = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -174,7 +153,7 @@ const ProfilePage = () => {
 
     try {
       const response = await api.get(
-        `/users/${profile.username}/posts?page=${pageNum}&per_page=10`,
+        `/users/${username}/posts?page=${pageNum}&per_page=10`,
       );
       const newPosts = response.data.data;
       const pagination = response.data.pagination;
@@ -194,7 +173,7 @@ const ProfilePage = () => {
     }
   };
 
-  // جلب المقالات المنشورة
+  // جلب مقالات المستخدم
   const fetchUserBlogs = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -202,7 +181,7 @@ const ProfilePage = () => {
 
     try {
       const response = await api.get(
-        `/users/${profile.username}/blogs?page=${pageNum}&per_page=10`,
+        `/users/${username}/blogs?page=${pageNum}&per_page=10`,
       );
       const newBlogs = response.data.data;
       const pagination = response.data.pagination;
@@ -222,48 +201,15 @@ const ProfilePage = () => {
     }
   };
 
-  // جلب المحفوظات
-  const fetchSavedItems = async (pageNum = 1, append = false) => {
-    if (isLoadingRef.current) return;
-    isLoadingRef.current = true;
-    setSavedLoading(true);
-
-    try {
-      const [postsRes, blogsRes] = await Promise.all([
-        api.get(`/saved?type=post&page=${pageNum}&per_page=10`),
-        api.get(`/saved?type=blog&page=${pageNum}&per_page=10`),
-      ]);
-
-      const postsData = postsRes.data.data || [];
-      const blogsData = blogsRes.data.data || [];
-
-      const allItems = [...postsData, ...blogsData].sort(
-        (a, b) => new Date(b.saved_at) - new Date(a.saved_at),
-      );
-
-      if (append) {
-        setSavedItems((prev) => [...prev, ...allItems]);
-      } else {
-        setSavedItems(allItems);
-      }
-
-      const postsPagination = postsRes.data.pagination;
-      const blogsPagination = blogsRes.data.pagination;
-      setSavedHasMore(
-        postsPagination.has_more_pages || blogsPagination.has_more_pages,
-      );
-    } catch (err) {
-      console.error("Error fetching saved items:", err);
-    } finally {
-      setSavedLoading(false);
-      setSavedLoadingMore(false);
-      isLoadingRef.current = false;
+  useEffect(() => {
+    if (username) {
+      fetchProfile();
     }
-  };
+  }, [username]);
 
   // تحميل البيانات حسب التاب النشط
   useEffect(() => {
-    if (profile?.username) {
+    if (username && profile) {
       if (activeTab === "posts") {
         setPosts([]);
         setPostsPage(1);
@@ -272,17 +218,138 @@ const ProfilePage = () => {
         setBlogs([]);
         setBlogsPage(1);
         fetchUserBlogs(1, false);
-      } else if (activeTab === "saved") {
-        setSavedItems([]);
-        setSavedPage(1);
-        fetchSavedItems(1, false);
       }
     }
-  }, [activeTab, profile?.username]);
+  }, [activeTab, username, profile?.id]);
 
+  // متابعة المستخدم
+  const handleFollow = async () => {
+    if (followingLoading) return;
+    setFollowingLoading(true);
+
+    try {
+      const response = await api.post(`/users/${profile.username}/follow`);
+      setIsFollowing(response.data.data?.is_following || true);
+      setFollowersCount(
+        response.data.data?.followers_count || followersCount + 1,
+      );
+    } catch (error) {
+      console.error("Follow error:", error);
+      alert("Failed to follow user.");
+    } finally {
+      setFollowingLoading(false);
+    }
+  };
+
+  // إلغاء متابعة المستخدم
+  const handleUnfollow = async () => {
+    if (followingLoading) return;
+    setFollowingLoading(true);
+
+    try {
+      const response = await api.delete(`/users/${profile.username}/follow`);
+      setIsFollowing(response.data.data?.is_following || false);
+      setFollowersCount(
+        response.data.data?.followers_count || followersCount - 1,
+      );
+    } catch (error) {
+      console.error("Unfollow error:", error);
+      alert("Failed to unfollow user.");
+    } finally {
+      setFollowingLoading(false);
+    }
+  };
+
+  // حظر المستخدم
+  const handleBlock = async () => {
+    if (blockLoading) return;
+    setBlockLoading(true);
+
+    if (
+      !confirm(
+        `Are you sure you want to block @${profile.username}? They won't be able to interact with you.`,
+      )
+    ) {
+      setBlockLoading(false);
+      return;
+    }
+
+    try {
+      await api.post(`/users/${profile.username}/block`);
+      setIsBlocked(true);
+      alert(`@${profile.username} has been blocked.`);
+      navigate("/");
+    } catch (error) {
+      console.error("Block error:", error);
+      alert("Failed to block user.");
+    } finally {
+      setBlockLoading(false);
+      setShowMenu(false);
+    }
+  };
+
+  // التبليغ عن مستخدم
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      alert("Please provide a reason for reporting.");
+      return;
+    }
+
+    if (!profile?.id) {
+      alert("Unable to report user: User ID not found.");
+      return;
+    }
+
+    setReporting(true);
+    try {
+      await api.post("/reports", {
+        kind: "user",
+        id: profile.id,
+        reason: reportReason,
+        details: reportDetails || null,
+      });
+      alert("User reported successfully. Our team will review it.");
+      setReportModalOpen(false);
+      setReportReason("");
+      setReportDetails("");
+    } catch (error) {
+      console.error("Report error:", error);
+      alert("Failed to report user. Please try again.");
+    } finally {
+      setReporting(false);
+    }
+  };
+
+  // تحميل المزيد
+  const loadMore = () => {
+    if (activeTab === "posts") {
+      if (postsLoadingMore || !postsHasMore) return;
+      setPostsLoadingMore(true);
+      const nextPage = postsPage + 1;
+      setPostsPage(nextPage);
+      fetchUserPosts(nextPage, true);
+    } else if (activeTab === "blogs") {
+      if (blogsLoadingMore || !blogsHasMore) return;
+      setBlogsLoadingMore(true);
+      const nextPage = blogsPage + 1;
+      setBlogsPage(nextPage);
+      fetchUserBlogs(nextPage, true);
+    }
+  };
+
+  // كشف التمرير
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    const handleScroll = () => {
+      if (
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 500
+      ) {
+        loadMore();
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeTab, postsHasMore, blogsHasMore]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -328,41 +395,13 @@ const ProfilePage = () => {
     return null;
   };
 
-  // تحميل المزيد
-  const loadMore = () => {
-    if (activeTab === "posts") {
-      if (postsLoadingMore || !postsHasMore) return;
-      setPostsLoadingMore(true);
-      const nextPage = postsPage + 1;
-      setPostsPage(nextPage);
-      fetchUserPosts(nextPage, true);
-    } else if (activeTab === "blogs") {
-      if (blogsLoadingMore || !blogsHasMore) return;
-      setBlogsLoadingMore(true);
-      const nextPage = blogsPage + 1;
-      setBlogsPage(nextPage);
-      fetchUserBlogs(nextPage, true);
-    } else if (activeTab === "saved") {
-      if (savedLoadingMore || !savedHasMore) return;
-      setSavedLoadingMore(true);
-      const nextPage = savedPage + 1;
-      setSavedPage(nextPage);
-      fetchSavedItems(nextPage, true);
-    }
-  };
-
   useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.scrollY + window.innerHeight >=
-        document.documentElement.scrollHeight - 500
-      ) {
-        loadMore();
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeTab, postsHasMore, blogsHasMore, savedHasMore]);
+    const handleClickOutside = () => setShowMenu(false);
+    if (showMenu) {
+      window.addEventListener("click", handleClickOutside);
+      return () => window.removeEventListener("click", handleClickOutside);
+    }
+  }, [showMenu]);
 
   if (loading) {
     return (
@@ -379,12 +418,32 @@ const ProfilePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error || "Profile not found"}</p>
+          <p className="text-red-400 mb-3">{error || "User not found"}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => navigate("/")}
             className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
           >
-            Try Again
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isBlocked) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+            <UserX size={40} className="text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">User Blocked</h2>
+          <p className="text-gray-400 mb-4">You have blocked @{username}</p>
+          <button
+            onClick={() => navigate("/")}
+            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+          >
+            Back to Home
           </button>
         </div>
       </div>
@@ -393,8 +452,8 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-4">
-      {/* Cover Image - بدون زر تعديل */}
-      <div className="relative h-48 md:h-56 rounded-xl overflow-hidden mb-16">
+      {/* Cover Image */}
+      <div className="relative h-48 md:h-56 rounded-xl overflow-hidden">
         {profile.cover_image_url ? (
           <img
             src={profile.cover_image_url}
@@ -427,9 +486,9 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* Avatar - بدون زر تعديل، يظهر كامل */}
+      {/* Avatar */}
       <div className="relative px-6">
-        <div className="absolute -top-32 left-6 md:left-8">
+        <div className="absolute -top-16 left-6 md:left-8">
           <img
             src={profile.avatar_url}
             alt={profile.name}
@@ -501,53 +560,59 @@ const ProfilePage = () => {
             )}
           </div>
 
+          {/* Actions Buttons */}
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2">
-              <Edit3 size={16} />
-              Edit Profile
-            </button>
-
-            {/* Options Menu Button (3 dots) */}
-            <div className="relative" ref={menuRef}>
+            {isFollowing ? (
               <button
-                onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                onClick={handleUnfollow}
+                disabled={followingLoading}
+                className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+              >
+                <UserCheck size={18} />
+                {followingLoading ? "..." : "Following"}
+              </button>
+            ) : (
+              <button
+                onClick={handleFollow}
+                disabled={followingLoading}
+                className="px-5 py-2 bg-yellowShade hover:bg-yellowShade/90 text-darkShade rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+              >
+                <UserPlus size={18} />
+                {followingLoading ? "..." : "Follow"}
+              </button>
+            )}
+
+            {/* More Options Menu */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(!showMenu);
+                }}
                 className="p-2 rounded-lg hover:bg-white/10 transition-colors"
               >
                 <MoreHorizontal size={20} className="text-gray-400" />
               </button>
 
-              {showOptionsMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
                   <button
                     onClick={() => {
-                      setShowOptionsMenu(false);
-                      alert("Activity page coming soon");
+                      setShowMenu(false);
+                      setReportModalOpen(true);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
                   >
-                    <Activity size={16} />
-                    Activity
+                    <Flag size={16} />
+                    Report User
                   </button>
                   <button
-                    onClick={() => {
-                      setShowOptionsMenu(false);
-                      setShowBlockedList(true);
-                      fetchBlockedUsers();
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    onClick={handleBlock}
+                    disabled={blockLoading}
+                    className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
                   >
                     <Shield size={16} />
-                    Blocked Users
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowOptionsMenu(false);
-                      alert("Settings page coming soon");
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
-                  >
-                    <Settings size={16} />
-                    Settings
+                    {blockLoading ? "Blocking..." : "Block User"}
                   </button>
                 </div>
               )}
@@ -569,15 +634,11 @@ const ProfilePage = () => {
             <p className="text-xs text-gray-400">blogs</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-bold text-white">
-              {profile.followers_count || 0}
-            </p>
+            <p className="text-xl font-bold text-white">{followersCount}</p>
             <p className="text-xs text-gray-400">followers</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-bold text-white">
-              {profile.following_count || 0}
-            </p>
+            <p className="text-xl font-bold text-white">{followingCount}</p>
             <p className="text-xs text-gray-400">following</p>
           </div>
           <div className="text-center">
@@ -606,14 +667,10 @@ const ProfilePage = () => {
 
       {/* Tabs */}
       <div className="mt-10 border-t border-gray-700 pt-6">
-        <div className="flex gap-8 justify-center">
+        <div className="flex gap-12 justify-center">
           <button
             onClick={() => setActiveTab("posts")}
-            className={`pb-3 text-base font-medium transition-colors relative ${
-              activeTab === "posts"
-                ? "text-yellowShade"
-                : "text-gray-400 hover:text-white"
-            }`}
+            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "posts" ? "text-yellowShade" : "text-gray-400 hover:text-white"}`}
           >
             POSTS
             {activeTab === "posts" && (
@@ -622,27 +679,10 @@ const ProfilePage = () => {
           </button>
           <button
             onClick={() => setActiveTab("blogs")}
-            className={`pb-3 text-base font-medium transition-colors relative ${
-              activeTab === "blogs"
-                ? "text-yellowShade"
-                : "text-gray-400 hover:text-white"
-            }`}
+            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "blogs" ? "text-yellowShade" : "text-gray-400 hover:text-white"}`}
           >
             BLOGS
             {activeTab === "blogs" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("saved")}
-            className={`pb-3 text-base font-medium transition-colors relative ${
-              activeTab === "saved"
-                ? "text-yellowShade"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            SAVED
-            {activeTab === "saved" && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
             )}
           </button>
@@ -663,7 +703,7 @@ const ProfilePage = () => {
                 <FileText size={48} className="text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400">No posts yet</p>
                 <p className="text-gray-500 text-sm mt-1">
-                  Share your first post!
+                  This user hasn't posted anything yet
                 </p>
               </div>
             ) : (
@@ -741,7 +781,7 @@ const ProfilePage = () => {
                 <BookOpen size={48} className="text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400">No blogs yet</p>
                 <p className="text-gray-500 text-sm mt-1">
-                  Write your first blog!
+                  This user hasn't written any blogs yet
                 </p>
               </div>
             ) : (
@@ -793,138 +833,74 @@ const ProfilePage = () => {
             )}
           </>
         )}
-
-        {/* SAVED TAB */}
-        {activeTab === "saved" && (
-          <>
-            {savedLoading && savedItems.length === 0 ? (
-              <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-              </div>
-            ) : savedItems.length === 0 ? (
-              <div className="text-center py-12">
-                <Heart size={48} className="text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400">No saved items yet</p>
-                <p className="text-gray-500 text-sm mt-1">
-                  Save posts and blogs to see them here
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {savedItems.map((item, idx) => {
-                  const content = item.data;
-                  const isBlog = item.kind === "blog";
-                  return (
-                    <Link
-                      key={idx}
-                      to={
-                        isBlog ? `/blogs/${content.id}` : `/posts/${content.id}`
-                      }
-                      className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
-                            {isBlog ? "BLOG" : "POST"}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            Saved {formatRelativeDate(item.saved_at)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Heart size={12} />
-                            <span>{content.likes_count}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MessageCircle size={12} />
-                            <span>{content.comments_count}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <h3 className="text-white font-semibold mb-1">
-                        {content.title}
-                      </h3>
-                      <p className="text-gray-400 text-sm line-clamp-2">
-                        {isBlog ? content.subtitle : content.body}
-                      </p>
-                    </Link>
-                  );
-                })}
-                {savedLoadingMore && (
-                  <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
       </div>
 
-      {/* Blocked Users Modal */}
-      {showBlockedList && (
+      {/* Report Modal */}
+      {reportModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl mx-4">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Shield size={20} className="text-red-400" />
-                Blocked Users
-              </h2>
+          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Flag size={20} className="text-red-400" />
+                Report User
+              </h3>
               <button
-                onClick={() => setShowBlockedList(false)}
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
                 className="p-1 rounded-lg hover:bg-white/10 transition-colors"
               >
                 <X size={20} className="text-gray-400 hover:text-white" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
-              {blockedLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-                </div>
-              ) : blockedUsers.length === 0 ? (
-                <div className="text-center py-8">
-                  <UserX size={48} className="text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400">No blocked users</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    When you block someone, they'll appear here
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {blockedUsers.map((user) => (
-                    <div
-                      key={user.id}
-                      className="bg-white/5 rounded-lg p-3 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={user.avatar_url}
-                          alt={user.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                        <div>
-                          <h3 className="text-white font-medium">
-                            {user.name}
-                          </h3>
-                          <p className="text-gray-400 text-sm">
-                            @{user.username}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleUnblock(user.id, user.username)}
-                        disabled={unblockLoading[user.id]}
-                        className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm disabled:opacity-50"
-                      >
-                        {unblockLoading[user.id] ? "..." : "Unblock"}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Reason <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Why are you reporting this user?"
+                  rows="3"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Additional Details (Optional)
+                </label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Any additional information..."
+                  rows="2"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
+                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReport}
+                disabled={reporting}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {reporting ? "Reporting..." : "Report"}
+              </button>
             </div>
           </div>
         </div>
@@ -933,4 +909,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default UserProfilePage;

@@ -10,6 +10,9 @@ import {
   User,
   Tag,
   Calendar,
+  MoreHorizontal,
+  Flag,
+  X,
 } from "lucide-react";
 import api from "../services/api";
 import CommentsModal from "../components/comments/CommentsModal";
@@ -20,6 +23,7 @@ const BlogDetailsPage = () => {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showMenu, setShowMenu] = useState(false);
 
   // States for interactions
   const [isLiked, setIsLiked] = useState(false);
@@ -29,6 +33,34 @@ const BlogDetailsPage = () => {
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [liking, setLiking] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Report states
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reporting, setReporting] = useState(false);
+
+  // تسجيل مشاهدة المقال (مرة واحدة لكل مقال في الجلسة)
+  useEffect(() => {
+    const recordView = async () => {
+      const viewedKey = `blog_viewed_${id}`;
+      const hasViewed = sessionStorage.getItem(viewedKey);
+
+      if (!hasViewed) {
+        try {
+          await api.post("/views", {
+            type: "blog",
+            id: parseInt(id),
+          });
+          sessionStorage.setItem(viewedKey, "true");
+        } catch (error) {
+          console.error("Error recording view:", error);
+        }
+      }
+    };
+
+    recordView();
+  }, [id]);
 
   // جلب بيانات المقال
   const fetchBlog = async () => {
@@ -51,7 +83,17 @@ const BlogDetailsPage = () => {
 
   useEffect(() => {
     fetchBlog();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // إغلاق القائمة عند الضغط خارجها
+  useEffect(() => {
+    const handleClickOutside = () => setShowMenu(false);
+    if (showMenu) {
+      window.addEventListener("click", handleClickOutside);
+      return () => window.removeEventListener("click", handleClickOutside);
+    }
+  }, [showMenu]);
 
   // معالجة الإعجاب
   const handleLike = async () => {
@@ -94,6 +136,33 @@ const BlogDetailsPage = () => {
       setIsSaved(isSaved);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // معالجة التبليغ
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      alert("Please provide a reason for reporting.");
+      return;
+    }
+
+    setReporting(true);
+    try {
+      await api.post("/reports", {
+        kind: "blog",
+        id: parseInt(id),
+        reason: reportReason,
+        details: reportDetails || null,
+      });
+      alert("Blog reported successfully. Our team will review it.");
+      setReportModalOpen(false);
+      setReportReason("");
+      setReportDetails("");
+    } catch (error) {
+      console.error("Report error:", error);
+      alert("Failed to report blog. Please try again.");
+    } finally {
+      setReporting(false);
     }
   };
 
@@ -201,15 +270,45 @@ const BlogDetailsPage = () => {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-sm text-gray-500">
-              <Eye size={14} />
-              <span>{blog.views_count || 0} views</span>
+            {/* Stats */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 text-sm text-gray-500">
+                <Eye size={14} />
+                <span>{blog.views_count || 0} views</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm text-gray-500">
+                <Clock size={14} />
+                <span>{blog.reading_time}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1 text-sm text-gray-500">
-              <Clock size={14} />
-              <span>{blog.reading_time}</span>
+
+            {/* 3 Dots Menu */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(!showMenu);
+                }}
+                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <MoreHorizontal size={18} className="text-gray-400" />
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-1 w-40 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      setReportModalOpen(true);
+                    }}
+                    className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                  >
+                    <Flag size={14} />
+                    Report Blog
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -294,6 +393,77 @@ const BlogDetailsPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {reportModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Flag size={20} className="text-red-400" />
+                Report Blog
+              </h3>
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
+                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <X size={20} className="text-gray-400 hover:text-white" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Reason <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Why are you reporting this blog?"
+                  rows="3"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Additional Details (Optional)
+                </label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Any additional information..."
+                  rows="2"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
+                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReport}
+                disabled={reporting}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {reporting ? "Reporting..." : "Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Comments Modal */}
       <CommentsModal

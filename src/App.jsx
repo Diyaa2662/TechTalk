@@ -12,7 +12,9 @@ import BlogsPage from "./pages/BlogsPage";
 import BlogDetailsPage from "./pages/BlogDetailsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ProfilePage from "./pages/ProfilePage";
+import UserProfilePage from "./pages/UserProfilePage";
 import CreatePostPage from "./pages/CreatePostPage";
+import SearchPage from "./pages/SearchPage";
 
 // مكون لحماية الصفحات
 const PrivateRoute = ({ children }) => {
@@ -138,11 +140,31 @@ function App() {
           }
         />
         <Route
+          path="/profile/:username"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <UserProfilePage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/create-post"
           element={
             <PrivateRoute>
               <MainLayout>
                 <CreatePostPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <SearchPage />
               </MainLayout>
             </PrivateRoute>
           }

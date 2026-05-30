@@ -1,6 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Bookmark, Code, Eye, User } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Bookmark,
+  Code,
+  Eye,
+  User,
+  MoreHorizontal,
+  Flag,
+  X,
+} from "lucide-react";
 import api from "../services/api";
 import CommentsModal from "../components/comments/CommentsModal";
 
@@ -13,6 +23,46 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(post.is_saved || false);
   const [saving, setSaving] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reporting, setReporting] = useState(false);
+
+  const menuRef = useRef(null);
+
+  // تسجيل مشاهدة البوست (مرة واحدة لكل بوست في الجلسة)
+  useEffect(() => {
+    const recordView = async () => {
+      const viewedKey = `post_viewed_${post.id}`;
+      const hasViewed = sessionStorage.getItem(viewedKey);
+
+      if (!hasViewed) {
+        try {
+          await api.post("/views", {
+            type: "post",
+            id: post.id,
+          });
+          sessionStorage.setItem(viewedKey, "true");
+        } catch (error) {
+          console.error("Error recording view:", error);
+        }
+      }
+    };
+
+    recordView();
+  }, [post.id]);
+
+  // إغلاق القائمة عند الضغط خارجها
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
 
   // تنسيق التاريخ
   const formatDate = (dateString) => {
@@ -89,6 +139,33 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
     }
   };
 
+  // معالجة التبليغ
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      alert("Please provide a reason for reporting.");
+      return;
+    }
+
+    setReporting(true);
+    try {
+      await api.post("/reports", {
+        kind: "post",
+        id: post.id,
+        reason: reportReason,
+        details: reportDetails || null,
+      });
+      alert("Post reported successfully. Our team will review it.");
+      setReportModalOpen(false);
+      setReportReason("");
+      setReportDetails("");
+    } catch (error) {
+      console.error("Report error:", error);
+      alert("Failed to report post. Please try again.");
+    } finally {
+      setReporting(false);
+    }
+  };
+
   // تحديث عدد التعليقات
   const handleCommentAdded = () => {
     const newCount = commentsCount + 1;
@@ -124,14 +201,41 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
             </div>
           </div>
 
-          {/* Views count */}
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <Eye size={14} />
-            <span>{post.views_count || 0}</span>
+          <div className="flex items-center gap-2">
+            {/* Views count */}
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <Eye size={14} />
+              <span>{post.views_count || 0}</span>
+            </div>
+
+            {/* 3 Dots Menu */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <MoreHorizontal size={16} className="text-gray-400" />
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-1 w-40 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      setReportModalOpen(true);
+                    }}
+                    className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                  >
+                    <Flag size={14} />
+                    Report Post
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Title - رابط لصفحة التفاصيل */}
+        {/* Title */}
         <Link to={`/posts/${post.id}`}>
           <h3 className="text-xl font-bold text-white mb-2 hover:text-yellowShade transition-colors cursor-pointer">
             {post.title}
@@ -162,7 +266,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
           </div>
         )}
 
-        {/* Photos - تعديل مهم: photos هي مصفوفة من الكائنات {id, url, sort_order} */}
+        {/* Photos */}
         {post.photos && post.photos.length > 0 && (
           <div
             className={`grid gap-2 mb-3 ${post.photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
@@ -194,7 +298,6 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
 
         {/* Actions Buttons */}
         <div className="flex items-center justify-around pt-3 border-t border-gray-700">
-          {/* Like Button */}
           <button
             onClick={handleLike}
             disabled={liking}
@@ -213,7 +316,6 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
             <span className="text-sm">{likesCount}</span>
           </button>
 
-          {/* Comment Button */}
           <button
             onClick={() => setIsCommentsModalOpen(true)}
             className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all duration-200"
@@ -222,7 +324,6 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
             <span className="text-sm">{commentsCount}</span>
           </button>
 
-          {/* Save Button */}
           <button
             onClick={handleSave}
             disabled={saving}
@@ -239,6 +340,77 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
           </button>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {reportModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Flag size={20} className="text-red-400" />
+                Report Post
+              </h3>
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
+                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <X size={20} className="text-gray-400 hover:text-white" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Reason <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Why are you reporting this post?"
+                  rows="3"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Additional Details (Optional)
+                </label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Any additional information..."
+                  rows="2"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
+                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReport}
+                disabled={reporting}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {reporting ? "Reporting..." : "Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Comments Modal */}
       <CommentsModal
@@ -260,37 +432,34 @@ const HomePage = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // منع عدة طلبات متزامنة
   const isLoadingRef = useRef(false);
+  // eslint-disable-next-line no-unused-vars
   const currentPageRef = useRef(1);
 
   // جلب البوستات
   const fetchPosts = useCallback(async (pageNum, append = false) => {
+    // منع الطلبات المتزامنة
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
 
     try {
+      console.log(`Fetching page ${pageNum}...`);
       const response = await api.get(`/posts?page=${pageNum}&per_page=20`);
-
       const newPosts = response.data.data;
+      const pagination = response.data.pagination;
 
-      if (newPosts.length === 0) {
-        setHasMore(false);
-      } else if (newPosts.length < 20) {
-        if (append) {
-          setPosts((prev) => [...prev, ...newPosts]);
-        } else {
-          setPosts(newPosts);
-        }
-        setHasMore(false);
+      console.log(
+        `Got ${newPosts.length} posts, has_more: ${pagination.has_more_pages}`,
+      );
+
+      if (append) {
+        setPosts((prev) => [...prev, ...newPosts]);
       } else {
-        if (append) {
-          setPosts((prev) => [...prev, ...newPosts]);
-        } else {
-          setPosts(newPosts);
-        }
-        setHasMore(true);
+        setPosts(newPosts);
       }
+
+      // استخدام has_more_pages من الـ API
+      setHasMore(pagination.has_more_pages === true);
     } catch (err) {
       console.error("Error fetching posts:", err);
       setError("Failed to load posts. Please refresh the page.");
@@ -304,7 +473,6 @@ const HomePage = () => {
 
   // تحميل أول صفحة
   useEffect(() => {
-    currentPageRef.current = 1;
     setPage(1);
     setPosts([]);
     setHasMore(true);
@@ -314,12 +482,24 @@ const HomePage = () => {
 
   // تحميل المزيد عند التمرير
   const loadMore = useCallback(() => {
-    if (loadingMore || isLoadingRef.current || !hasMore) return;
+    console.log(
+      "loadMore called, hasMore:",
+      hasMore,
+      "loadingMore:",
+      loadingMore,
+      "isLoadingRef:",
+      isLoadingRef.current,
+    );
+
+    if (loadingMore || isLoadingRef.current || !hasMore) {
+      console.log("Skipping loadMore - conditions not met");
+      return;
+    }
 
     setLoadingMore(true);
     const nextPage = page + 1;
     setPage(nextPage);
-    currentPageRef.current = nextPage;
+    console.log(`Loading more: page ${nextPage}`);
     fetchPosts(nextPage, true);
   }, [loadingMore, hasMore, page, fetchPosts]);
 
@@ -329,8 +509,10 @@ const HomePage = () => {
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
+      const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
 
-      if (scrollTop + windowHeight >= documentHeight - 500) {
+      // عندما يصل المستخدم إلى 80% من الصفحة، نحمل المزيد
+      if (scrollPercentage > 0.8) {
         loadMore();
       }
     };
@@ -339,7 +521,7 @@ const HomePage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMore]);
 
-  // تحديث حالة الإعجاب في قائمة البوستات
+  // تحديث حالة الإعجاب
   const handleLikeUpdate = (postId, isLiked) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
@@ -356,7 +538,7 @@ const HomePage = () => {
     );
   };
 
-  // تحديث حالة التعليقات في قائمة البوستات
+  // تحديث حالة التعليقات
   const handleCommentUpdate = (postId, newCount) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
@@ -365,7 +547,7 @@ const HomePage = () => {
     );
   };
 
-  // تحديث حالة الحفظ في قائمة البوستات
+  // تحديث حالة الحفظ
   const handleSaveUpdate = (postId, isSaved) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>

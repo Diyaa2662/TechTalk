@@ -1,6 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Bookmark, Eye, Clock, MessageCircle } from "lucide-react";
+import {
+  Heart,
+  Bookmark,
+  Eye,
+  Clock,
+  MessageCircle,
+  MoreHorizontal,
+  Flag,
+  X,
+} from "lucide-react";
 import api from "../services/api";
 import CommentsModal from "../components/comments/CommentsModal";
 
@@ -13,6 +22,24 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
   const [liking, setLiking] = useState(false);
   const [commentsCount, setCommentsCount] = useState(blog.comments_count || 0);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reporting, setReporting] = useState(false);
+
+  const menuRef = useRef(null);
+
+  // إغلاق القائمة عند الضغط خارجها
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
 
   // معالجة الإعجاب
   const handleLike = async () => {
@@ -54,6 +81,33 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
       console.error("Error saving blog:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // معالجة التبليغ
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      alert("Please provide a reason for reporting.");
+      return;
+    }
+
+    setReporting(true);
+    try {
+      await api.post("/reports", {
+        kind: "blog",
+        id: blog.id,
+        reason: reportReason,
+        details: reportDetails || null,
+      });
+      alert("Blog reported successfully. Our team will review it.");
+      setReportModalOpen(false);
+      setReportReason("");
+      setReportDetails("");
+    } catch (error) {
+      console.error("Report error:", error);
+      alert("Failed to report blog. Please try again.");
+    } finally {
+      setReporting(false);
     }
   };
 
@@ -119,15 +173,42 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
               </div>
             </div>
 
-            {/* Views و Reading Time */}
-            <div className="flex items-center gap-3 text-xs text-gray-500">
-              <div className="flex items-center gap-1">
-                <Eye size={14} />
-                <span>{blog.views_count || 0}</span>
+            <div className="flex items-center gap-2">
+              {/* Views و Reading Time */}
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Eye size={14} />
+                  <span>{blog.views_count || 0}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock size={14} />
+                  <span>{blog.reading_time}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Clock size={14} />
-                <span>{blog.reading_time}</span>
+
+              {/* 3 Dots Menu */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <MoreHorizontal size={16} className="text-gray-400" />
+                </button>
+
+                {showMenu && (
+                  <div className="absolute right-0 mt-1 w-40 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        setReportModalOpen(true);
+                      }}
+                      className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                    >
+                      <Flag size={14} />
+                      Report Blog
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -186,6 +267,77 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
         </div>
       </div>
 
+      {/* Report Modal */}
+      {reportModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Flag size={20} className="text-red-400" />
+                Report Blog
+              </h3>
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
+                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <X size={20} className="text-gray-400 hover:text-white" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Reason <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Why are you reporting this blog?"
+                  rows="3"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Additional Details (Optional)
+                </label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Any additional information..."
+                  rows="2"
+                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                }}
+                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReport}
+                disabled={reporting}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {reporting ? "Reporting..." : "Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Comments Modal - للمقالات */}
       <CommentsModal
         isOpen={isCommentsModalOpen}
@@ -207,6 +359,7 @@ const BlogsPage = () => {
   const [hasMore, setHasMore] = useState(true);
 
   const isLoadingRef = useRef(false);
+  // eslint-disable-next-line no-unused-vars
   const currentPageRef = useRef(1);
 
   // جلب المقالات
@@ -216,26 +369,16 @@ const BlogsPage = () => {
 
     try {
       const response = await api.get(`/blogs?page=${pageNum}&per_page=15`);
-
       const newBlogs = response.data.data;
+      const pagination = response.data.pagination;
 
-      if (newBlogs.length === 0) {
-        setHasMore(false);
-      } else if (newBlogs.length < 15) {
-        if (append) {
-          setBlogs((prev) => [...prev, ...newBlogs]);
-        } else {
-          setBlogs(newBlogs);
-        }
-        setHasMore(false);
+      if (append) {
+        setBlogs((prev) => [...prev, ...newBlogs]);
       } else {
-        if (append) {
-          setBlogs((prev) => [...prev, ...newBlogs]);
-        } else {
-          setBlogs(newBlogs);
-        }
-        setHasMore(true);
+        setBlogs(newBlogs);
       }
+
+      setHasMore(pagination.has_more_pages === true);
     } catch (err) {
       console.error("Error fetching blogs:", err);
       setError("Failed to load blogs. Please refresh the page.");
@@ -249,7 +392,6 @@ const BlogsPage = () => {
 
   // تحميل أول صفحة
   useEffect(() => {
-    currentPageRef.current = 1;
     setPage(1);
     setBlogs([]);
     setHasMore(true);
@@ -264,7 +406,6 @@ const BlogsPage = () => {
     setLoadingMore(true);
     const nextPage = page + 1;
     setPage(nextPage);
-    currentPageRef.current = nextPage;
     fetchBlogs(nextPage, true);
   }, [loadingMore, hasMore, page, fetchBlogs]);
 
