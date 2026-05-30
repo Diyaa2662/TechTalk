@@ -18,7 +18,14 @@ import {
 } from "lucide-react";
 import api from "../../services/api";
 
-const CommentsModal = ({ isOpen, onClose, postId, onCommentAdded }) => {
+const CommentsModal = ({
+  isOpen,
+  onClose,
+  postId,
+  blogId,
+  type = "post",
+  onCommentAdded,
+}) => {
   const [comments, setComments] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -88,12 +95,19 @@ const CommentsModal = ({ isOpen, onClose, postId, onCommentAdded }) => {
     }
   };
 
-  // جلب التعليقات
+  // جلب التعليقات (يدعم البوستات والمقالات)
   const fetchComments = async (pageNum = 1, append = false) => {
     try {
-      const response = await api.get(
-        `/posts/${postId}/comments?page=${pageNum}&per_page=15`,
-      );
+      let response;
+      if (type === "post") {
+        response = await api.get(
+          `/posts/${postId}/comments?page=${pageNum}&per_page=15`,
+        );
+      } else {
+        response = await api.get(
+          `/blogs/${blogId}/comments?page=${pageNum}&per_page=15`,
+        );
+      }
 
       const newComments = response.data.data;
       const pagination = response.data.pagination;
@@ -141,7 +155,10 @@ const CommentsModal = ({ isOpen, onClose, postId, onCommentAdded }) => {
 
   // تحميل عند فتح المودال
   useEffect(() => {
-    if (isOpen && postId) {
+    if (
+      isOpen &&
+      ((type === "post" && postId) || (type === "blog" && blogId))
+    ) {
       setPage(1);
       setComments([]);
       setRepliesData({});
@@ -155,7 +172,7 @@ const CommentsModal = ({ isOpen, onClose, postId, onCommentAdded }) => {
       mentionQueryRef.current = "";
       fetchComments(1, false);
     }
-  }, [isOpen, postId]);
+  }, [isOpen, postId, blogId, type]);
 
   // تحميل المزيد
   const loadMore = () => {
@@ -540,7 +557,7 @@ const CommentsModal = ({ isOpen, onClose, postId, onCommentAdded }) => {
 
     const payload = {
       body: content || " ",
-      post_id: postId,
+      ...(type === "post" ? { post_id: postId } : { blog_id: blogId }),
       code: pendingCode?.content || null,
       code_language: pendingCode?.language || null,
     };
@@ -593,7 +610,7 @@ const CommentsModal = ({ isOpen, onClose, postId, onCommentAdded }) => {
 
     const payload = {
       body: content || " ",
-      post_id: postId,
+      ...(type === "post" ? { post_id: postId } : { blog_id: blogId }),
       code: pendingCode?.content || null,
       code_language: pendingCode?.language || null,
     };
@@ -730,7 +747,7 @@ const CommentsModal = ({ isOpen, onClose, postId, onCommentAdded }) => {
     const replies = repliesData[comment.id] || [];
     const isLoadingReplies = loadingReplies[comment.id];
     const isExpanded = expandedReplies[comment.id];
-    const isOwner = comment.user_id === currentUserId;
+    const isOwner = Number(comment.user_id) === currentUserId;
 
     useEffect(() => {
       const handleClickOutside = (e) => {

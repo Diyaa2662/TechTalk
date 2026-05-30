@@ -1,15 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Bookmark, Eye, Clock, User } from "lucide-react";
+import { Heart, Bookmark, Eye, Clock, MessageCircle } from "lucide-react";
 import api from "../services/api";
+import CommentsModal from "../components/comments/CommentsModal";
 
-// مكون بطاقة المقالة المنفصل (يحتوي على useStates الخاصة به)
+// مكون بطاقة المقالة المنفصل
 const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
   const [isLiked, setIsLiked] = useState(blog.is_liked_by_user || false);
   const [likesCount, setLikesCount] = useState(blog.likes_count || 0);
   const [isSaved, setIsSaved] = useState(blog.is_saved || false);
   const [saving, setSaving] = useState(false);
   const [liking, setLiking] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(blog.comments_count || 0);
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
   // معالجة الإعجاب
   const handleLike = async () => {
@@ -54,6 +57,12 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
     }
   };
 
+  // تحديث عدد التعليقات
+  const handleCommentAdded = () => {
+    const newCount = commentsCount + 1;
+    setCommentsCount(newCount);
+  };
+
   // تنسيق التاريخ
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -71,98 +80,121 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-yellowShade/30 transition-all duration-200">
-      {/* Cover Image */}
-      {blog.cover_image_url && (
-        <div className="w-full h-48 overflow-hidden">
-          <img
-            src={blog.cover_image_url}
-            alt={blog.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-      )}
-
-      <div className="p-5">
-        {/* Header - معلومات الكاتب */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
+    <>
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-yellowShade/30 transition-all duration-200">
+        {/* Cover Image */}
+        {blog.cover_image_url && (
+          <div className="w-full h-48 overflow-hidden">
             <img
-              src={blog.user.avatar_url}
-              alt={blog.user.name}
-              className="w-10 h-10 rounded-full object-cover"
+              src={blog.cover_image_url}
+              alt={blog.title}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
-            <div>
-              <div className="flex items-center gap-2">
-                <h4 className="text-white font-semibold hover:text-yellowShade transition-colors">
-                  {blog.user.name}
-                </h4>
-                <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
-                  {blog.user.badge}
-                </span>
+          </div>
+        )}
+
+        <div className="p-5">
+          {/* Header - معلومات الكاتب */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <img
+                src={blog.user.avatar_url}
+                alt={blog.user.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-white font-semibold hover:text-yellowShade transition-colors">
+                    {blog.user.name}
+                  </h4>
+                  <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
+                    {blog.user.badge}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <span>@{blog.user.username}</span>
+                  <span>•</span>
+                  <span>{formatDate(blog.created_at)}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span>@{blog.user.username}</span>
-                <span>•</span>
-                <span>{formatDate(blog.created_at)}</span>
+            </div>
+
+            {/* Views و Reading Time */}
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <Eye size={14} />
+                <span>{blog.views_count || 0}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock size={14} />
+                <span>{blog.reading_time}</span>
               </div>
             </div>
           </div>
 
-          {/* Views و Reading Time */}
-          <div className="flex items-center gap-3 text-xs text-gray-500">
-            <div className="flex items-center gap-1">
-              <Eye size={14} />
-              <span>{blog.views_count || 0}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock size={14} />
-              <span>{blog.reading_time}</span>
-            </div>
+          {/* Title & Subtitle - رابط للمقال */}
+          <Link to={`/blogs/${blog.id}`}>
+            <h2 className="text-xl font-bold text-white mb-2 hover:text-yellowShade transition-colors cursor-pointer">
+              {blog.title}
+            </h2>
+            <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+              {blog.subtitle}
+            </p>
+          </Link>
+
+          {/* Actions Buttons */}
+          <div className="flex items-center gap-6 pt-3 border-t border-gray-700">
+            {/* Like Button */}
+            <button
+              onClick={handleLike}
+              disabled={liking}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
+                isLiked
+                  ? "text-red-500 bg-red-500/10"
+                  : "text-gray-400 hover:text-red-500 hover:bg-red-500/10"
+              }`}
+            >
+              <Heart size={18} className={isLiked ? "fill-red-500" : ""} />
+              <span className="text-sm">{likesCount}</span>
+            </button>
+
+            {/* Comment Button */}
+            <button
+              onClick={() => setIsCommentsModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all duration-200"
+            >
+              <MessageCircle size={18} />
+              <span className="text-sm">{commentsCount}</span>
+            </button>
+
+            {/* Save Button */}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
+                isSaved
+                  ? "text-yellowShade bg-yellowShade/10"
+                  : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"
+              }`}
+            >
+              <Bookmark
+                size={18}
+                className={isSaved ? "fill-yellowShade" : ""}
+              />
+            </button>
           </div>
-        </div>
-
-        {/* Title & Subtitle - رابط للمقال */}
-        <Link to={`/blogs/${blog.id}`}>
-          <h2 className="text-xl font-bold text-white mb-2 hover:text-yellowShade transition-colors cursor-pointer">
-            {blog.title}
-          </h2>
-          <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-            {blog.subtitle}
-          </p>
-        </Link>
-
-        {/* Actions Buttons */}
-        <div className="flex items-center gap-6 pt-3 border-t border-gray-700">
-          {/* Like Button */}
-          <button
-            onClick={handleLike}
-            disabled={liking}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
-              isLiked
-                ? "text-red-500 bg-red-500/10"
-                : "text-gray-400 hover:text-red-500 hover:bg-red-500/10"
-            }`}
-          >
-            <Heart size={18} className={isLiked ? "fill-red-500" : ""} />
-            <span className="text-sm">{likesCount}</span>
-          </button>
-
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
-              isSaved
-                ? "text-yellowShade bg-yellowShade/10"
-                : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"
-            }`}
-          >
-            <Bookmark size={18} className={isSaved ? "fill-yellowShade" : ""} />
-          </button>
         </div>
       </div>
-    </div>
+
+      {/* Comments Modal - للمقالات */}
+      <CommentsModal
+        isOpen={isCommentsModalOpen}
+        onClose={() => setIsCommentsModalOpen(false)}
+        blogId={blog.id}
+        type="blog"
+        onCommentAdded={handleCommentAdded}
+      />
+    </>
   );
 };
 

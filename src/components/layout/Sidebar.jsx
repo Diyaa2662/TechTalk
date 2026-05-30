@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   HomeIcon,
   NewspaperIcon,
@@ -16,14 +16,32 @@ const navItems = [
   { name: "Home", icon: HomeIcon, href: "/" },
   { name: "Blogs", icon: NewspaperIcon, href: "/blogs" },
   { name: "Search", icon: SearchIcon, href: "/search" },
-  { name: "Profile", icon: UserIcon, href: "/profile" },
   { name: "Notifications", icon: BellIcon, href: "/notifications" },
+  { name: "Profile", icon: UserIcon, href: "/profile" },
 ];
 
 const Sidebar = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+
+  // جلب عدد الإشعارات غير المقروءة
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await api.get("/notifications/unread-count");
+      setUnreadCount(response.data.data?.unread_count || 0);
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  };
+
+  // جلب العداد عند تحميل المكون وكل 30 ثانية
+  useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
@@ -92,11 +110,17 @@ const Sidebar = () => {
                   href={item.href}
                   className="flex items-center gap-4 px-2 py-3 rounded-lg hover:bg-white/10 transition-colors group relative"
                 >
-                  <div className="min-w-[24px]">
+                  <div className="min-w-[24px] relative">
                     <item.icon
                       size={24}
                       className="text-gray-300 group-hover:text-yellowShade transition-colors"
                     />
+                    {/* عداد الإشعارات غير المقروءة */}
+                    {item.name === "Notifications" && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-0.5 flex items-center justify-center">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                   </div>
                   <span
                     className={`
@@ -115,7 +139,10 @@ const Sidebar = () => {
 
         {/* Create Post Button */}
         <div className="px-2 pb-2">
-          <button className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/10 transition-colors group relative">
+          <button
+            onClick={() => navigate("/create-post")}
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/10 transition-colors group relative"
+          >
             <div className="min-w-[24px]">
               <PlusCircleIcon size={24} className="text-yellowShade" />
             </div>

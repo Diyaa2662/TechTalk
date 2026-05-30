@@ -2,12 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import HomePage from "./pages/HomePage";
+import PostDetailsPage from "./pages/PostDetailsPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import OtpPage from "./pages/OtpPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SplashScreen from "./components/common/SplashScreen";
 import BlogsPage from "./pages/BlogsPage";
+import BlogDetailsPage from "./pages/BlogDetailsPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import ProfilePage from "./pages/ProfilePage";
+import CreatePostPage from "./pages/CreatePostPage";
 
 // مكون لحماية الصفحات
 const PrivateRoute = ({ children }) => {
@@ -68,6 +73,10 @@ function App() {
         />
       )}
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/verify-otp" element={<OtpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route
           path="/"
           element={
@@ -88,10 +97,56 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/verify-otp" element={<OtpPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route
+          path="/blogs/:id"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <BlogDetailsPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <NotificationsPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/posts/:id"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <PostDetailsPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <ProfilePage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/create-post"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <CreatePostPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </>
   );
