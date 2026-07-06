@@ -22,6 +22,7 @@ import {
   Code,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 // أيقونات SVG لوسائل التواصل
 const GithubIcon = () => (
@@ -406,10 +407,7 @@ const UserProfilePage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-          <p className="text-muted">Loading profile...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading profile..." />
       </div>
     );
   }
@@ -704,7 +702,7 @@ const UserProfilePage = () => {
           <>
             {postsLoading && posts.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                <LoadingSpinner size="md" text="Loading posts..." />
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
@@ -769,7 +767,7 @@ const UserProfilePage = () => {
                 ))}
                 {postsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                    <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}
               </div>
@@ -782,7 +780,7 @@ const UserProfilePage = () => {
           <>
             {blogsLoading && blogs.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                <LoadingSpinner size="md" text="Loading blogs..." />
               </div>
             ) : blogs.length === 0 ? (
               <div className="text-center py-12">
@@ -834,7 +832,7 @@ const UserProfilePage = () => {
                 ))}
                 {blogsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                    <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}
               </div>

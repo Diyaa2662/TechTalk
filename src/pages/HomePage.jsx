@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import CommentsModal from "../components/comments/CommentsModal";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 // مكون بطاقة البوست المنفصل
 const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
@@ -556,10 +557,7 @@ const HomePage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-          <p className="text-muted">Loading posts...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading posts..." />
       </div>
     );
   }
@@ -613,7 +611,7 @@ const HomePage = () => {
 
       {loadingMore && (
         <div className="flex justify-center my-6">
-          <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <LoadingSpinner size="md" text={null} />
         </div>
       )}
 

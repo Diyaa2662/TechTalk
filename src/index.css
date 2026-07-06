@@ -40,7 +40,6 @@
     background-image: linear-gradient(135deg, #8b6dff, #6b4ae0, #4a2fb0);
   }
 
-  /* إصلاح glass-card */
   .glass-card {
     @apply bg-panel/90 backdrop-blur-md border border-panelEdge rounded-xl shadow-panel;
   }
@@ -58,5 +57,14 @@
 
   .input-field {
     @apply w-full px-3 py-2 bg-panel border border-panelEdge rounded-lg text-white placeholder-label focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all;
+  }
+
+  /* تحسينات Spinner */
+  .spinner-glow {
+    @apply absolute inset-0 bg-accent/20 rounded-full blur-2xl animate-pulse;
+  }
+
+  .spinner-ring {
+    @apply w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin;
   }
 }

@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const CreatePostPage = () => {
   const navigate = useNavigate();

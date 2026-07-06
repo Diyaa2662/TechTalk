@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 // أيقونات SVG لوسائل التواصل
 const GithubIcon = () => (
@@ -334,10 +335,7 @@ const ProfilePage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-          <p className="text-muted">Loading profile...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading profile..." />
       </div>
     );
   }
@@ -601,7 +599,7 @@ const ProfilePage = () => {
           <>
             {postsLoading && posts.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                <LoadingSpinner size="md" text="Loading posts..." />
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
@@ -666,7 +664,7 @@ const ProfilePage = () => {
                 ))}
                 {postsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                    <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}
               </div>
@@ -679,7 +677,7 @@ const ProfilePage = () => {
           <>
             {blogsLoading && blogs.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                <LoadingSpinner size="md" text="Loading blogs..." />
               </div>
             ) : blogs.length === 0 ? (
               <div className="text-center py-12">
@@ -731,7 +729,7 @@ const ProfilePage = () => {
                 ))}
                 {blogsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                    <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}
               </div>
@@ -744,7 +742,7 @@ const ProfilePage = () => {
           <>
             {savedLoading && savedItems.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                <LoadingSpinner size="md" text="Loading saved items..." />
               </div>
             ) : savedItems.length === 0 ? (
               <div className="text-center py-12">
@@ -798,7 +796,7 @@ const ProfilePage = () => {
                 })}
                 {savedLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                    <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}
               </div>
@@ -825,7 +823,7 @@ const ProfilePage = () => {
             <div className="flex-1 overflow-y-auto p-4">
               {blockedLoading ? (
                 <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                  <LoadingSpinner size="md" text="Loading blocked users..." />
                 </div>
               ) : blockedUsers.length === 0 ? (
                 <div className="text-center py-8">

@@ -13,6 +13,7 @@ import {
   Code,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -393,7 +394,7 @@ const SearchPage = () => {
 
       {loading && results.length === 0 ? (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <LoadingSpinner size="lg" text="Searching..." />
         </div>
       ) : error ? (
         <div className="text-center py-12">
@@ -580,7 +581,7 @@ const SearchPage = () => {
 
           {loadingMore && (
             <div className="flex justify-center py-4">
-              <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+              <LoadingSpinner size="md" text={null} />
             </div>
           )}
 

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -209,10 +210,7 @@ const NotificationsPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-          <p className="text-muted">Loading notifications...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading notifications..." />
       </div>
     );
   }
@@ -346,7 +344,7 @@ const NotificationsPage = () => {
       {/* Loading More */}
       {loadingMore && (
         <div className="flex justify-center my-6">
-          <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <LoadingSpinner size="md" text={null} />
         </div>
       )}
 

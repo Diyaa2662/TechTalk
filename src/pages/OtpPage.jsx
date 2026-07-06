@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import logo from "/src/assets/logo.png";
 import api from "../services/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const OtpPage = () => {
   const navigate = useNavigate();
@@ -121,6 +122,14 @@ const OtpPage = () => {
       setResendLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <LoadingSpinner size="lg" text="Verifying..." />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

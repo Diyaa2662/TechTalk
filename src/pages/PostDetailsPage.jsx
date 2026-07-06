@@ -22,6 +22,7 @@ import {
   Trash2,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 // مكون إضافة كود للتعليق
 const CodeModal = ({
@@ -699,8 +700,7 @@ const PostDetailsPage = () => {
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-        <p className="text-muted ml-3">Loading post...</p>
+        <LoadingSpinner size="lg" text="Loading post..." />
       </div>
     );
   if (error || !post)
@@ -865,7 +865,7 @@ const PostDetailsPage = () => {
 
         {commentsLoading ? (
           <div className="flex justify-center py-8">
-            <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+            <LoadingSpinner size="md" text="Loading comments..." />
           </div>
         ) : comments.length === 0 ? (
           <div className="text-center py-8">
