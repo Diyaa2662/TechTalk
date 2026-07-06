@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import logo from "/src/assets/logo.png";
 import api from "../services/api";
 
@@ -23,13 +23,11 @@ const SignupPage = () => {
     e.preventDefault();
     setError("");
 
-    // التحقق من تطابق كلمتي المرور
     if (password !== password_confirmation) {
       setError("Passwords do not match!");
       return;
     }
 
-    // التحقق من طول كلمة المرور (8 محارف على الأقل)
     if (password.length < 8) {
       setError("Password must be at least 8 characters long!");
       return;
@@ -74,38 +72,37 @@ const SignupPage = () => {
       setLoading(false);
     }
   };
+
   return (
-    <div className="min-h-screen bg-darkShade flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl w-full bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl w-full glass-card overflow-hidden">
         <div className="flex flex-col md:flex-row">
           {/* Left Side - Platform Info */}
-          <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-darkShade to-darkShade/80">
+          <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg to-bg/80">
             <div className="flex items-center gap-3 mb-8">
               <div className="relative">
-                <div className="absolute inset-0 w-10 h-10 bg-yellowShade/20 rounded-full blur-lg"></div>
+                <div className="absolute inset-0 w-10 h-10 bg-accent/20 rounded-full blur-lg"></div>
                 <img
                   src={logo}
                   alt="TechTalk Logo"
                   className="h-8 w-auto relative z-10"
                 />
               </div>
-              <span className="text-yellowShade font-bold text-xl">
-                TechTalk
-              </span>
+              <span className="gradient-title font-bold text-xl">TechTalk</span>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
               Join Our Community!
             </h2>
-            <p className="text-gray-400 mb-8">
+            <p className="text-muted mb-8">
               Create your account to connect with developers worldwide.
             </p>
 
             <div className="space-y-5">
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-yellowShade rounded-full flex items-center justify-center mt-0.5">
+                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
                   <svg
-                    className="w-3 h-3 text-darkShade"
+                    className="w-3 h-3 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -120,16 +117,16 @@ const SignupPage = () => {
                 </div>
                 <div>
                   <h4 className="text-white font-medium">Share Your Code</h4>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-muted text-sm">
                     Post snippets and get feedback
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-yellowShade rounded-full flex items-center justify-center mt-0.5">
+                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
                   <svg
-                    className="w-3 h-3 text-darkShade"
+                    className="w-3 h-3 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -146,16 +143,16 @@ const SignupPage = () => {
                   <h4 className="text-white font-medium">
                     Solve Problems Together
                   </h4>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-muted text-sm">
                     Get help from expert developers
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-yellowShade rounded-full flex items-center justify-center mt-0.5">
+                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
                   <svg
-                    className="w-3 h-3 text-darkShade"
+                    className="w-3 h-3 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -170,21 +167,21 @@ const SignupPage = () => {
                 </div>
                 <div>
                   <h4 className="text-white font-medium">Build Your Network</h4>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-muted text-sm">
                     Connect with tech professionals
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-10 pt-6 border-t border-white/10">
+            <div className="grid grid-cols-2 gap-4 mt-10 pt-6 border-t border-panelEdge">
               <div>
-                <p className="text-2xl font-bold text-yellowShade">10K+</p>
-                <p className="text-gray-500 text-sm">Active Developers</p>
+                <p className="text-2xl font-bold text-accent">10K+</p>
+                <p className="text-label text-sm">Active Developers</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-yellowShade">4.9</p>
-                <p className="text-gray-500 text-sm">Community Rating</p>
+                <p className="text-2xl font-bold text-accent">4.9</p>
+                <p className="text-label text-sm">Community Rating</p>
               </div>
             </div>
           </div>
@@ -193,14 +190,14 @@ const SignupPage = () => {
           <div className="md:w-1/2 p-8 md:p-10">
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-white">Create Account</h3>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-muted text-sm mt-1">
                 Enter your details to get started
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
-                <p className="text-red-400 text-sm text-center">{error}</p>
+              <div className="mb-4 p-3 bg-error/20 border border-error/50 rounded-lg">
+                <p className="text-error text-sm text-center">{error}</p>
               </div>
             )}
 
@@ -208,7 +205,7 @@ const SignupPage = () => {
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-300 mb-1"
+                  className="block text-sm font-medium text-label mb-1"
                 >
                   Full Name
                 </label>
@@ -220,14 +217,14 @@ const SignupPage = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full px-4 py-2.5 bg-white/10 border border-gray-600 rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent transition-all"
+                  className="input-field"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="username"
-                  className="block text-sm font-medium text-gray-300 mb-1"
+                  className="block text-sm font-medium text-label mb-1"
                 >
                   Username
                 </label>
@@ -239,14 +236,14 @@ const SignupPage = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="johndoe"
-                  className="w-full px-4 py-2.5 bg-white/10 border border-gray-600 rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent transition-all"
+                  className="input-field"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-300 mb-1"
+                  className="block text-sm font-medium text-label mb-1"
                 >
                   Email Address
                 </label>
@@ -259,7 +256,7 @@ const SignupPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="hello@example.com"
-                  className="w-full px-4 py-2.5 bg-white/10 border border-gray-600 rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent transition-all"
+                  className="input-field"
                 />
               </div>
 
@@ -267,7 +264,7 @@ const SignupPage = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-300 mb-1"
+                  className="block text-sm font-medium text-label mb-1"
                 >
                   Password
                 </label>
@@ -281,17 +278,17 @@ const SignupPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2.5 pr-11 bg-white/10 border border-gray-600 rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent transition-all"
+                    className="input-field pr-11"
                   />
                   {password && password.length < 8 && (
-                    <p className="text-red-400 text-xs mt-1">
+                    <p className="text-error text-xs mt-1">
                       * Password must be at least 8 characters
                     </p>
                   )}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-yellowShade transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted hover:text-accent transition-colors"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -302,7 +299,7 @@ const SignupPage = () => {
               <div>
                 <label
                   htmlFor="password_confirmation"
-                  className="block text-sm font-medium text-gray-300 mb-1"
+                  className="block text-sm font-medium text-label mb-1"
                 >
                   Confirm Password
                 </label>
@@ -316,12 +313,12 @@ const SignupPage = () => {
                     value={password_confirmation}
                     onChange={(e) => setPasswordConfirmation(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2.5 pr-11 bg-white/10 border border-gray-600 rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent transition-all"
+                    className="input-field pr-11"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-yellowShade transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted hover:text-accent transition-colors"
                   >
                     {showConfirmPassword ? (
                       <EyeOff size={20} />
@@ -332,21 +329,23 @@ const SignupPage = () => {
                 </div>
               </div>
 
+              {/* Sign Up Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 mt-2 bg-yellowShade hover:bg-yellowShade/90 text-darkShade font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-accent-sm"
               >
                 {loading ? "Creating account..." : "Sign Up"}
+                {!loading && <ArrowRight size={18} />}
               </button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted">
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="font-medium text-yellowShade hover:text-yellowShade/80 transition-colors"
+                  className="font-medium text-accent hover:text-accent/80 transition-colors"
                 >
                   Sign In
                 </Link>

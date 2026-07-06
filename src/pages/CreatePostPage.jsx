@@ -25,7 +25,7 @@ const CreatePostPage = () => {
   const [codeLanguage, setCodeLanguage] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [photos, setPhotos] = useState([]);
-  const [photoFiles, setPhotoFiles] = useState([]); // Store files for upload after post creation
+  const [photoFiles, setPhotoFiles] = useState([]);
 
   // Tags from API
   const [allTags, setAllTags] = useState([]);
@@ -100,12 +100,11 @@ const CreatePostPage = () => {
     setSelectedTags(selectedTags.filter((tag) => tag.id !== tagId));
   };
 
-  // معالجة اختيار الصور (تخزين الملفات مؤقتاً)
+  // معالجة اختيار الصور
   const handlePhotoSelect = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // عرض معاينة الصور
     const newPhotos = [];
     const newFiles = [];
 
@@ -125,7 +124,7 @@ const CreatePostPage = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // رفع الصور إلى endpoint /posts/:post/photos
+  // رفع الصور
   const uploadPhotos = async (postId) => {
     if (photoFiles.length === 0) return;
 
@@ -152,7 +151,7 @@ const CreatePostPage = () => {
     }
   };
 
-  // إزالة صورة من المعاينة (قبل الرفع)
+  // إزالة صورة
   const removePhoto = (index) => {
     setPhotos(photos.filter((_, i) => i !== index));
     setPhotoFiles(photoFiles.filter((_, i) => i !== index));
@@ -182,14 +181,13 @@ const CreatePostPage = () => {
       code: code.trim() || null,
       code_language: codeLanguage.trim() || null,
       tags: selectedTags.map((tag) => tag.id),
-      photos: null, // سيتم رفع الصور بعد إنشاء البوست
+      photos: null,
     };
 
     try {
       const response = await api.post("/posts", payload);
       const newPost = response.data.data;
 
-      // رفع الصور بعد إنشاء البوست
       if (photoFiles.length > 0) {
         await uploadPhotos(newPost.id);
       }
@@ -253,12 +251,12 @@ const CreatePostPage = () => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-gray-400 hover:text-yellowShade transition-colors"
+          className="flex items-center gap-2 text-muted hover:text-accent transition-colors"
         >
           <ArrowLeft size={20} />
           <span>Back to Home</span>
         </button>
-        <h1 className="text-2xl font-bold text-white">Create New Post</h1>
+        <h1 className="gradient-title text-2xl font-bold">Create New Post</h1>
         <div className="w-20"></div>
       </div>
 
@@ -266,36 +264,36 @@ const CreatePostPage = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Error message */}
         {error && (
-          <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
-            <p className="text-red-400 text-sm text-center">{error}</p>
+          <div className="p-3 bg-error/20 border border-error/50 rounded-lg">
+            <p className="text-error text-sm text-center">{error}</p>
           </div>
         )}
 
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Title <span className="text-red-400">*</span>
+          <label className="block text-sm font-medium text-label mb-1">
+            Title <span className="text-error">*</span>
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What's the title of your post?"
-            className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent transition-all"
+            className="input-field"
           />
         </div>
 
         {/* Body */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Content <span className="text-red-400">*</span>
+          <label className="block text-sm font-medium text-label mb-1">
+            Content <span className="text-error">*</span>
           </label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="Write your post content here..."
             rows="8"
-            className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent resize-none transition-all"
+            className="input-field resize-none"
           />
         </div>
 
@@ -304,7 +302,7 @@ const CreatePostPage = () => {
           <button
             type="button"
             onClick={() => setShowCodeBlock(!showCodeBlock)}
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-yellowShade transition-colors"
+            className="flex items-center gap-2 text-sm text-muted hover:text-accent transition-colors"
           >
             <Code size={16} />
             {showCodeBlock ? "Hide code block" : "Add code block"}
@@ -313,10 +311,10 @@ const CreatePostPage = () => {
 
         {/* Code Block */}
         {showCodeBlock && (
-          <div className="space-y-3 p-4 bg-white/5 rounded-lg border border-gray-700">
+          <div className="space-y-3 p-4 glass-card">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-label mb-1">
                   Code Language
                 </label>
                 <input
@@ -324,12 +322,12 @@ const CreatePostPage = () => {
                   value={codeLanguage}
                   onChange={(e) => setCodeLanguage(e.target.value)}
                   placeholder="e.g., javascript, python, php"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-label mb-1">
                 Code Snippet
               </label>
               <textarea
@@ -337,15 +335,15 @@ const CreatePostPage = () => {
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="Paste your code here..."
                 rows="6"
-                className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent font-mono text-sm"
+                className="input-field font-mono text-sm"
               />
             </div>
           </div>
         )}
 
-        {/* Tags - Multi-select with dropdown */}
+        {/* Tags */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-label mb-1">
             Tags
           </label>
           <div className="relative" ref={dropdownRef}>
@@ -354,13 +352,13 @@ const CreatePostPage = () => {
                 {selectedTags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-yellowShade/10 text-yellowShade rounded-full"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
                   >
                     #{tag.name}
                     <button
                       type="button"
                       onClick={() => removeTag(tag.id)}
-                      className="hover:text-red-400 transition-colors"
+                      className="hover:text-error transition-colors"
                     >
                       <X size={12} />
                     </button>
@@ -380,42 +378,42 @@ const CreatePostPage = () => {
                 }}
                 onFocus={() => setShowTagDropdown(true)}
                 placeholder="Search tags..."
-                className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                className="input-field"
               />
               <Tag
                 size={16}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted"
               />
             </div>
 
             {showTagDropdown && tagSearch && filteredTags.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-darkShade border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-panel border border-panelEdge rounded-lg shadow-panel max-h-48 overflow-y-auto">
                 {filteredTags.map((tag) => (
                   <button
                     key={tag.id}
                     type="button"
                     onClick={() => addTag(tag)}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/10 transition-colors flex items-center justify-between"
+                    className="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/5 transition-colors flex items-center justify-between"
                   >
                     <span>#{tag.name}</span>
-                    <Plus size={14} className="text-gray-400" />
+                    <Plus size={14} className="text-muted" />
                   </button>
                 ))}
               </div>
             )}
 
             {loadingTags && (
-              <p className="text-xs text-gray-500 mt-1">Loading tags...</p>
+              <p className="text-xs text-muted mt-1">Loading tags...</p>
             )}
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted mt-1">
             Search and select tags relevant to your post
           </p>
         </div>
 
         {/* Photos */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-label mb-1">
             Photos
           </label>
           <div className="flex gap-2">
@@ -423,7 +421,7 @@ const CreatePostPage = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={photoUploading}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               <ImageIcon size={18} />
               {photoUploading ? "Uploading..." : "Upload Images"}
@@ -449,7 +447,7 @@ const CreatePostPage = () => {
                   <button
                     type="button"
                     onClick={() => removePhoto(index)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 p-1 bg-error rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X size={14} className="text-white" />
                   </button>
@@ -457,14 +455,14 @@ const CreatePostPage = () => {
               ))}
             </div>
           )}
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted mt-1">
             Images will be uploaded after post creation
           </p>
         </div>
 
-        {/* Privacy / Publication Status */}
+        {/* Privacy */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-label mb-2">
             Privacy
           </label>
           <div className="flex gap-4">
@@ -473,8 +471,8 @@ const CreatePostPage = () => {
               onClick={() => setIsPublished(true)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isPublished
-                  ? "bg-yellowShade text-darkShade"
-                  : "bg-white/10 text-gray-400 hover:text-white"
+                  ? "bg-accent text-white shadow-accent-sm"
+                  : "bg-white/5 text-muted hover:text-white"
               }`}
             >
               <Globe size={16} />
@@ -485,15 +483,15 @@ const CreatePostPage = () => {
               onClick={() => setIsPublished(false)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 !isPublished
-                  ? "bg-yellowShade text-darkShade"
-                  : "bg-white/10 text-gray-400 hover:text-white"
+                  ? "bg-accent text-white shadow-accent-sm"
+                  : "bg-white/5 text-muted hover:text-white"
               }`}
             >
               <Lock size={16} />
               Draft
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-muted mt-2">
             {isPublished
               ? "Your post will be visible to everyone immediately."
               : "Your post will be saved as a draft. You can publish it later."}
@@ -501,11 +499,11 @@ const CreatePostPage = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-4 border-t border-gray-700">
+        <div className="flex gap-3 pt-4 border-t border-panelEdge">
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 py-2.5 bg-yellowShade hover:bg-yellowShade/90 text-darkShade font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-accent-sm"
           >
             {submitting ? (
               <>
@@ -524,7 +522,7 @@ const CreatePostPage = () => {
               type="button"
               onClick={handleSaveDraft}
               disabled={submitting}
-              className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-all duration-200 disabled:opacity-50"
+              className="px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-all duration-200 disabled:opacity-50"
             >
               Save as Draft
             </button>

@@ -167,6 +167,7 @@ const SearchPage = () => {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, loadingMore, searchQuery, activeTab, selectedTags, perPage]);
 
   const addTag = (tag) => {
@@ -203,12 +204,12 @@ const SearchPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold text-white mb-6">Search</h1>
+      <h1 className="gradient-title text-2xl font-bold mb-6">Search</h1>
 
       <div className="relative mb-4">
         <Search
           size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
         />
         <input
           ref={searchInputRef}
@@ -216,15 +217,15 @@ const SearchPage = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search for posts, blogs, or users..."
-          className="w-full pl-10 pr-10 py-3 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent"
+          className="input-field !pl-10 !pr-10"
         />
         {searchQuery && (
           <button
             onClick={clearSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/10 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/5 transition-colors"
             aria-label="Clear search"
           >
-            <X size={16} className="text-gray-400 hover:text-white" />
+            <X size={16} className="text-muted hover:text-white" />
           </button>
         )}
       </div>
@@ -233,7 +234,7 @@ const SearchPage = () => {
         <button
           ref={filterButtonRef}
           onClick={() => setShowTagDropdown(!showTagDropdown)}
-          className="flex items-center gap-2 text-sm text-gray-400 hover:text-yellowShade transition-colors"
+          className="flex items-center gap-2 text-sm text-muted hover:text-accent transition-colors"
         >
           <Filter size={14} />
           Filter by tags {selectedTags.length > 0 && `(${selectedTags.length})`}
@@ -242,7 +243,7 @@ const SearchPage = () => {
         {showTagDropdown && (
           <div
             ref={dropdownRef}
-            className="absolute z-20 mt-2 w-64 bg-darkShade border border-gray-600 rounded-lg shadow-lg p-3"
+            className="absolute z-20 mt-2 w-64 bg-panel border border-panelEdge rounded-lg shadow-panel p-3"
           >
             <div className="relative mb-2">
               <input
@@ -251,12 +252,12 @@ const SearchPage = () => {
                 value={tagSearch}
                 onChange={(e) => setTagSearch(e.target.value)}
                 placeholder="Search tags..."
-                className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-1 focus:ring-yellowShade"
+                className="w-full px-3 py-2 bg-white/5 border border-panelEdge rounded-lg text-white placeholder-muted text-sm focus:outline-none focus:ring-1 focus:ring-accent"
                 autoFocus
               />
               <Tag
                 size={14}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted"
               />
             </div>
 
@@ -266,31 +267,31 @@ const SearchPage = () => {
                   <button
                     key={tag.id}
                     onClick={() => addTag(tag)}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/10 rounded-lg flex items-center justify-between transition-colors"
+                    className="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/5 rounded-lg flex items-center justify-between transition-colors"
                   >
                     <span>#{tag.name}</span>
-                    <span className="text-xs text-gray-500">Add</span>
+                    <span className="text-xs text-muted">Add</span>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4 text-sm text-gray-500">
+              <div className="text-center py-4 text-sm text-muted">
                 No tags found
               </div>
             )}
 
             {selectedTags.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-gray-700">
+              <div className="mt-3 pt-3 border-t border-panelEdge">
                 <div className="flex flex-wrap gap-1">
                   {selectedTags.map((tag) => (
                     <span
                       key={tag.id}
-                      className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-yellowShade/10 text-yellowShade rounded-full"
+                      className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
                     >
                       #{tag.name}
                       <button
                         onClick={() => removeTag(tag.id)}
-                        className="hover:text-red-400 ml-1"
+                        className="hover:text-error ml-1"
                       >
                         <X size={12} />
                       </button>
@@ -303,7 +304,7 @@ const SearchPage = () => {
         )}
       </div>
 
-      <div className="flex gap-6 border-b border-gray-700 mb-6">
+      <div className="flex gap-6 border-b border-panelEdge mb-6">
         <button
           onClick={() => {
             setActiveTab("posts");
@@ -321,11 +322,15 @@ const SearchPage = () => {
               setResults([]);
             }
           }}
-          className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "posts" ? "text-yellowShade" : "text-gray-400 hover:text-white"}`}
+          className={`pb-3 text-sm font-medium transition-colors relative ${
+            activeTab === "posts"
+              ? "text-accent"
+              : "text-muted hover:text-white"
+          }`}
         >
           Posts
           {activeTab === "posts" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
           )}
         </button>
         <button
@@ -345,11 +350,15 @@ const SearchPage = () => {
               setResults([]);
             }
           }}
-          className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "blogs" ? "text-yellowShade" : "text-gray-400 hover:text-white"}`}
+          className={`pb-3 text-sm font-medium transition-colors relative ${
+            activeTab === "blogs"
+              ? "text-accent"
+              : "text-muted hover:text-white"
+          }`}
         >
           Blogs
           {activeTab === "blogs" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
           )}
         </button>
         <button
@@ -369,40 +378,44 @@ const SearchPage = () => {
               setResults([]);
             }
           }}
-          className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "users" ? "text-yellowShade" : "text-gray-400 hover:text-white"}`}
+          className={`pb-3 text-sm font-medium transition-colors relative ${
+            activeTab === "users"
+              ? "text-accent"
+              : "text-muted hover:text-white"
+          }`}
         >
           Users
           {activeTab === "users" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
           )}
         </button>
       </div>
 
       {loading && results.length === 0 ? (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <p className="text-red-400">{error}</p>
+          <p className="text-error">{error}</p>
         </div>
       ) : results.length === 0 && !loading && searchQuery ? (
         <div className="text-center py-12">
-          <p className="text-gray-400">No results found for "{searchQuery}"</p>
+          <p className="text-muted">No results found for "{searchQuery}"</p>
         </div>
       ) : results.length === 0 &&
         !loading &&
         !searchQuery &&
         selectedTags.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-400">Start typing to search...</p>
+          <p className="text-muted">Start typing to search...</p>
         </div>
       ) : results.length === 0 &&
         !loading &&
         !searchQuery &&
         selectedTags.length > 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-400">Enter a search term to filter by tags</p>
+          <p className="text-muted">Enter a search term to filter by tags</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -413,11 +426,11 @@ const SearchPage = () => {
                 <Link
                   key={post.id || index}
                   to={`/posts/${post.id}`}
-                  className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                  className="block glass-card hover:border-accent/50 transition-all duration-300 p-4"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted">
                         <img
                           src={post.user.avatar_url}
                           alt={post.user.name}
@@ -428,7 +441,7 @@ const SearchPage = () => {
                         <span>{formatDate(post.created_at)}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-muted">
                       <div className="flex items-center gap-1">
                         <Heart size={12} />
                         <span>{post.likes_count}</span>
@@ -446,11 +459,9 @@ const SearchPage = () => {
                   <h3 className="text-white font-semibold mb-1">
                     {post.title}
                   </h3>
-                  <p className="text-gray-400 text-sm line-clamp-2">
-                    {post.body}
-                  </p>
+                  <p className="text-muted text-sm line-clamp-2">{post.body}</p>
                   {post.code && (
-                    <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                    <div className="mt-2 flex items-center gap-1 text-xs text-muted">
                       <Code size={12} />
                       <span>{post.code_language}</span>
                     </div>
@@ -460,7 +471,7 @@ const SearchPage = () => {
                       {post.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag.id}
-                          className="text-xs px-1.5 py-0.5 bg-yellowShade/10 text-yellowShade rounded-full"
+                          className="text-xs px-1.5 py-0.5 bg-accent/10 text-accent rounded-full"
                         >
                           #{tag.name}
                         </span>
@@ -475,11 +486,11 @@ const SearchPage = () => {
                 <Link
                   key={blog.id || index}
                   to={`/blogs/${blog.id}`}
-                  className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                  className="block glass-card hover:border-accent/50 transition-all duration-300 p-4"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted">
                         <img
                           src={blog.user.avatar_url}
                           alt={blog.user.name}
@@ -490,7 +501,7 @@ const SearchPage = () => {
                         <span>{formatDate(blog.created_at)}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-muted">
                       <div className="flex items-center gap-1">
                         <Heart size={12} />
                         <span>{blog.likes_count}</span>
@@ -508,11 +519,11 @@ const SearchPage = () => {
                   <h3 className="text-white font-semibold mb-1">
                     {blog.title}
                   </h3>
-                  <p className="text-gray-400 text-sm line-clamp-2">
+                  <p className="text-muted text-sm line-clamp-2">
                     {blog.subtitle}
                   </p>
                   {blog.reading_time && (
-                    <div className="mt-2 text-xs text-gray-500">
+                    <div className="mt-2 text-xs text-muted">
                       📖 {blog.reading_time}
                     </div>
                   )}
@@ -524,7 +535,7 @@ const SearchPage = () => {
                 <Link
                   key={user.id || index}
                   to={`/profile/${user.username}`}
-                  className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                  className="block glass-card hover:border-accent/50 transition-all duration-300 p-4"
                 >
                   <div className="flex items-center gap-3">
                     <img
@@ -540,22 +551,22 @@ const SearchPage = () => {
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${
                             user.badge === "expert"
-                              ? "bg-yellowShade/20 text-yellowShade"
+                              ? "bg-accent/20 text-accent"
                               : user.badge === "senior"
                                 ? "bg-purple-500/20 text-purple-400"
-                                : "bg-blue-500/20 text-blue-400"
+                                : "bg-accent/15 text-accent"
                           }`}
                         >
                           {user.badge}
                         </span>
                       </div>
-                      <p className="text-gray-400 text-sm">@{user.username}</p>
+                      <p className="text-muted text-sm">@{user.username}</p>
                       {user.bio && (
-                        <p className="text-gray-500 text-sm mt-1 line-clamp-1">
+                        <p className="text-muted text-sm mt-1 line-clamp-1">
                           {user.bio}
                         </p>
                       )}
-                      <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                      <div className="flex gap-4 mt-2 text-xs text-muted">
                         <span>{user.followers_count || 0} followers</span>
                         <span>{user.following_count || 0} following</span>
                       </div>
@@ -569,12 +580,12 @@ const SearchPage = () => {
 
           {loadingMore && (
             <div className="flex justify-center py-4">
-              <div className="w-6 h-6 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+              <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
             </div>
           )}
 
           {!hasMore && results.length > 0 && (
-            <p className="text-center text-gray-500 text-sm py-4">
+            <p className="text-center text-muted text-sm py-4">
               You've reached the end! 🎉
             </p>
           )}

@@ -186,8 +186,8 @@ const BlogDetailsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-          <p className="text-gray-400">Loading blog...</p>
+          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <p className="text-muted">Loading blog...</p>
         </div>
       </div>
     );
@@ -197,10 +197,10 @@ const BlogDetailsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error || "Blog not found"}</p>
+          <p className="text-error mb-3">{error || "Blog not found"}</p>
           <button
             onClick={() => navigate("/blogs")}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
           >
             Back to Blogs
           </button>
@@ -215,7 +215,7 @@ const BlogDetailsPage = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate("/blogs")}
-          className="flex items-center gap-2 text-gray-400 hover:text-yellowShade transition-colors mb-6"
+          className="flex items-center gap-2 text-muted hover:text-accent transition-colors mb-6"
         >
           <ArrowLeft size={20} />
           <span>Back to Blogs</span>
@@ -232,16 +232,16 @@ const BlogDetailsPage = () => {
           </div>
         )}
 
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+        {/* Title - Gradient */}
+        <h1 className="gradient-title text-3xl md:text-4xl font-bold mb-4">
           {blog.title}
         </h1>
 
         {/* Subtitle */}
-        <p className="text-gray-400 text-lg mb-6">{blog.subtitle}</p>
+        <p className="text-muted text-lg mb-6">{blog.subtitle}</p>
 
         {/* Meta Info */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-gray-700">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-panelEdge">
           <div className="flex items-center gap-4">
             {/* Author */}
             <div className="flex items-center gap-3">
@@ -253,18 +253,18 @@ const BlogDetailsPage = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h4 className="text-white font-semibold">{blog.user.name}</h4>
-                  <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
+                  <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
                     {blog.user.badge}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-400">
+                <div className="flex items-center gap-2 text-xs text-muted">
                   <span>@{blog.user.username}</span>
                 </div>
               </div>
             </div>
 
             {/* Date */}
-            <div className="flex items-center gap-1 text-sm text-gray-500">
+            <div className="flex items-center gap-1 text-sm text-muted">
               <Calendar size={14} />
               <span>{formatDate(blog.created_at)}</span>
             </div>
@@ -273,11 +273,11 @@ const BlogDetailsPage = () => {
           <div className="flex items-center gap-4">
             {/* Stats */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm text-gray-500">
+              <div className="flex items-center gap-1 text-sm text-muted">
                 <Eye size={14} />
                 <span>{blog.views_count || 0} views</span>
               </div>
-              <div className="flex items-center gap-1 text-sm text-gray-500">
+              <div className="flex items-center gap-1 text-sm text-muted">
                 <Clock size={14} />
                 <span>{blog.reading_time}</span>
               </div>
@@ -290,19 +290,19 @@ const BlogDetailsPage = () => {
                   e.stopPropagation();
                   setShowMenu(!showMenu);
                 }}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <MoreHorizontal size={18} className="text-gray-400" />
+                <MoreHorizontal size={18} className="text-muted" />
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 mt-1 w-40 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                   <button
                     onClick={() => {
                       setShowMenu(false);
                       setReportModalOpen(true);
                     }}
-                    className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                    className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
                   >
                     <Flag size={14} />
                     Report Blog
@@ -319,7 +319,7 @@ const BlogDetailsPage = () => {
             {blog.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="text-sm px-3 py-1 bg-yellowShade/10 text-yellowShade rounded-full"
+                className="text-sm px-3 py-1 bg-accent/10 text-accent rounded-full"
               >
                 #{tag.name}
               </span>
@@ -331,10 +331,7 @@ const BlogDetailsPage = () => {
         <div className="space-y-8 mb-8">
           {blog.sections &&
             blog.sections.map((section) => (
-              <div
-                key={section.id}
-                className="bg-white/5 rounded-xl p-6 border border-white/10"
-              >
+              <div key={section.id} className="glass-card p-6">
                 {section.title && (
                   <h2 className="text-xl font-bold text-white mb-3">
                     {section.title}
@@ -347,33 +344,31 @@ const BlogDetailsPage = () => {
                     className="w-full rounded-lg mb-4"
                   />
                 )}
-                <p className="text-gray-300 leading-relaxed">
-                  {section.content}
-                </p>
+                <p className="text-muted leading-relaxed">{section.content}</p>
               </div>
             ))}
         </div>
 
         {/* Actions Buttons */}
-        <div className="flex items-center gap-6 pt-6 border-t border-gray-700">
+        <div className="flex items-center gap-6 pt-6 border-t border-panelEdge">
           {/* Like Button */}
           <button
             onClick={handleLike}
             disabled={liking}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
               isLiked
-                ? "text-red-500 bg-red-500/10"
-                : "text-gray-400 hover:text-red-500 hover:bg-red-500/10"
+                ? "text-error bg-error/10"
+                : "text-muted hover:text-error hover:bg-error/10"
             }`}
           >
-            <Heart size={20} className={isLiked ? "fill-red-500" : ""} />
+            <Heart size={20} className={isLiked ? "fill-error" : ""} />
             <span>{likesCount}</span>
           </button>
 
           {/* Comment Button */}
           <button
             onClick={() => setIsCommentsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
           >
             <MessageCircle size={20} />
             <span>{commentsCount}</span>
@@ -385,11 +380,11 @@ const BlogDetailsPage = () => {
             disabled={saving}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
               isSaved
-                ? "text-yellowShade bg-yellowShade/10"
-                : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"
+                ? "text-accent bg-accent/10"
+                : "text-muted hover:text-accent hover:bg-accent/10"
             }`}
           >
-            <Bookmark size={20} className={isSaved ? "fill-yellowShade" : ""} />
+            <Bookmark size={20} className={isSaved ? "fill-accent" : ""} />
           </button>
         </div>
       </div>
@@ -397,10 +392,10 @@ const BlogDetailsPage = () => {
       {/* Report Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+          <div className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Flag size={20} className="text-red-400" />
+                <Flag size={20} className="text-error" />
                 Report Blog
               </h3>
               <button
@@ -409,27 +404,27 @@ const BlogDetailsPage = () => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <X size={20} className="text-gray-400 hover:text-white" />
+                <X size={20} className="text-muted hover:text-white" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Reason <span className="text-red-400">*</span>
+                <label className="block text-sm font-medium text-label mb-1">
+                  Reason <span className="text-error">*</span>
                 </label>
                 <textarea
                   value={reportReason}
                   onChange={(e) => setReportReason(e.target.value)}
                   placeholder="Why are you reporting this blog?"
                   rows="3"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-label mb-1">
                   Additional Details (Optional)
                 </label>
                 <textarea
@@ -437,7 +432,7 @@ const BlogDetailsPage = () => {
                   onChange={(e) => setReportDetails(e.target.value)}
                   placeholder="Any additional information..."
                   rows="2"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
             </div>
@@ -449,14 +444,14 @@ const BlogDetailsPage = () => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+                className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReport}
                 disabled={reporting}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-error hover:bg-error/80 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {reporting ? "Reporting..." : "Report"}
               </button>

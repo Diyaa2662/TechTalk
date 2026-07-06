@@ -81,18 +81,19 @@ const Sidebar = () => {
       <div
         className={`h-full text-white flex flex-col shadow-lg transition-all duration-300 ease-out ${
           isHovered ? "w-48" : "w-16"
-        } bg-gradient-to-r from-darkShade via-darkShade to-yellowShade/5`}
+        } bg-gradient-to-r from-bg via-bg to-accent/5`}
       >
         {/* Logo */}
-        <div className="px-2 py-4 border-b border-white/10 mb-4">
+        <div className="px-2 py-4 border-b border-panelEdge mb-4">
           <div className="flex items-center gap-4 px-2 py-2 rounded-lg group relative">
             <div className="min-w-[24px] flex justify-center">
               <img src={logo} alt="TechTalk Logo" className="h-6 w-auto" />
             </div>
             <span
               className={`
-                text-base whitespace-nowrap font-bold text-yellowShade
+                text-base whitespace-nowrap font-bold
                 transition-all duration-300 ease-out
+                gradient-title
                 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
               `}
             >
@@ -108,16 +109,16 @@ const Sidebar = () => {
               <li key={item.name}>
                 <a
                   href={item.href}
-                  className="flex items-center gap-4 px-2 py-3 rounded-lg hover:bg-white/10 transition-colors group relative"
+                  className="flex items-center gap-4 px-2 py-3 rounded-lg hover:bg-white/5 transition-colors group relative"
                 >
                   <div className="min-w-[24px] relative">
                     <item.icon
                       size={24}
-                      className="text-gray-300 group-hover:text-yellowShade transition-colors"
+                      className="text-muted group-hover:text-accent transition-colors"
                     />
                     {/* عداد الإشعارات غير المقروءة */}
                     {item.name === "Notifications" && unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-0.5 flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 bg-error text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-0.5 flex items-center justify-center">
                         {unreadCount > 9 ? "9+" : unreadCount}
                       </span>
                     )}
@@ -141,14 +142,14 @@ const Sidebar = () => {
         <div className="px-2 pb-2">
           <button
             onClick={() => navigate("/create-post")}
-            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/10 transition-colors group relative"
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/5 transition-colors group relative"
           >
             <div className="min-w-[24px]">
-              <PlusCircleIcon size={24} className="text-yellowShade" />
+              <PlusCircleIcon size={24} className="text-accent" />
             </div>
             <span
               className={`
-                text-base whitespace-nowrap text-yellowShade font-medium
+                text-base whitespace-nowrap text-accent font-medium
                 transition-all duration-300 ease-out
                 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
               `}
@@ -159,16 +160,16 @@ const Sidebar = () => {
         </div>
 
         {/* Logout button */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-panelEdge">
           <button
             onClick={handleLogout}
             disabled={logoutLoading}
-            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/10 transition-colors group relative disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/5 transition-colors group relative disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="min-w-[24px]">
               <LogOutIcon
                 size={24}
-                className="text-gray-300 group-hover:text-yellowShade transition-colors"
+                className="text-muted group-hover:text-accent transition-colors"
               />
             </div>
             <span

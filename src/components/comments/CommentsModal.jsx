@@ -789,11 +789,11 @@ const CommentsModal = ({
     if (editingComment?.id === comment.id) {
       return (
         <div className={`flex gap-3 ${!isReply ? "mb-4" : "mb-3 ml-11"}`}>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellowShade/20 to-yellowShade/5 flex items-center justify-center flex-shrink-0">
-            <User size={16} className="text-yellowShade" />
+          <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+            <User size={16} className="text-accent" />
           </div>
           <div className="flex-1">
-            <div className="bg-white/5 rounded-lg p-3">
+            <div className="glass-card p-3">
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-semibold text-white text-sm">
                   {comment.user_name} (editing)
@@ -804,15 +804,15 @@ const CommentsModal = ({
                 ref={editTextareaRef}
                 defaultValue={editTextValueRef.current}
                 onChange={handleEditCommentChange}
-                className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent resize-none text-sm mb-2"
+                className="input-field mb-2 resize-none text-sm"
                 rows="3"
               />
 
               {editingCode?.content && (
-                <div className="mb-2 p-2 bg-blue-500/10 rounded-lg flex items-center justify-between border border-blue-500/30">
+                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between border border-accent/20">
                   <div className="flex items-center gap-2">
-                    <Code size={14} className="text-blue-400" />
-                    <span className="text-xs text-blue-400">
+                    <Code size={14} className="text-accent" />
+                    <span className="text-xs text-accent">
                       Code attached{" "}
                       {editingCode.language ? `(${editingCode.language})` : ""}
                     </span>
@@ -821,14 +821,14 @@ const CommentsModal = ({
                     <button
                       type="button"
                       onClick={openEditCodeModal}
-                      className="text-xs text-blue-400 hover:text-blue-300"
+                      className="text-xs text-accent hover:text-accent/80"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingCode(null)}
-                      className="text-xs text-gray-400 hover:text-gray-300"
+                      className="text-xs text-error hover:text-error/80"
                     >
                       Remove
                     </button>
@@ -843,19 +843,19 @@ const CommentsModal = ({
                     submitting ||
                     (!editTextValueRef.current.trim() && !editingCode?.content)
                   }
-                  className="px-3 py-1.5 bg-yellowShade hover:bg-yellowShade/90 text-darkShade font-semibold rounded-lg transition-all duration-200 text-sm disabled:opacity-50"
+                  className="px-3 py-1.5 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 text-sm disabled:opacity-50 shadow-accent-sm"
                 >
                   {submitting ? "Saving..." : "Save"}
                 </button>
                 <button
                   onClick={cancelEdit}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-all duration-200 text-sm"
+                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-all duration-200 text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={openEditCodeModal}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-all duration-200 text-sm flex items-center gap-1"
+                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-all duration-200 text-sm flex items-center gap-1"
                 >
                   <Code size={14} />
                   Code
@@ -869,22 +869,22 @@ const CommentsModal = ({
 
     return (
       <div className={`flex gap-3 ${!isReply ? "mb-4" : "mb-3 ml-11"}`}>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellowShade/20 to-yellowShade/5 flex items-center justify-center flex-shrink-0">
-          <User size={16} className="text-yellowShade" />
+        <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+          <User size={16} className="text-accent" />
         </div>
 
         <div className="flex-1">
-          <div className="bg-white/5 rounded-lg p-3">
+          <div className="glass-card p-3">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-white text-sm">
                   {comment.user_name}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted">
                   {formatDate(comment.created_at)}
                 </span>
                 {comment.is_modified && (
-                  <span className="text-xs text-gray-500">(edited)</span>
+                  <span className="text-xs text-muted">(edited)</span>
                 )}
               </div>
 
@@ -895,18 +895,18 @@ const CommentsModal = ({
                       e.stopPropagation();
                       setShowMenu(!showMenu);
                     }}
-                    className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                    className="p-1 rounded-lg hover:bg-white/5 transition-colors"
                   >
-                    <MoreHorizontal size={14} className="text-gray-400" />
+                    <MoreHorizontal size={14} className="text-muted" />
                   </button>
                   {showMenu && (
-                    <div className="absolute right-0 mt-1 w-32 bg-darkShade border border-white/10 rounded-lg shadow-lg z-10 py-1">
+                    <div className="absolute right-0 mt-1 w-32 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                       <button
                         onClick={() => {
                           setShowMenu(false);
                           startEdit(comment);
                         }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
                       >
                         <Edit size={14} />
                         Edit
@@ -916,7 +916,7 @@ const CommentsModal = ({
                           setShowMenu(false);
                           deleteComment(comment.id);
                         }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
                       >
                         <Trash2 size={14} />
                         Delete
@@ -926,14 +926,14 @@ const CommentsModal = ({
                 </div>
               )}
             </div>
-            <p className="text-gray-300 text-sm">{comment.body}</p>
+            <p className="text-muted text-sm">{comment.body}</p>
 
             {comment.code && (
-              <div className="mt-2 bg-darkShade/50 rounded-lg overflow-hidden border border-gray-700">
-                <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800/50 border-b border-gray-700">
+              <div className="mt-2 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
+                <div className="flex items-center justify-between px-3 py-1.5 bg-panel/50 border-b border-panelEdge">
                   <div className="flex items-center gap-2">
-                    <Code size={12} className="text-yellowShade" />
-                    <span className="text-xs text-gray-300">
+                    <Code size={12} className="text-accent" />
+                    <span className="text-xs text-muted">
                       {comment.code_language || "code"}
                     </span>
                   </div>
@@ -941,8 +941,8 @@ const CommentsModal = ({
                     <div
                       className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
                         comment.code_label === "SAFE"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-success/20 text-success"
+                          : "bg-error/20 text-error"
                       }`}
                     >
                       {comment.code_label === "SAFE" ? (
@@ -954,7 +954,7 @@ const CommentsModal = ({
                     </div>
                   )}
                 </div>
-                <pre className="p-2 text-xs text-gray-300 overflow-x-auto font-mono">
+                <pre className="p-2 text-xs text-muted overflow-x-auto font-mono">
                   <code>{comment.code}</code>
                 </pre>
               </div>
@@ -965,19 +965,17 @@ const CommentsModal = ({
             <button
               onClick={handleLocalLike}
               className={`text-xs transition-colors flex items-center gap-1 ${
-                isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"
+                isLiked ? "text-error" : "text-muted hover:text-error"
               }`}
             >
-              <Heart size={12} className={isLiked ? "fill-red-500" : ""} />
+              <Heart size={12} className={isLiked ? "fill-error" : ""} />
               <span>{likesCount > 0 ? likesCount : "Like"}</span>
             </button>
 
             <button
               onClick={handleLocalDislike}
               className={`text-xs transition-colors flex items-center gap-1 ${
-                isDisliked
-                  ? "text-yellowShade"
-                  : "text-gray-500 hover:text-yellowShade"
+                isDisliked ? "text-accent" : "text-muted hover:text-accent"
               }`}
             >
               <ThumbsDown size={12} />
@@ -986,7 +984,7 @@ const CommentsModal = ({
 
             <button
               onClick={() => startReply(comment)}
-              className="text-xs text-gray-500 hover:text-yellowShade transition-colors flex items-center gap-1"
+              className="text-xs text-muted hover:text-accent transition-colors flex items-center gap-1"
             >
               <MessageCircle size={12} />
               Reply
@@ -996,7 +994,7 @@ const CommentsModal = ({
           {comment.has_childrens && (
             <button
               onClick={() => toggleReplies(comment.id)}
-              className="mt-2 text-xs text-yellowShade hover:text-yellowShade/80 transition-colors flex items-center gap-1"
+              className="mt-2 text-xs text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
             >
               {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               {isExpanded ? "Hide replies" : `View replies`}
@@ -1007,7 +1005,7 @@ const CommentsModal = ({
             <div className="mt-3">
               {isLoadingReplies ? (
                 <div className="flex justify-center py-2">
-                  <div className="w-4 h-4 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
                 </div>
               ) : (
                 replies.map((reply) => (
@@ -1029,20 +1027,20 @@ const CommentsModal = ({
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
         <div
           ref={modalRef}
-          className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl mx-4"
+          className="glass-card max-w-2xl w-full max-h-[90vh] flex flex-col shadow-panel mx-4"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <div className="flex items-center justify-between p-4 border-b border-panelEdge">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <MessageCircle size={20} className="text-yellowShade" />
+              <MessageCircle size={20} className="text-accent" />
               Comments
-              <span className="text-sm text-gray-400">({totalComments})</span>
+              <span className="text-sm text-muted">({totalComments})</span>
             </h2>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              className="p-1 rounded-lg hover:bg-white/5 transition-colors"
             >
-              <X size={20} className="text-gray-400 hover:text-white" />
+              <X size={20} className="text-muted hover:text-white" />
             </button>
           </div>
 
@@ -1050,14 +1048,9 @@ const CommentsModal = ({
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {comments.length === 0 ? (
               <div className="text-center py-8">
-                <MessageCircle
-                  size={40}
-                  className="text-gray-600 mx-auto mb-2"
-                />
-                <p className="text-gray-400">No comments yet</p>
-                <p className="text-gray-500 text-sm">
-                  Be the first to comment!
-                </p>
+                <MessageCircle size={40} className="text-muted mx-auto mb-2" />
+                <p className="text-muted">No comments yet</p>
+                <p className="text-label text-sm">Be the first to comment!</p>
               </div>
             ) : (
               <>
@@ -1070,7 +1063,7 @@ const CommentsModal = ({
                     <button
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className="text-sm text-yellowShade hover:text-yellowShade/80 transition-colors disabled:opacity-50"
+                      className="text-sm text-accent hover:text-accent/80 transition-colors disabled:opacity-50"
                     >
                       {loadingMore ? "Loading..." : "Load more comments"}
                     </button>
@@ -1084,18 +1077,18 @@ const CommentsModal = ({
           {!editingComment && (
             <form
               onSubmit={handleSubmitComment}
-              className="p-4 border-t border-white/10"
+              className="p-4 border-t border-panelEdge"
             >
               {replyTo && (
-                <div className="mb-2 p-2 bg-yellowShade/10 rounded-lg flex items-center justify-between">
-                  <span className="text-xs text-yellowShade">
+                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between">
+                  <span className="text-xs text-accent">
                     Replying to{" "}
                     <span className="font-semibold">@{replyTo.user_name}</span>
                   </span>
                   <button
                     type="button"
                     onClick={cancelReply}
-                    className="text-gray-400 hover:text-white"
+                    className="text-muted hover:text-white"
                   >
                     <X size={14} />
                   </button>
@@ -1103,10 +1096,10 @@ const CommentsModal = ({
               )}
 
               {hasCodeAttached && (
-                <div className="mb-2 p-2 bg-blue-500/10 rounded-lg flex items-center justify-between border border-blue-500/30">
+                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between border border-accent/20">
                   <div className="flex items-center gap-2">
-                    <Code size={14} className="text-blue-400" />
-                    <span className="text-xs text-blue-400">
+                    <Code size={14} className="text-accent" />
+                    <span className="text-xs text-accent">
                       Code attached{" "}
                       {pendingCode?.language ? `(${pendingCode.language})` : ""}
                     </span>
@@ -1115,7 +1108,7 @@ const CommentsModal = ({
                     <button
                       type="button"
                       onClick={openCodeModal}
-                      className="text-xs text-blue-400 hover:text-blue-300"
+                      className="text-xs text-accent hover:text-accent/80"
                     >
                       Edit
                     </button>
@@ -1126,7 +1119,7 @@ const CommentsModal = ({
                         setCodeContent("");
                         setCodeLanguage("");
                       }}
-                      className="text-xs text-gray-400 hover:text-gray-300"
+                      className="text-xs text-error hover:text-error/80"
                     >
                       Remove
                     </button>
@@ -1144,7 +1137,7 @@ const CommentsModal = ({
                       ? `Reply to ${replyTo.user_name}...`
                       : "Write a comment... (use @ to mention users)"
                   }
-                  className="flex-1 px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent resize-none text-sm"
+                  className="input-field resize-none text-sm"
                   rows="2"
                 />
                 <div className="flex flex-col gap-1">
@@ -1157,14 +1150,14 @@ const CommentsModal = ({
                         !pendingCode?.content) ||
                       (replyTo && !replyContent.trim() && !pendingCode?.content)
                     }
-                    className="px-4 py-2 bg-yellowShade hover:bg-yellowShade/90 text-darkShade font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-accent-sm"
                   >
                     <Send size={18} />
                   </button>
                   <button
                     type="button"
                     onClick={openCodeModal}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-all duration-200 text-sm flex items-center gap-1 justify-center"
+                    className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-all duration-200 text-sm flex items-center gap-1 justify-center"
                   >
                     <Code size={14} />
                     Code
@@ -1186,17 +1179,17 @@ const CommentsModal = ({
             left: mentionPosition.left,
             zIndex: 300,
           }}
-          className="bg-darkShade border border-gray-600 rounded-lg shadow-xl overflow-hidden min-w-[200px] max-h-[220px] overflow-y-auto"
+          className="bg-panel border border-panelEdge rounded-lg shadow-panel overflow-hidden min-w-[200px] max-h-[220px] overflow-y-auto"
         >
           {mentionSuggestions.map((user, idx) => (
             <button
               key={user.id}
               onClick={() => selectMention(user)}
-              className={`w-full px-3 py-2 text-left hover:bg-white/10 transition-colors flex items-center gap-2 ${
-                selectedSuggestionIndex === idx ? "bg-white/10" : ""
+              className={`w-full px-3 py-2 text-left hover:bg-white/5 transition-colors flex items-center gap-2 ${
+                selectedSuggestionIndex === idx ? "bg-white/5" : ""
               }`}
             >
-              <div className="w-6 h-6 rounded-full bg-yellowShade/20 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center">
                 {user.avatar ? (
                   <img
                     src={user.avatar}
@@ -1204,14 +1197,14 @@ const CommentsModal = ({
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 ) : (
-                  <User size={12} className="text-yellowShade" />
+                  <User size={12} className="text-accent" />
                 )}
               </div>
               <div>
                 <div className="text-sm text-white font-medium">
                   {user.name}
                 </div>
-                <div className="text-xs text-gray-400">@{user.username}</div>
+                <div className="text-xs text-muted">@{user.username}</div>
               </div>
             </button>
           ))}
@@ -1227,26 +1220,26 @@ const CommentsModal = ({
           <div
             ref={codeModalRef}
             onClick={(e) => e.stopPropagation()}
-            className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4"
+            className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Code size={20} className="text-yellowShade" />
+                <Code size={20} className="text-accent" />
                 {editingComment
                   ? "Edit Code in Comment"
                   : "Add Code to Comment"}
               </h3>
               <button
                 onClick={cancelCode}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <X size={20} className="text-gray-400 hover:text-white" />
+                <X size={20} className="text-muted hover:text-white" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-label mb-1">
                   Code Language
                 </label>
                 <input
@@ -1254,20 +1247,20 @@ const CommentsModal = ({
                   value={codeLanguage}
                   onChange={(e) => setCodeLanguage(e.target.value)}
                   placeholder="e.g., javascript, python, php"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent"
+                  className="input-field"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-label mb-1">
                   Code
                 </label>
                 <textarea
                   value={codeContent}
                   onChange={(e) => setCodeContent(e.target.value)}
                   placeholder="Paste your code here..."
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent font-mono text-sm"
+                  className="input-field font-mono text-sm"
                   rows="6"
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -1277,13 +1270,13 @@ const CommentsModal = ({
             <div className="flex gap-3 mt-6">
               <button
                 onClick={cancelCode}
-                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+                className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={editingComment ? saveEditCode : saveCode}
-                className="flex-1 px-4 py-2 bg-yellowShade hover:bg-yellowShade/90 text-darkShade font-semibold rounded-lg transition-all duration-200"
+                className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 shadow-accent-sm"
               >
                 {editingComment ? "Update Code" : "Attach Code"}
               </button>

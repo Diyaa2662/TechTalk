@@ -16,7 +16,6 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
   // تسجيل مشاهدة البوست (مرة واحدة فقط)
   useEffect(() => {
     const recordView = async () => {
-      // نتحقق إذا كان البوست تمت مشاهدته قبل هيك في هذه الجلسة
       const viewedKey = `post_viewed_${post.id}`;
       const hasViewed = sessionStorage.getItem(viewedKey);
 
@@ -113,11 +112,10 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
 
   return (
     <>
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 hover:border-yellowShade/30 transition-all duration-200">
+      <div className="glass-card-hover p-5">
         {/* Header - معلومات المستخدم */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            {/* Avatar */}
             <img
               src={post.user.avatar_url}
               alt={post.user.name}
@@ -125,14 +123,14 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
             />
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="text-white font-semibold hover:text-yellowShade transition-colors cursor-pointer">
+                <h4 className="text-white font-semibold hover:text-accent transition-colors cursor-pointer">
                   {post.user.name}
                 </h4>
-                <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
+                <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
                   {post.user.badge}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
+              <div className="flex items-center gap-2 text-xs text-muted">
                 <span>@{post.user.username}</span>
                 <span>•</span>
                 <span>{formatDate(post.created_at)}</span>
@@ -141,19 +139,19 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
           </div>
 
           {/* Views count */}
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-xs text-muted">
             <Eye size={14} />
             <span>{post.views_count || 0}</span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold text-white mb-2 hover:text-yellowShade transition-colors cursor-pointer">
+        <h3 className="text-xl font-bold text-white mb-2 hover:text-accent transition-colors cursor-pointer">
           {post.title}
         </h3>
 
         {/* Body */}
-        <p className="text-gray-300 mb-3 leading-relaxed">
+        <p className="text-muted mb-3 leading-relaxed">
           {post.body && post.body.length > 200
             ? `${post.body.substring(0, 200)}...`
             : post.body}
@@ -161,16 +159,16 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
 
         {/* Code Block */}
         {post.code && (
-          <div className="mb-3 bg-darkShade/50 rounded-lg overflow-hidden border border-gray-700">
-            <div className="flex items-center justify-between px-3 py-2 bg-gray-800/50 border-b border-gray-700">
-              <span className="text-xs text-gray-400">
+          <div className="mb-3 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
+            <div className="flex items-center justify-between px-3 py-2 bg-panel/50 border-b border-panelEdge">
+              <span className="text-xs text-muted">
                 {post.code_language || "code"}
               </span>
-              <button className="text-gray-400 hover:text-yellowShade transition-colors">
+              <button className="text-muted hover:text-accent transition-colors">
                 <Code size={14} />
               </button>
             </div>
-            <pre className="p-3 text-sm text-gray-300 overflow-x-auto">
+            <pre className="p-3 text-sm text-muted overflow-x-auto">
               <code>{post.code}</code>
             </pre>
           </div>
@@ -198,7 +196,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
             {post.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="text-xs px-2 py-1 bg-yellowShade/10 text-yellowShade rounded-full hover:bg-yellowShade/20 transition-colors cursor-pointer"
+                className="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full hover:bg-accent/20 transition-colors cursor-pointer"
               >
                 #{tag.name}
               </span>
@@ -207,20 +205,20 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
         )}
 
         {/* Actions Buttons */}
-        <div className="flex items-center justify-around pt-3 border-t border-gray-700">
+        <div className="flex items-center justify-around pt-3 border-t border-panelEdge">
           {/* Like Button */}
           <button
             onClick={handleLike}
             disabled={liking}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all duration-200 ${
               isLiked
-                ? "text-red-500 bg-red-500/10"
-                : "text-gray-400 hover:text-red-500 hover:bg-red-500/10"
+                ? "text-error bg-error/10"
+                : "text-muted hover:text-error hover:bg-error/10"
             } ${liking ? "scale-90" : "scale-100"} active:scale-75`}
           >
             <Heart
               size={18}
-              className={`${isLiked ? "fill-red-500" : ""} transition-all duration-200 ${
+              className={`${isLiked ? "fill-error" : ""} transition-all duration-200 ${
                 liking ? "animate-pulse" : ""
               }`}
             />
@@ -230,7 +228,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
           {/* Comment Button - فتح المودال */}
           <button
             onClick={() => setIsCommentsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
           >
             <MessageCircle size={18} />
             <span className="text-sm">{commentsCount}</span>
@@ -242,13 +240,13 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate }) => {
             disabled={saving}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all duration-200 ${
               isSaved
-                ? "text-yellowShade bg-yellowShade/10"
-                : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"
+                ? "text-accent bg-accent/10"
+                : "text-muted hover:text-accent hover:bg-accent/10"
             } ${saving ? "scale-90" : "scale-100"} active:scale-75`}
           >
             <Bookmark
               size={18}
-              className={`${isSaved ? "fill-yellowShade" : ""} transition-all duration-200`}
+              className={`${isSaved ? "fill-accent" : ""} transition-all duration-200`}
             />
           </button>
         </div>

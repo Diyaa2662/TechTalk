@@ -377,11 +377,11 @@ const UserProfilePage = () => {
   const getBadgeColor = (badge) => {
     switch (badge) {
       case "junior":
-        return "bg-blue-500/20 text-blue-400";
+        return "bg-accent/15 text-accent";
       case "senior":
         return "bg-purple-500/20 text-purple-400";
       case "expert":
-        return "bg-yellowShade/20 text-yellowShade";
+        return "bg-accent/20 text-accent";
       default:
         return "bg-gray-500/20 text-gray-400";
     }
@@ -407,8 +407,8 @@ const UserProfilePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-          <p className="text-gray-400">Loading profile...</p>
+          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <p className="text-muted">Loading profile...</p>
         </div>
       </div>
     );
@@ -418,10 +418,10 @@ const UserProfilePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error || "User not found"}</p>
+          <p className="text-error mb-3">{error || "User not found"}</p>
           <button
             onClick={() => navigate("/")}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
           >
             Back to Home
           </button>
@@ -434,14 +434,14 @@ const UserProfilePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
-            <UserX size={40} className="text-red-400" />
+          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-error/20 flex items-center justify-center">
+            <UserX size={40} className="text-error" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">User Blocked</h2>
-          <p className="text-gray-400 mb-4">You have blocked @{username}</p>
+          <p className="text-muted mb-4">You have blocked @{username}</p>
           <button
             onClick={() => navigate("/")}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
           >
             Back to Home
           </button>
@@ -461,12 +461,12 @@ const UserProfilePage = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-yellowShade/40 via-purple-500/20 to-darkShade">
+          <div className="w-full h-full bg-gradient-to-r from-accent/40 via-purple-500/20 to-bg">
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-white/10 flex items-center justify-center">
                   <svg
-                    className="w-8 h-8 text-gray-400"
+                    className="w-8 h-8 text-muted"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -479,7 +479,7 @@ const UserProfilePage = () => {
                     />
                   </svg>
                 </div>
-                <p className="text-gray-400 text-sm">Cover image</p>
+                <p className="text-muted text-sm">Cover image</p>
               </div>
             </div>
           </div>
@@ -492,7 +492,7 @@ const UserProfilePage = () => {
           <img
             src={profile.avatar_url}
             alt={profile.name}
-            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-darkShade object-cover shadow-xl"
+            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-bg object-cover shadow-xl"
           />
         </div>
       </div>
@@ -511,13 +511,13 @@ const UserProfilePage = () => {
                 {profile.badge}
               </span>
             </div>
-            <p className="text-gray-400 text-sm mt-1">@{profile.username}</p>
+            <p className="text-muted text-sm mt-1">@{profile.username}</p>
 
             {profile.bio && (
-              <p className="text-gray-300 mt-3 max-w-md">{profile.bio}</p>
+              <p className="text-muted mt-3 max-w-md">{profile.bio}</p>
             )}
 
-            <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
+            <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted">
               {profile.location && (
                 <div className="flex items-center gap-1">
                   <MapPin size={14} />
@@ -531,7 +531,7 @@ const UserProfilePage = () => {
                     href={profile.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-yellowShade transition-colors"
+                    className="hover:text-accent transition-colors"
                   >
                     {profile.website}
                   </a>
@@ -551,7 +551,7 @@ const UserProfilePage = () => {
                     href={link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-yellowShade transition-colors"
+                    className="text-muted hover:text-accent transition-colors"
                   >
                     {getSocialIcon(link)}
                   </a>
@@ -566,7 +566,7 @@ const UserProfilePage = () => {
               <button
                 onClick={handleUnfollow}
                 disabled={followingLoading}
-                className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+                className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
               >
                 <UserCheck size={18} />
                 {followingLoading ? "..." : "Following"}
@@ -575,7 +575,7 @@ const UserProfilePage = () => {
               <button
                 onClick={handleFollow}
                 disabled={followingLoading}
-                className="px-5 py-2 bg-yellowShade hover:bg-yellowShade/90 text-darkShade rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+                className="px-5 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-accent-sm"
               >
                 <UserPlus size={18} />
                 {followingLoading ? "..." : "Follow"}
@@ -589,19 +589,19 @@ const UserProfilePage = () => {
                   e.stopPropagation();
                   setShowMenu(!showMenu);
                 }}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <MoreHorizontal size={20} className="text-gray-400" />
+                <MoreHorizontal size={20} className="text-muted" />
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                <div className="absolute right-0 mt-2 w-48 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                   <button
                     onClick={() => {
                       setShowMenu(false);
                       setReportModalOpen(true);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
                   >
                     <Flag size={16} />
                     Report User
@@ -609,7 +609,7 @@ const UserProfilePage = () => {
                   <button
                     onClick={handleBlock}
                     disabled={blockLoading}
-                    className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
                   >
                     <Shield size={16} />
                     {blockLoading ? "Blocking..." : "Block User"}
@@ -625,27 +625,27 @@ const UserProfilePage = () => {
             <p className="text-xl font-bold text-white">
               {profile.posts_count || 0}
             </p>
-            <p className="text-xs text-gray-400">posts</p>
+            <p className="text-xs text-muted">posts</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">
               {profile.blogs_count || 0}
             </p>
-            <p className="text-xs text-gray-400">blogs</p>
+            <p className="text-xs text-muted">blogs</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">{followersCount}</p>
-            <p className="text-xs text-gray-400">followers</p>
+            <p className="text-xs text-muted">followers</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">{followingCount}</p>
-            <p className="text-xs text-gray-400">following</p>
+            <p className="text-xs text-muted">following</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">
               {profile.ranking_points || 0}
             </p>
-            <p className="text-xs text-gray-400">points</p>
+            <p className="text-xs text-muted">points</p>
           </div>
         </div>
 
@@ -655,7 +655,7 @@ const UserProfilePage = () => {
               {profile.tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="text-xs px-2 py-1 bg-yellowShade/10 text-yellowShade rounded-full"
+                  className="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
                 >
                   #{tag.name}
                 </span>
@@ -666,24 +666,32 @@ const UserProfilePage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="mt-10 border-t border-gray-700 pt-6">
+      <div className="mt-10 border-t border-panelEdge pt-6">
         <div className="flex gap-12 justify-center">
           <button
             onClick={() => setActiveTab("posts")}
-            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "posts" ? "text-yellowShade" : "text-gray-400 hover:text-white"}`}
+            className={`pb-3 text-base font-medium transition-colors relative ${
+              activeTab === "posts"
+                ? "text-accent"
+                : "text-muted hover:text-white"
+            }`}
           >
             POSTS
             {activeTab === "posts" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
             )}
           </button>
           <button
             onClick={() => setActiveTab("blogs")}
-            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "blogs" ? "text-yellowShade" : "text-gray-400 hover:text-white"}`}
+            className={`pb-3 text-base font-medium transition-colors relative ${
+              activeTab === "blogs"
+                ? "text-accent"
+                : "text-muted hover:text-white"
+            }`}
           >
             BLOGS
             {activeTab === "blogs" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
             )}
           </button>
         </div>
@@ -696,13 +704,13 @@ const UserProfilePage = () => {
           <>
             {postsLoading && posts.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
-                <FileText size={48} className="text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400">No posts yet</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <FileText size={48} className="text-muted mx-auto mb-3" />
+                <p className="text-muted">No posts yet</p>
+                <p className="text-label text-sm mt-1">
                   This user hasn't posted anything yet
                 </p>
               </div>
@@ -712,13 +720,13 @@ const UserProfilePage = () => {
                   <Link
                     key={post.id}
                     to={`/posts/${post.id}`}
-                    className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                    className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted">
                         <span>{formatRelativeDate(post.created_at)}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 text-xs text-muted">
                         <div className="flex items-center gap-1">
                           <Heart size={12} />
                           <span>{post.likes_count}</span>
@@ -736,11 +744,11 @@ const UserProfilePage = () => {
                     <h3 className="text-white font-semibold mb-1">
                       {post.title}
                     </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2">
+                    <p className="text-muted text-sm line-clamp-2">
                       {post.body}
                     </p>
                     {post.code && (
-                      <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                      <div className="mt-2 flex items-center gap-1 text-xs text-muted">
                         <Code size={12} />
                         <span>{post.code_language}</span>
                       </div>
@@ -750,7 +758,7 @@ const UserProfilePage = () => {
                         {post.tags.slice(0, 3).map((tag) => (
                           <span
                             key={tag.id}
-                            className="text-xs px-1.5 py-0.5 bg-yellowShade/10 text-yellowShade rounded-full"
+                            className="text-xs px-1.5 py-0.5 bg-accent/10 text-accent rounded-full"
                           >
                             #{tag.name}
                           </span>
@@ -761,7 +769,7 @@ const UserProfilePage = () => {
                 ))}
                 {postsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
                   </div>
                 )}
               </div>
@@ -774,13 +782,13 @@ const UserProfilePage = () => {
           <>
             {blogsLoading && blogs.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
               </div>
             ) : blogs.length === 0 ? (
               <div className="text-center py-12">
-                <BookOpen size={48} className="text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400">No blogs yet</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <BookOpen size={48} className="text-muted mx-auto mb-3" />
+                <p className="text-muted">No blogs yet</p>
+                <p className="text-label text-sm mt-1">
                   This user hasn't written any blogs yet
                 </p>
               </div>
@@ -790,13 +798,13 @@ const UserProfilePage = () => {
                   <Link
                     key={blog.id}
                     to={`/blogs/${blog.id}`}
-                    className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                    className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted">
                         <span>{formatRelativeDate(blog.created_at)}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 text-xs text-muted">
                         <div className="flex items-center gap-1">
                           <Heart size={12} />
                           <span>{blog.likes_count}</span>
@@ -814,11 +822,11 @@ const UserProfilePage = () => {
                     <h3 className="text-white font-semibold mb-1">
                       {blog.title}
                     </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2">
+                    <p className="text-muted text-sm line-clamp-2">
                       {blog.subtitle}
                     </p>
                     {blog.reading_time && (
-                      <div className="mt-2 text-xs text-gray-500">
+                      <div className="mt-2 text-xs text-muted">
                         📖 {blog.reading_time}
                       </div>
                     )}
@@ -826,7 +834,7 @@ const UserProfilePage = () => {
                 ))}
                 {blogsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
                   </div>
                 )}
               </div>
@@ -838,10 +846,10 @@ const UserProfilePage = () => {
       {/* Report Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+          <div className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Flag size={20} className="text-red-400" />
+                <Flag size={20} className="text-error" />
                 Report User
               </h3>
               <button
@@ -850,27 +858,27 @@ const UserProfilePage = () => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <X size={20} className="text-gray-400 hover:text-white" />
+                <X size={20} className="text-muted hover:text-white" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Reason <span className="text-red-400">*</span>
+                <label className="block text-sm font-medium text-label mb-1">
+                  Reason <span className="text-error">*</span>
                 </label>
                 <textarea
                   value={reportReason}
                   onChange={(e) => setReportReason(e.target.value)}
                   placeholder="Why are you reporting this user?"
                   rows="3"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-label mb-1">
                   Additional Details (Optional)
                 </label>
                 <textarea
@@ -878,7 +886,7 @@ const UserProfilePage = () => {
                   onChange={(e) => setReportDetails(e.target.value)}
                   placeholder="Any additional information..."
                   rows="2"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
             </div>
@@ -890,14 +898,14 @@ const UserProfilePage = () => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+                className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReport}
                 disabled={reporting}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-error hover:bg-error/80 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {reporting ? "Reporting..." : "Report"}
               </button>

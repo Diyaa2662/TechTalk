@@ -135,7 +135,7 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
 
   return (
     <>
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-yellowShade/30 transition-all duration-200">
+      <div className="glass-card-hover overflow-hidden">
         {/* Cover Image */}
         {blog.cover_image_url && (
           <div className="w-full h-48 overflow-hidden">
@@ -158,14 +158,14 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="text-white font-semibold hover:text-yellowShade transition-colors">
+                  <h4 className="text-white font-semibold hover:text-accent transition-colors">
                     {blog.user.name}
                   </h4>
-                  <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
+                  <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
                     {blog.user.badge}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-400">
+                <div className="flex items-center gap-2 text-xs text-muted">
                   <span>@{blog.user.username}</span>
                   <span>•</span>
                   <span>{formatDate(blog.created_at)}</span>
@@ -175,7 +175,7 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
 
             <div className="flex items-center gap-2">
               {/* Views و Reading Time */}
-              <div className="flex items-center gap-3 text-xs text-gray-500">
+              <div className="flex items-center gap-3 text-xs text-muted">
                 <div className="flex items-center gap-1">
                   <Eye size={14} />
                   <span>{blog.views_count || 0}</span>
@@ -190,19 +190,19 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                  className="p-1 rounded-lg hover:bg-white/5 transition-colors"
                 >
-                  <MoreHorizontal size={16} className="text-gray-400" />
+                  <MoreHorizontal size={16} className="text-muted" />
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 mt-1 w-40 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                  <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                     <button
                       onClick={() => {
                         setShowMenu(false);
                         setReportModalOpen(true);
                       }}
-                      className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                      className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
                     >
                       <Flag size={14} />
                       Report Blog
@@ -215,34 +215,34 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
 
           {/* Title & Subtitle - رابط للمقال */}
           <Link to={`/blogs/${blog.id}`}>
-            <h2 className="text-xl font-bold text-white mb-2 hover:text-yellowShade transition-colors cursor-pointer">
+            <h2 className="text-xl font-bold text-white mb-2 hover:text-accent transition-colors cursor-pointer">
               {blog.title}
             </h2>
-            <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+            <p className="text-muted text-sm mb-4 line-clamp-2">
               {blog.subtitle}
             </p>
           </Link>
 
           {/* Actions Buttons */}
-          <div className="flex items-center gap-6 pt-3 border-t border-gray-700">
+          <div className="flex items-center gap-6 pt-3 border-t border-panelEdge">
             {/* Like Button */}
             <button
               onClick={handleLike}
               disabled={liking}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
                 isLiked
-                  ? "text-red-500 bg-red-500/10"
-                  : "text-gray-400 hover:text-red-500 hover:bg-red-500/10"
+                  ? "text-error bg-error/10"
+                  : "text-muted hover:text-error hover:bg-error/10"
               }`}
             >
-              <Heart size={18} className={isLiked ? "fill-red-500" : ""} />
+              <Heart size={18} className={isLiked ? "fill-error" : ""} />
               <span className="text-sm">{likesCount}</span>
             </button>
 
             {/* Comment Button */}
             <button
               onClick={() => setIsCommentsModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all duration-200"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
             >
               <MessageCircle size={18} />
               <span className="text-sm">{commentsCount}</span>
@@ -254,14 +254,11 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
               disabled={saving}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
                 isSaved
-                  ? "text-yellowShade bg-yellowShade/10"
-                  : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"
+                  ? "text-accent bg-accent/10"
+                  : "text-muted hover:text-accent hover:bg-accent/10"
               }`}
             >
-              <Bookmark
-                size={18}
-                className={isSaved ? "fill-yellowShade" : ""}
-              />
+              <Bookmark size={18} className={isSaved ? "fill-accent" : ""} />
             </button>
           </div>
         </div>
@@ -270,10 +267,10 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
       {/* Report Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+          <div className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Flag size={20} className="text-red-400" />
+                <Flag size={20} className="text-error" />
                 Report Blog
               </h3>
               <button
@@ -282,27 +279,27 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <X size={20} className="text-gray-400 hover:text-white" />
+                <X size={20} className="text-muted hover:text-white" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Reason <span className="text-red-400">*</span>
+                <label className="block text-sm font-medium text-label mb-1">
+                  Reason <span className="text-error">*</span>
                 </label>
                 <textarea
                   value={reportReason}
                   onChange={(e) => setReportReason(e.target.value)}
                   placeholder="Why are you reporting this blog?"
                   rows="3"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-label mb-1">
                   Additional Details (Optional)
                 </label>
                 <textarea
@@ -310,7 +307,7 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
                   onChange={(e) => setReportDetails(e.target.value)}
                   placeholder="Any additional information..."
                   rows="2"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
             </div>
@@ -322,14 +319,14 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+                className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReport}
                 disabled={reporting}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-error hover:bg-error/80 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {reporting ? "Reporting..." : "Report"}
               </button>
@@ -429,8 +426,8 @@ const BlogsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-          <p className="text-gray-400">Loading blogs...</p>
+          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <p className="text-muted">Loading blogs...</p>
         </div>
       </div>
     );
@@ -440,10 +437,10 @@ const BlogsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error}</p>
+          <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
           >
             Try Again
           </button>
@@ -456,8 +453,8 @@ const BlogsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-gray-400 text-lg">No blogs yet</p>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-white text-lg">No blogs yet</p>
+          <p className="text-muted text-sm mt-1">
             Check back later for new articles
           </p>
         </div>
@@ -467,7 +464,7 @@ const BlogsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold text-white mb-6">Tech Blogs</h1>
+      <h1 className="gradient-title text-2xl font-bold mb-6">Tech Blogs</h1>
 
       <div className="space-y-6">
         {blogs.map((blog) => (
@@ -477,12 +474,12 @@ const BlogsPage = () => {
 
       {loadingMore && (
         <div className="flex justify-center my-6">
-          <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
         </div>
       )}
 
       {!hasMore && blogs.length > 0 && (
-        <p className="text-center text-gray-500 text-sm py-6">
+        <p className="text-center text-muted text-sm py-6">
           You've seen all blogs! 🎉
         </p>
       )}

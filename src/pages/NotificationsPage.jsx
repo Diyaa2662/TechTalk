@@ -163,12 +163,10 @@ const NotificationsPage = () => {
   const handleNotificationClick = async (notification) => {
     const link = getNotificationLink(notification);
 
-    // إذا كان الإشعار غير مقروء، نحدثه إلى مقروء
     if (!notification.read_at) {
       await markAsRead(notification.id);
     }
 
-    // التوجيه إلى المحتوى المرتبط
     if (link !== "#") {
       navigate(link);
     }
@@ -194,17 +192,17 @@ const NotificationsPage = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case "comment_verified":
-        return <Code size={18} className="text-green-400" />;
+        return <Code size={18} className="text-accent" />;
       case "like":
-        return <Heart size={18} className="text-red-400" />;
+        return <Heart size={18} className="text-error" />;
       case "dislike":
-        return <ThumbsDown size={18} className="text-yellowShade" />;
+        return <ThumbsDown size={18} className="text-accent" />;
       case "comment":
-        return <MessageCircle size={18} className="text-blue-400" />;
+        return <MessageCircle size={18} className="text-accent" />;
       case "follow":
-        return <User size={18} className="text-purple-400" />;
+        return <User size={18} className="text-accent" />;
       default:
-        return <Bell size={18} className="text-gray-400" />;
+        return <Bell size={18} className="text-muted" />;
     }
   };
 
@@ -212,8 +210,8 @@ const NotificationsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-          <p className="text-gray-400">Loading notifications...</p>
+          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <p className="text-muted">Loading notifications...</p>
         </div>
       </div>
     );
@@ -223,10 +221,10 @@ const NotificationsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error}</p>
+          <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
           >
             Try Again
           </button>
@@ -241,21 +239,21 @@ const NotificationsPage = () => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Bell size={28} className="text-yellowShade" />
+            <Bell size={28} className="text-accent" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-bold text-white">Notifications</h1>
+          <h1 className="gradient-title text-2xl font-bold">Notifications</h1>
         </div>
 
         {notifications.length > 0 && unreadCount > 0 && (
           <button
             onClick={markAllAsRead}
             disabled={markingAll}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-yellowShade hover:text-yellowShade/80 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-accent hover:text-accent/80 transition-colors disabled:opacity-50"
           >
             <CheckCheck size={16} />
             Mark all as read
@@ -265,10 +263,10 @@ const NotificationsPage = () => {
 
       {/* Notifications List */}
       {notifications.length === 0 ? (
-        <div className="text-center py-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
-          <Bell size={48} className="text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 text-lg">No notifications yet</p>
-          <p className="text-gray-500 text-sm mt-1">
+        <div className="text-center py-12 glass-card">
+          <Bell size={48} className="text-muted mx-auto mb-3" />
+          <p className="text-muted text-lg">No notifications yet</p>
+          <p className="text-label text-sm mt-1">
             When you get notifications, they'll appear here
           </p>
         </div>
@@ -283,15 +281,15 @@ const NotificationsPage = () => {
               <div
                 key={notification.id}
                 onClick={() => hasLink && handleNotificationClick(notification)}
-                className={`group relative bg-white/5 backdrop-blur-md border rounded-xl p-4 transition-all duration-200 hover:border-yellowShade/30 ${
+                className={`group relative glass-card p-4 transition-all duration-200 ${
                   isRead
-                    ? "border-white/10"
-                    : "border-yellowShade/30 bg-yellowShade/5"
-                } ${hasLink ? "cursor-pointer hover:bg-white/10" : "cursor-default"}`}
+                    ? "hover:border-accent/30"
+                    : "border-accent/50 bg-accent/5 hover:border-accent"
+                } ${hasLink ? "cursor-pointer" : "cursor-default"}`}
               >
                 <div className="flex gap-4">
                   {/* Icon */}
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center">
                     {getNotificationIcon(notification.type)}
                   </div>
 
@@ -300,22 +298,22 @@ const NotificationsPage = () => {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <h3
-                          className={`text-sm font-semibold ${isRead ? "text-gray-400" : "text-white"}`}
+                          className={`text-sm font-semibold ${isRead ? "text-muted" : "text-white"}`}
                         >
                           {notification.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mt-0.5">
+                        <p className="text-sm text-muted mt-0.5">
                           {notification.body}
                         </p>
                         {notification.context?.ranking_points_delta && (
-                          <p className="text-xs text-green-400 mt-1">
+                          <p className="text-xs text-success mt-1">
                             +{notification.context.ranking_points_delta} points
                           </p>
                         )}
                       </div>
 
                       <div className="flex flex-col items-end gap-1">
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                        <span className="text-xs text-muted whitespace-nowrap">
                           {formatDate(notification.created_at)}
                         </span>
 
@@ -325,7 +323,7 @@ const NotificationsPage = () => {
                               e.stopPropagation();
                               markAsRead(notification.id);
                             }}
-                            className="text-xs text-yellowShade hover:text-yellowShade/80 transition-colors"
+                            className="text-xs text-accent hover:text-accent/80 transition-colors"
                           >
                             Mark as read
                           </button>
@@ -337,7 +335,7 @@ const NotificationsPage = () => {
 
                 {/* Unread indicator dot */}
                 {!isRead && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-yellowShade rounded-r-full"></div>
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-r-full"></div>
                 )}
               </div>
             );
@@ -348,13 +346,13 @@ const NotificationsPage = () => {
       {/* Loading More */}
       {loadingMore && (
         <div className="flex justify-center my-6">
-          <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
         </div>
       )}
 
       {/* End of list */}
       {!hasMore && notifications.length > 0 && (
-        <p className="text-center text-gray-500 text-sm py-6">
+        <p className="text-center text-muted text-sm py-6">
           You've seen all notifications! 🎉
         </p>
       )}

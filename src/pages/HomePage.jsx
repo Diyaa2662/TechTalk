@@ -175,7 +175,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
 
   return (
     <>
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 hover:border-yellowShade/30 transition-all duration-200">
+      <div className="glass-card-hover p-5">
         {/* Header - معلومات المستخدم */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -186,14 +186,14 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
             />
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="text-white font-semibold hover:text-yellowShade transition-colors">
+                <h4 className="text-white font-semibold hover:text-accent transition-colors">
                   {post.user.name}
                 </h4>
-                <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
+                <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
                   {post.user.badge}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
+              <div className="flex items-center gap-2 text-xs text-muted">
                 <span>@{post.user.username}</span>
                 <span>•</span>
                 <span>{formatDate(post.created_at)}</span>
@@ -203,7 +203,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
 
           <div className="flex items-center gap-2">
             {/* Views count */}
-            <div className="flex items-center gap-1 text-xs text-gray-500">
+            <div className="flex items-center gap-1 text-xs text-muted">
               <Eye size={14} />
               <span>{post.views_count || 0}</span>
             </div>
@@ -212,19 +212,19 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <MoreHorizontal size={16} className="text-gray-400" />
+                <MoreHorizontal size={16} className="text-muted" />
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 mt-1 w-40 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                   <button
                     onClick={() => {
                       setShowMenu(false);
                       setReportModalOpen(true);
                     }}
-                    className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                    className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
                   >
                     <Flag size={14} />
                     Report Post
@@ -237,13 +237,13 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
 
         {/* Title */}
         <Link to={`/posts/${post.id}`}>
-          <h3 className="text-xl font-bold text-white mb-2 hover:text-yellowShade transition-colors cursor-pointer">
+          <h3 className="text-xl font-bold text-white mb-2 hover:text-accent transition-colors cursor-pointer">
             {post.title}
           </h3>
         </Link>
 
         {/* Body */}
-        <p className="text-gray-300 mb-3 leading-relaxed">
+        <p className="text-muted mb-3 leading-relaxed">
           {post.body && post.body.length > 200
             ? `${post.body.substring(0, 200)}...`
             : post.body}
@@ -251,16 +251,16 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
 
         {/* Code Block */}
         {post.code && (
-          <div className="mb-3 bg-darkShade/50 rounded-lg overflow-hidden border border-gray-700">
-            <div className="flex items-center justify-between px-3 py-2 bg-gray-800/50 border-b border-gray-700">
-              <span className="text-xs text-gray-400">
+          <div className="mb-3 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
+            <div className="flex items-center justify-between px-3 py-2 bg-panel/50 border-b border-panelEdge">
+              <span className="text-xs text-label">
                 {post.code_language || "code"}
               </span>
-              <button className="text-gray-400 hover:text-yellowShade transition-colors">
+              <button className="text-muted hover:text-accent transition-colors">
                 <Code size={14} />
               </button>
             </div>
-            <pre className="p-3 text-sm text-gray-300 overflow-x-auto">
+            <pre className="p-3 text-sm text-muted overflow-x-auto">
               <code>{post.code}</code>
             </pre>
           </div>
@@ -288,7 +288,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
             {post.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="text-xs px-2 py-1 bg-yellowShade/10 text-yellowShade rounded-full hover:bg-yellowShade/20 transition-colors cursor-pointer"
+                className="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full hover:bg-accent/20 transition-colors cursor-pointer"
               >
                 #{tag.name}
               </span>
@@ -297,19 +297,19 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
         )}
 
         {/* Actions Buttons */}
-        <div className="flex items-center justify-around pt-3 border-t border-gray-700">
+        <div className="flex items-center justify-around pt-3 border-t border-panelEdge">
           <button
             onClick={handleLike}
             disabled={liking}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all duration-200 ${
               isLiked
-                ? "text-red-500 bg-red-500/10"
-                : "text-gray-400 hover:text-red-500 hover:bg-red-500/10"
+                ? "text-error bg-error/10"
+                : "text-muted hover:text-error hover:bg-error/10"
             } ${liking ? "scale-90" : "scale-100"} active:scale-75`}
           >
             <Heart
               size={18}
-              className={`${isLiked ? "fill-red-500" : ""} transition-all duration-200 ${
+              className={`${isLiked ? "fill-error" : ""} transition-all duration-200 ${
                 liking ? "animate-pulse" : ""
               }`}
             />
@@ -318,7 +318,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
 
           <button
             onClick={() => setIsCommentsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
           >
             <MessageCircle size={18} />
             <span className="text-sm">{commentsCount}</span>
@@ -329,13 +329,13 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
             disabled={saving}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all duration-200 ${
               isSaved
-                ? "text-yellowShade bg-yellowShade/10"
-                : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"
+                ? "text-accent bg-accent/10"
+                : "text-muted hover:text-accent hover:bg-accent/10"
             } ${saving ? "scale-90" : "scale-100"} active:scale-75`}
           >
             <Bookmark
               size={18}
-              className={`${isSaved ? "fill-yellowShade" : ""} transition-all duration-200`}
+              className={`${isSaved ? "fill-accent" : ""} transition-all duration-200`}
             />
           </button>
         </div>
@@ -344,10 +344,10 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
       {/* Report Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+          <div className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Flag size={20} className="text-red-400" />
+                <Flag size={20} className="text-error" />
                 Report Post
               </h3>
               <button
@@ -356,27 +356,27 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <X size={20} className="text-gray-400 hover:text-white" />
+                <X size={20} className="text-muted hover:text-white" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Reason <span className="text-red-400">*</span>
+                <label className="block text-sm font-medium text-label mb-1">
+                  Reason <span className="text-error">*</span>
                 </label>
                 <textarea
                   value={reportReason}
                   onChange={(e) => setReportReason(e.target.value)}
                   placeholder="Why are you reporting this post?"
                   rows="3"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-label mb-1">
                   Additional Details (Optional)
                 </label>
                 <textarea
@@ -384,7 +384,7 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
                   onChange={(e) => setReportDetails(e.target.value)}
                   placeholder="Any additional information..."
                   rows="2"
-                  className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent text-sm"
+                  className="input-field"
                 />
               </div>
             </div>
@@ -396,14 +396,14 @@ const PostCard = ({ post, onLikeUpdate, onCommentUpdate, onSaveUpdate }) => {
                   setReportReason("");
                   setReportDetails("");
                 }}
-                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+                className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReport}
                 disabled={reporting}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-error hover:bg-error/80 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {reporting ? "Reporting..." : "Report"}
               </button>
@@ -438,7 +438,6 @@ const HomePage = () => {
 
   // جلب البوستات
   const fetchPosts = useCallback(async (pageNum, append = false) => {
-    // منع الطلبات المتزامنة
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
 
@@ -458,7 +457,6 @@ const HomePage = () => {
         setPosts(newPosts);
       }
 
-      // استخدام has_more_pages من الـ API
       setHasMore(pagination.has_more_pages === true);
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -511,7 +509,6 @@ const HomePage = () => {
       const documentHeight = document.documentElement.scrollHeight;
       const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
 
-      // عندما يصل المستخدم إلى 80% من الصفحة، نحمل المزيد
       if (scrollPercentage > 0.8) {
         loadMore();
       }
@@ -560,8 +557,8 @@ const HomePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-          <p className="text-gray-400">Loading posts...</p>
+          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <p className="text-muted">Loading posts...</p>
         </div>
       </div>
     );
@@ -571,10 +568,10 @@ const HomePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error}</p>
+          <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
           >
             Try Again
           </button>
@@ -587,8 +584,8 @@ const HomePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-gray-400 text-lg">No posts yet</p>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-white text-lg">No posts yet</p>
+          <p className="text-muted text-sm mt-1">
             Follow more developers to see their posts
           </p>
         </div>
@@ -598,7 +595,9 @@ const HomePage = () => {
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold text-white mb-6">Recommended Feed</h1>
+      <h1 className="gradient-title text-2xl font-bold mb-6">
+        Recommended Feed
+      </h1>
 
       <div className="space-y-5">
         {posts.map((post) => (
@@ -614,12 +613,12 @@ const HomePage = () => {
 
       {loadingMore && (
         <div className="flex justify-center my-6">
-          <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
         </div>
       )}
 
       {!hasMore && posts.length > 0 && (
-        <p className="text-center text-gray-500 text-sm py-6">
+        <p className="text-center text-muted text-sm py-6">
           You've seen all posts! 🎉
         </p>
       )}

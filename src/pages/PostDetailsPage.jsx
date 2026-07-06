@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 
-// مكون إضافة كود للتعليق - يظهر في منتصف الشاشة باستخدام Portal
+// مكون إضافة كود للتعليق
 const CodeModal = ({
   isOpen,
   onClose,
@@ -49,25 +49,25 @@ const CodeModal = ({
       onClick={onClose}
     >
       <div
-        className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4"
+        className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Code size={20} className="text-yellowShade" />
+            <Code size={20} className="text-accent" />
             Add Code to Comment
           </h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1 rounded-lg hover:bg-white/5 transition-colors"
           >
-            <X size={20} className="text-gray-400 hover:text-white" />
+            <X size={20} className="text-muted hover:text-white" />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-label mb-1">
               Code Language
             </label>
             <input
@@ -75,19 +75,19 @@ const CodeModal = ({
               value={codeLanguage}
               onChange={(e) => setCodeLanguage(e.target.value)}
               placeholder="e.g., javascript, python, php"
-              className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent"
+              className="input-field"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-label mb-1">
               Code
             </label>
             <textarea
               value={codeContent}
               onChange={(e) => setCodeContent(e.target.value)}
               placeholder="Paste your code here..."
-              className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade focus:border-transparent font-mono text-sm"
+              className="input-field font-mono text-sm"
               rows="6"
             />
           </div>
@@ -96,13 +96,13 @@ const CodeModal = ({
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
+            className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(codeContent, codeLanguage)}
-            className="flex-1 px-4 py-2 bg-yellowShade hover:bg-yellowShade/90 text-darkShade font-semibold rounded-lg transition-all duration-200"
+            className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 shadow-accent-sm"
           >
             Attach Code
           </button>
@@ -279,13 +279,13 @@ const CommentItem = ({
 
   if (isEditing) {
     return (
-      <div className="border-b border-gray-700 pb-4 mb-4">
+      <div className="border-b border-panelEdge pb-4 mb-4">
         <div className="flex gap-3">
-          <div className="w-8 h-8 rounded-full bg-yellowShade/20 flex items-center justify-center">
-            <User size={14} className="text-yellowShade" />
+          <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center">
+            <User size={14} className="text-accent" />
           </div>
           <div className="flex-1">
-            <div className="bg-white/5 rounded-lg p-3">
+            <div className="glass-card p-3">
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-semibold text-white text-sm">
                   Editing comment
@@ -295,18 +295,18 @@ const CommentItem = ({
                 ref={editTextareaRef}
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white resize-none text-sm mb-2"
+                className="input-field mb-2"
                 rows="3"
               />
               {editCode?.content && (
-                <div className="mb-2 p-2 bg-blue-500/10 rounded-lg flex items-center justify-between">
-                  <span className="text-xs text-blue-400">
+                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between">
+                  <span className="text-xs text-accent">
                     Code attached{" "}
                     {editCode.language ? `(${editCode.language})` : ""}
                   </span>
                   <button
                     onClick={() => setEditCode(null)}
-                    className="text-xs text-red-400"
+                    className="text-xs text-error"
                   >
                     Remove
                   </button>
@@ -315,19 +315,19 @@ const CommentItem = ({
               <div className="flex gap-2">
                 <button
                   onClick={handleEdit}
-                  className="px-3 py-1.5 bg-yellowShade text-darkShade font-semibold rounded-lg text-sm"
+                  className="px-3 py-1.5 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg text-sm"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-1.5 bg-white/10 text-gray-300 rounded-lg text-sm"
+                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={openCodeModalForEdit}
-                  className="px-3 py-1.5 bg-white/10 text-gray-300 rounded-lg text-sm flex items-center gap-1"
+                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm flex items-center gap-1"
                 >
                   <Code size={14} /> Code
                 </button>
@@ -350,35 +350,35 @@ const CommentItem = ({
   }
 
   return (
-    <div className="border-b border-gray-700 pb-4 last:border-0">
+    <div className="border-b border-panelEdge pb-4 last:border-0">
       <div className="flex gap-3">
-        <div className="w-8 h-8 rounded-full bg-yellowShade/20 flex items-center justify-center flex-shrink-0">
-          <User size={14} className="text-yellowShade" />
+        <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+          <User size={14} className="text-accent" />
         </div>
         <div className="flex-1">
-          <div className="bg-white/5 rounded-lg p-3">
+          <div className="glass-card p-3">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-white text-sm">
                   {comment.user_name}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted">
                   {formatDate(comment.created_at)}
                 </span>
                 {comment.is_modified && (
-                  <span className="text-xs text-gray-500">(edited)</span>
+                  <span className="text-xs text-muted">(edited)</span>
                 )}
               </div>
               {isOwner && (
                 <div className="relative" ref={menuRef}>
                   <button
                     onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 rounded-lg hover:bg-white/10"
+                    className="p-1 rounded-lg hover:bg-white/5"
                   >
-                    <MoreHorizontal size={14} className="text-gray-400" />
+                    <MoreHorizontal size={14} className="text-muted" />
                   </button>
                   {showMenu && (
-                    <div className="absolute right-0 mt-1 w-32 bg-darkShade border border-white/10 rounded-lg shadow-lg z-10 py-1">
+                    <div className="absolute right-0 mt-1 w-32 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                       <button
                         onClick={() => {
                           setShowMenu(false);
@@ -388,7 +388,7 @@ const CommentItem = ({
                             100,
                           );
                         }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
                       >
                         <Edit size={14} /> Edit
                       </button>
@@ -397,7 +397,7 @@ const CommentItem = ({
                           setShowMenu(false);
                           handleDelete();
                         }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
                       >
                         <Trash2 size={14} /> Delete
                       </button>
@@ -406,9 +406,9 @@ const CommentItem = ({
                 </div>
               )}
             </div>
-            <p className="text-gray-300 text-sm">{comment.body}</p>
+            <p className="text-muted text-sm">{comment.body}</p>
             {comment.code && (
-              <pre className="mt-2 p-2 bg-darkShade/50 rounded text-xs text-gray-300 overflow-x-auto">
+              <pre className="mt-2 p-2 bg-bg/50 rounded text-xs text-muted overflow-x-auto">
                 <code className={`language-${comment.code_language || "text"}`}>
                   {comment.code}
                 </code>
@@ -418,21 +418,21 @@ const CommentItem = ({
           <div className="flex gap-4 mt-1 ml-2">
             <button
               onClick={handleLike}
-              className={`text-xs flex items-center gap-1 ${isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"}`}
+              className={`text-xs flex items-center gap-1 ${isLiked ? "text-error" : "text-muted hover:text-error"}`}
             >
-              <Heart size={12} className={isLiked ? "fill-red-500" : ""} />
+              <Heart size={12} className={isLiked ? "fill-error" : ""} />
               <span>{likesCount > 0 ? likesCount : "Like"}</span>
             </button>
             <button
               onClick={handleDislike}
-              className={`text-xs flex items-center gap-1 ${isDisliked ? "text-yellowShade" : "text-gray-500 hover:text-yellowShade"}`}
+              className={`text-xs flex items-center gap-1 ${isDisliked ? "text-accent" : "text-muted hover:text-accent"}`}
             >
               <ThumbsDown size={12} />
               <span>{dislikesCount > 0 ? dislikesCount : "Dislike"}</span>
             </button>
             <button
               onClick={() => setShowReplyInput(!showReplyInput)}
-              className="text-xs text-gray-500 hover:text-yellowShade flex items-center gap-1"
+              className="text-xs text-muted hover:text-accent flex items-center gap-1"
             >
               <MessageCircle size={12} /> Reply
             </button>
@@ -443,18 +443,18 @@ const CommentItem = ({
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder={`Reply to ${comment.user_name}...`}
-                className="w-full px-3 py-1.5 bg-white/10 border border-gray-600 rounded-lg text-white resize-none text-sm"
+                className="input-field text-sm"
                 rows="2"
               />
               {replyCode?.content && (
-                <div className="mt-1 p-1.5 bg-blue-500/10 rounded text-xs text-blue-400 flex justify-between items-center">
+                <div className="mt-1 p-1.5 bg-accent/10 rounded text-xs text-accent flex justify-between items-center">
                   <span>
                     Code attached{" "}
                     {replyCode.language ? `(${replyCode.language})` : ""}
                   </span>
                   <button
                     onClick={() => setReplyCode(null)}
-                    className="text-red-400"
+                    className="text-error"
                   >
                     Remove
                   </button>
@@ -467,13 +467,13 @@ const CommentItem = ({
                     submittingReply ||
                     (!replyContent.trim() && !replyCode?.content)
                   }
-                  className="px-3 py-1.5 bg-yellowShade text-darkShade font-semibold rounded-lg"
+                  className="px-3 py-1.5 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg"
                 >
                   <Send size={14} />
                 </button>
                 <button
                   onClick={openCodeModalForReply}
-                  className="px-3 py-1.5 bg-white/10 text-gray-300 rounded-lg text-sm flex items-center gap-1"
+                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm flex items-center gap-1"
                 >
                   <Code size={14} /> Code
                 </button>
@@ -483,7 +483,7 @@ const CommentItem = ({
                     setReplyContent("");
                     setReplyCode(null);
                   }}
-                  className="px-3 py-1.5 bg-white/10 text-gray-300 rounded-lg"
+                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg"
                 >
                   Cancel
                 </button>
@@ -491,7 +491,7 @@ const CommentItem = ({
             </div>
           )}
           {comment.has_childrens && (
-            <button className="mt-2 text-xs text-yellowShade flex items-center gap-1">
+            <button className="mt-2 text-xs text-accent flex items-center gap-1">
               <ChevronDown size={14} /> View replies
             </button>
           )}
@@ -536,6 +536,23 @@ const PostDetailsPage = () => {
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const currentUserId = currentUser?.id;
+
+  // تسجيل مشاهدة البوست
+  useEffect(() => {
+    const recordView = async () => {
+      const viewedKey = `post_viewed_${id}`;
+      const hasViewed = sessionStorage.getItem(viewedKey);
+      if (!hasViewed) {
+        try {
+          await api.post("/views", { type: "post", id: parseInt(id) });
+          sessionStorage.setItem(viewedKey, "true");
+        } catch (error) {
+          console.error("Error recording view:", error);
+        }
+      }
+    };
+    recordView();
+  }, [id]);
 
   const fetchPost = async () => {
     try {
@@ -682,18 +699,18 @@ const PostDetailsPage = () => {
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="w-10 h-10 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-        <p className="text-gray-400 ml-3">Loading post...</p>
+        <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+        <p className="text-muted ml-3">Loading post...</p>
       </div>
     );
   if (error || !post)
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error || "Post not found"}</p>
+          <p className="text-error mb-3">{error || "Post not found"}</p>
           <button
             onClick={() => navigate("/")}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold"
           >
             Back to Home
           </button>
@@ -705,20 +722,18 @@ const PostDetailsPage = () => {
     <div className="max-w-4xl mx-auto py-6 px-4">
       <button
         onClick={() => navigate("/")}
-        className="flex items-center gap-2 text-gray-400 hover:text-yellowShade mb-6"
+        className="flex items-center gap-2 text-muted hover:text-accent mb-6"
       >
         <ArrowLeft size={20} /> Back to Home
       </button>
 
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+      <div className="glass-card p-6 mb-8">
+        <h1 className="gradient-title text-3xl md:text-4xl font-bold mb-4">
           {post.title}
         </h1>
-        <p className="text-gray-300 text-lg mb-6 leading-relaxed">
-          {post.body}
-        </p>
+        <p className="text-muted text-lg mb-6 leading-relaxed">{post.body}</p>
 
-        {/* Photos - إضافة عرض الصور */}
+        {/* Photos */}
         {post.photos && post.photos.length > 0 && (
           <div className="mb-6">
             <div
@@ -737,21 +752,21 @@ const PostDetailsPage = () => {
         )}
 
         {post.code && (
-          <div className="mb-6 bg-darkShade/50 rounded-lg overflow-hidden border border-gray-700">
-            <div className="flex items-center justify-between px-3 py-2 bg-gray-800/50 border-b border-gray-700">
+          <div className="mb-6 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
+            <div className="flex items-center justify-between px-3 py-2 bg-panel/50 border-b border-panelEdge">
               <div className="flex items-center gap-2">
-                <Code size={14} className="text-yellowShade" />
-                <span className="text-xs text-gray-300">
+                <Code size={14} className="text-accent" />
+                <span className="text-xs text-muted">
                   {post.code_language || "code"}
                 </span>
               </div>
             </div>
-            <pre className="p-4 text-sm text-gray-300 overflow-x-auto font-mono">
+            <pre className="p-4 text-sm text-muted overflow-x-auto font-mono">
               <code>{post.code}</code>
             </pre>
           </div>
         )}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-gray-700">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-panelEdge">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <img
@@ -762,22 +777,20 @@ const PostDetailsPage = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h4 className="text-white font-semibold">{post.user.name}</h4>
-                  <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
+                  <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
                     {post.user.badge}
                   </span>
                 </div>
-                <div className="text-xs text-gray-400">
-                  @{post.user.username}
-                </div>
+                <div className="text-xs text-muted">@{post.user.username}</div>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-sm text-gray-500">
+            <div className="flex items-center gap-1 text-sm text-muted">
               <Calendar size={14} />
               <span>{formatDate(post.created_at)}</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-sm text-gray-500">
+            <div className="flex items-center gap-1 text-sm text-muted">
               <Eye size={14} />
               <span>{post.views_count || 0} views</span>
             </div>
@@ -787,24 +800,24 @@ const PostDetailsPage = () => {
           <button
             onClick={handleLike}
             disabled={liking}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isLiked ? "text-red-500 bg-red-500/10" : "text-gray-400 hover:text-red-500 hover:bg-red-500/10"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isLiked ? "text-error bg-error/10" : "text-muted hover:text-error hover:bg-error/10"}`}
           >
-            <Heart size={20} className={isLiked ? "fill-red-500" : ""} />
+            <Heart size={20} className={isLiked ? "fill-error" : ""} />
             <span>{likesCount}</span>
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isSaved ? "text-yellowShade bg-yellowShade/10" : "text-gray-400 hover:text-yellowShade hover:bg-yellowShade/10"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isSaved ? "text-accent bg-accent/10" : "text-muted hover:text-accent hover:bg-accent/10"}`}
           >
-            <Bookmark size={20} className={isSaved ? "fill-yellowShade" : ""} />
+            <Bookmark size={20} className={isSaved ? "fill-accent" : ""} />
           </button>
         </div>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6">
+      <div className="glass-card p-6">
         <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <MessageCircle size={20} className="text-yellowShade" />
+          <MessageCircle size={20} className="text-accent" />
           Comments ({post.comments_count || 0})
         </h2>
 
@@ -813,18 +826,18 @@ const PostDetailsPage = () => {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellowShade resize-none text-sm"
+            className="input-field"
             rows="3"
           />
           {newCommentCode?.content && (
-            <div className="mt-2 p-2 bg-blue-500/10 rounded flex justify-between items-center">
-              <span className="text-sm text-blue-400">
+            <div className="mt-2 p-2 bg-accent/10 rounded flex justify-between items-center">
+              <span className="text-sm text-accent">
                 Code attached{" "}
                 {newCommentCode.language ? `(${newCommentCode.language})` : ""}
               </span>
               <button
                 onClick={() => setNewCommentCode(null)}
-                className="text-red-400 text-sm"
+                className="text-error text-sm"
               >
                 Remove
               </button>
@@ -836,14 +849,14 @@ const PostDetailsPage = () => {
               disabled={
                 submitting || (!newComment.trim() && !newCommentCode?.content)
               }
-              className="px-5 py-2 bg-yellowShade text-darkShade font-semibold rounded-lg"
+              className="px-5 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg shadow-accent-sm"
             >
               <Send size={18} />
             </button>
             <button
               type="button"
               onClick={() => setShowCodeModal(true)}
-              className="px-5 py-2 bg-white/10 text-gray-300 rounded-lg flex items-center gap-1"
+              className="px-5 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg flex items-center gap-1"
             >
               <Code size={16} /> Add Code
             </button>
@@ -852,13 +865,13 @@ const PostDetailsPage = () => {
 
         {commentsLoading ? (
           <div className="flex justify-center py-8">
-            <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
           </div>
         ) : comments.length === 0 ? (
           <div className="text-center py-8">
-            <MessageCircle size={40} className="text-gray-600 mx-auto mb-2" />
-            <p className="text-gray-400">No comments yet</p>
-            <p className="text-gray-500 text-sm">Be the first to comment!</p>
+            <MessageCircle size={40} className="text-muted mx-auto mb-2" />
+            <p className="text-muted">No comments yet</p>
+            <p className="text-label text-sm">Be the first to comment!</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -877,7 +890,7 @@ const PostDetailsPage = () => {
                 <button
                   onClick={loadMoreComments}
                   disabled={loadingMoreComments}
-                  className="text-sm text-yellowShade"
+                  className="text-sm text-accent hover:text-accent/80"
                 >
                   {loadingMoreComments ? "Loading..." : "Load more comments"}
                 </button>

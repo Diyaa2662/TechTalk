@@ -19,31 +19,38 @@ const SplashScreen = ({ onFinish }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-between bg-darkShade transition-all duration-500 ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-between bg-bg transition-all duration-500 ${
         fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
-      {/* مساحة فارغة في الأعلى عشان الوسط يبقى متوازن */}
+      {/* مساحة فارغة في الأعلى */}
       <div></div>
 
       {/* المحتوى الوسطي (اللوغو + الاسم + النقاط) */}
       <div className="flex flex-col items-center justify-center">
-        {/* اللوغو - تصغير */}
-        <img src={logo} alt="TechTalk Logo" className="w-16 h-16 mb-4" />
+        {/* اللوغو */}
+        <div className="relative">
+          <div className="absolute inset-0 w-24 h-24 bg-accent/20 rounded-full blur-2xl"></div>
+          <img
+            src={logo}
+            alt="TechTalk Logo"
+            className="w-16 h-16 relative z-10"
+          />
+        </div>
 
-        {/* اسم المنصة - تصغير */}
-        <h1 className="text-2xl font-bold text-yellowShade mb-8">TechTalk</h1>
+        {/* اسم المنصة - Gradient Title */}
+        <h1 className="gradient-title text-3xl font-bold mt-4">TechTalk</h1>
 
         {/* النقاط الثلاث */}
-        <div className="flex space-x-2">
-          <div className="w-2.5 h-2.5 bg-yellowShade rounded-full animate-[pulse_1.5s_ease-in-out_infinite] [animation-delay:0s]"></div>
-          <div className="w-2.5 h-2.5 bg-yellowShade rounded-full animate-[pulse_1.5s_ease-in-out_infinite] [animation-delay:0.3s]"></div>
-          <div className="w-2.5 h-2.5 bg-yellowShade rounded-full animate-[pulse_1.5s_ease-in-out_infinite] [animation-delay:0.6s]"></div>
+        <div className="flex space-x-2 mt-8">
+          <div className="w-2.5 h-2.5 bg-accent rounded-full animate-[pulse_1.5s_ease-in-out_infinite] [animation-delay:0s]"></div>
+          <div className="w-2.5 h-2.5 bg-accent rounded-full animate-[pulse_1.5s_ease-in-out_infinite] [animation-delay:0.3s]"></div>
+          <div className="w-2.5 h-2.5 bg-accent rounded-full animate-[pulse_1.5s_ease-in-out_infinite] [animation-delay:0.6s]"></div>
         </div>
       </div>
 
       {/* النسخة في أسفل الصفحة */}
-      <p className="text-gray-500 text-sm pb-6">version 1.0</p>
+      <p className="text-muted text-sm pb-6">version 1.0</p>
     </div>
   );
 };

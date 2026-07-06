@@ -4,6 +4,59 @@
 
 @layer base {
   body {
-    @apply bg-darkShade text-white;
+    @apply bg-bg text-white min-h-screen;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #13151a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #262b35;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7c5cfc;
+  }
+}
+
+@layer utilities {
+  .gradient-title {
+    @apply text-transparent bg-clip-text;
+    background-image: linear-gradient(135deg, #ffffff, #b09fff);
+  }
+
+  .gradient-button {
+    background-image: linear-gradient(135deg, #9b7dff, #7c5cfc, #5a3fc0);
+  }
+
+  .gradient-button:hover {
+    background-image: linear-gradient(135deg, #8b6dff, #6b4ae0, #4a2fb0);
+  }
+
+  /* إصلاح glass-card */
+  .glass-card {
+    @apply bg-panel/90 backdrop-blur-md border border-panelEdge rounded-xl shadow-panel;
+  }
+
+  .glass-card-hover {
+    @apply glass-card hover:border-accent/50 transition-all duration-300;
+  }
+
+  .text-muted {
+    color: #6b7385;
+  }
+  .text-label {
+    color: #4a5060;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 bg-panel border border-panelEdge rounded-lg text-white placeholder-label focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all;
   }
 }

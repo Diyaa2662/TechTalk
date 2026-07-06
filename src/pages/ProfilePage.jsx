@@ -81,28 +81,24 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
 
-  // States for posts
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsPage, setPostsPage] = useState(1);
   const [postsHasMore, setPostsHasMore] = useState(false);
   const [postsLoadingMore, setPostsLoadingMore] = useState(false);
 
-  // States for blogs
   const [blogs, setBlogs] = useState([]);
   const [blogsLoading, setBlogsLoading] = useState(false);
   const [blogsPage, setBlogsPage] = useState(1);
   const [blogsHasMore, setBlogsHasMore] = useState(false);
   const [blogsLoadingMore, setBlogsLoadingMore] = useState(false);
 
-  // States for saved
   const [savedItems, setSavedItems] = useState([]);
   const [savedLoading, setSavedLoading] = useState(false);
   const [savedPage, setSavedPage] = useState(1);
   const [savedHasMore, setSavedHasMore] = useState(false);
   const [savedLoadingMore, setSavedLoadingMore] = useState(false);
 
-  // States for blocked users
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [blockedLoading, setBlockedLoading] = useState(false);
   const [unblockLoading, setUnblockLoading] = useState({});
@@ -124,7 +120,6 @@ const ProfilePage = () => {
     }
   };
 
-  // جلب قائمة المحظورين
   const fetchBlockedUsers = async () => {
     setBlockedLoading(true);
     try {
@@ -137,12 +132,9 @@ const ProfilePage = () => {
     }
   };
 
-  // إلغاء الحظر
   const handleUnblock = async (userId, username) => {
     if (!confirm(`Are you sure you want to unblock @${username}?`)) return;
-
     setUnblockLoading((prev) => ({ ...prev, [userId]: true }));
-
     try {
       await api.delete(`/users/${username}/block`);
       setBlockedUsers((prev) => prev.filter((user) => user.id !== userId));
@@ -155,7 +147,6 @@ const ProfilePage = () => {
     }
   };
 
-  // إغلاق القائمة عند الضغط خارجها
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -166,24 +157,18 @@ const ProfilePage = () => {
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // جلب البوستات المنشورة
   const fetchUserPosts = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
     setPostsLoading(true);
-
     try {
       const response = await api.get(
         `/users/${profile.username}/posts?page=${pageNum}&per_page=10`,
       );
       const newPosts = response.data.data;
       const pagination = response.data.pagination;
-
-      if (append) {
-        setPosts((prev) => [...prev, ...newPosts]);
-      } else {
-        setPosts(newPosts);
-      }
+      if (append) setPosts((prev) => [...prev, ...newPosts]);
+      else setPosts(newPosts);
       setPostsHasMore(pagination.current_page < pagination.last_page);
     } catch (err) {
       console.error("Error fetching user posts:", err);
@@ -194,24 +179,18 @@ const ProfilePage = () => {
     }
   };
 
-  // جلب المقالات المنشورة
   const fetchUserBlogs = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
     setBlogsLoading(true);
-
     try {
       const response = await api.get(
         `/users/${profile.username}/blogs?page=${pageNum}&per_page=10`,
       );
       const newBlogs = response.data.data;
       const pagination = response.data.pagination;
-
-      if (append) {
-        setBlogs((prev) => [...prev, ...newBlogs]);
-      } else {
-        setBlogs(newBlogs);
-      }
+      if (append) setBlogs((prev) => [...prev, ...newBlogs]);
+      else setBlogs(newBlogs);
       setBlogsHasMore(pagination.current_page < pagination.last_page);
     } catch (err) {
       console.error("Error fetching user blogs:", err);
@@ -222,31 +201,22 @@ const ProfilePage = () => {
     }
   };
 
-  // جلب المحفوظات
   const fetchSavedItems = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
     setSavedLoading(true);
-
     try {
       const [postsRes, blogsRes] = await Promise.all([
         api.get(`/saved?type=post&page=${pageNum}&per_page=10`),
         api.get(`/saved?type=blog&page=${pageNum}&per_page=10`),
       ]);
-
       const postsData = postsRes.data.data || [];
       const blogsData = blogsRes.data.data || [];
-
       const allItems = [...postsData, ...blogsData].sort(
         (a, b) => new Date(b.saved_at) - new Date(a.saved_at),
       );
-
-      if (append) {
-        setSavedItems((prev) => [...prev, ...allItems]);
-      } else {
-        setSavedItems(allItems);
-      }
-
+      if (append) setSavedItems((prev) => [...prev, ...allItems]);
+      else setSavedItems(allItems);
       const postsPagination = postsRes.data.pagination;
       const blogsPagination = blogsRes.data.pagination;
       setSavedHasMore(
@@ -261,7 +231,6 @@ const ProfilePage = () => {
     }
   };
 
-  // تحميل البيانات حسب التاب النشط
   useEffect(() => {
     if (profile?.username) {
       if (activeTab === "posts") {
@@ -310,11 +279,11 @@ const ProfilePage = () => {
   const getBadgeColor = (badge) => {
     switch (badge) {
       case "junior":
-        return "bg-blue-500/20 text-blue-400";
+        return "bg-accent/15 text-accent";
       case "senior":
         return "bg-purple-500/20 text-purple-400";
       case "expert":
-        return "bg-yellowShade/20 text-yellowShade";
+        return "bg-accent/20 text-accent";
       default:
         return "bg-gray-500/20 text-gray-400";
     }
@@ -328,7 +297,6 @@ const ProfilePage = () => {
     return null;
   };
 
-  // تحميل المزيد
   const loadMore = () => {
     if (activeTab === "posts") {
       if (postsLoadingMore || !postsHasMore) return;
@@ -356,9 +324,8 @@ const ProfilePage = () => {
       if (
         window.scrollY + window.innerHeight >=
         document.documentElement.scrollHeight - 500
-      ) {
+      )
         loadMore();
-      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -368,8 +335,8 @@ const ProfilePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
-          <p className="text-gray-400">Loading profile...</p>
+          <div className="w-10 h-10 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <p className="text-muted">Loading profile...</p>
         </div>
       </div>
     );
@@ -379,10 +346,10 @@ const ProfilePage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <p className="text-red-400 mb-3">{error || "Profile not found"}</p>
+          <p className="text-error mb-3">{error || "Profile not found"}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-yellowShade text-darkShade rounded-lg font-semibold hover:bg-yellowShade/90"
+            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
           >
             Try Again
           </button>
@@ -393,7 +360,7 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-4">
-      {/* Cover Image - بدون زر تعديل */}
+      {/* Cover Image */}
       <div className="relative h-48 md:h-56 rounded-xl overflow-hidden mb-16">
         {profile.cover_image_url ? (
           <img
@@ -402,12 +369,12 @@ const ProfilePage = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-yellowShade/40 via-purple-500/20 to-darkShade">
+          <div className="w-full h-full bg-gradient-to-r from-accent/40 via-purple-500/20 to-bg">
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-white/10 flex items-center justify-center">
                   <svg
-                    className="w-8 h-8 text-gray-400"
+                    className="w-8 h-8 text-muted"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -420,20 +387,20 @@ const ProfilePage = () => {
                     />
                   </svg>
                 </div>
-                <p className="text-gray-400 text-sm">Cover image</p>
+                <p className="text-muted text-sm">Cover image</p>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Avatar - بدون زر تعديل، يظهر كامل */}
+      {/* Avatar */}
       <div className="relative px-6">
         <div className="absolute -top-32 left-6 md:left-8">
           <img
             src={profile.avatar_url}
             alt={profile.name}
-            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-darkShade object-cover shadow-xl"
+            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-bg object-cover shadow-xl"
           />
         </div>
       </div>
@@ -452,13 +419,11 @@ const ProfilePage = () => {
                 {profile.badge}
               </span>
             </div>
-            <p className="text-gray-400 text-sm mt-1">@{profile.username}</p>
-
+            <p className="text-muted text-sm mt-1">@{profile.username}</p>
             {profile.bio && (
-              <p className="text-gray-300 mt-3 max-w-md">{profile.bio}</p>
+              <p className="text-muted mt-3 max-w-md">{profile.bio}</p>
             )}
-
-            <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
+            <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted">
               {profile.location && (
                 <div className="flex items-center gap-1">
                   <MapPin size={14} />
@@ -472,7 +437,7 @@ const ProfilePage = () => {
                     href={profile.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-yellowShade transition-colors"
+                    className="hover:text-accent transition-colors"
                   >
                     {profile.website}
                   </a>
@@ -483,7 +448,6 @@ const ProfilePage = () => {
                 <span>Joined {formatDate(profile.joined_at)}</span>
               </div>
             </div>
-
             {profile.social_links && profile.social_links.length > 0 && (
               <div className="flex gap-3 mt-3">
                 {profile.social_links.map((link, idx) => (
@@ -492,7 +456,7 @@ const ProfilePage = () => {
                     href={link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-yellowShade transition-colors"
+                    className="text-muted hover:text-accent transition-colors"
                   >
                     {getSocialIcon(link)}
                   </a>
@@ -502,31 +466,26 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2">
-              <Edit3 size={16} />
-              Edit Profile
+            <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2">
+              <Edit3 size={16} /> Edit Profile
             </button>
-
-            {/* Options Menu Button (3 dots) */}
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowOptionsMenu(!showOptionsMenu)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <MoreHorizontal size={20} className="text-gray-400" />
+                <MoreHorizontal size={20} className="text-muted" />
               </button>
-
               {showOptionsMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-darkShade border border-gray-600 rounded-lg shadow-lg z-10 py-1">
+                <div className="absolute right-0 mt-2 w-56 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                   <button
                     onClick={() => {
                       setShowOptionsMenu(false);
                       alert("Activity page coming soon");
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
                   >
-                    <Activity size={16} />
-                    Activity
+                    <Activity size={16} /> Activity
                   </button>
                   <button
                     onClick={() => {
@@ -534,20 +493,18 @@ const ProfilePage = () => {
                       setShowBlockedList(true);
                       fetchBlockedUsers();
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
                   >
-                    <Shield size={16} />
-                    Blocked Users
+                    <Shield size={16} /> Blocked Users
                   </button>
                   <button
                     onClick={() => {
                       setShowOptionsMenu(false);
                       alert("Settings page coming soon");
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
                   >
-                    <Settings size={16} />
-                    Settings
+                    <Settings size={16} /> Settings
                   </button>
                 </div>
               )}
@@ -560,31 +517,31 @@ const ProfilePage = () => {
             <p className="text-xl font-bold text-white">
               {profile.posts_count || 0}
             </p>
-            <p className="text-xs text-gray-400">posts</p>
+            <p className="text-xs text-muted">posts</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">
               {profile.blogs_count || 0}
             </p>
-            <p className="text-xs text-gray-400">blogs</p>
+            <p className="text-xs text-muted">blogs</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">
               {profile.followers_count || 0}
             </p>
-            <p className="text-xs text-gray-400">followers</p>
+            <p className="text-xs text-muted">followers</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">
               {profile.following_count || 0}
             </p>
-            <p className="text-xs text-gray-400">following</p>
+            <p className="text-xs text-muted">following</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-white">
               {profile.ranking_points || 0}
             </p>
-            <p className="text-xs text-gray-400">points</p>
+            <p className="text-xs text-muted">points</p>
           </div>
         </div>
 
@@ -594,7 +551,7 @@ const ProfilePage = () => {
               {profile.tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="text-xs px-2 py-1 bg-yellowShade/10 text-yellowShade rounded-full"
+                  className="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
                 >
                   #{tag.name}
                 </span>
@@ -605,45 +562,33 @@ const ProfilePage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="mt-10 border-t border-gray-700 pt-6">
+      <div className="mt-10 border-t border-panelEdge pt-6">
         <div className="flex gap-8 justify-center">
           <button
             onClick={() => setActiveTab("posts")}
-            className={`pb-3 text-base font-medium transition-colors relative ${
-              activeTab === "posts"
-                ? "text-yellowShade"
-                : "text-gray-400 hover:text-white"
-            }`}
+            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "posts" ? "text-accent" : "text-muted hover:text-white"}`}
           >
-            POSTS
+            POSTS{" "}
             {activeTab === "posts" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
             )}
           </button>
           <button
             onClick={() => setActiveTab("blogs")}
-            className={`pb-3 text-base font-medium transition-colors relative ${
-              activeTab === "blogs"
-                ? "text-yellowShade"
-                : "text-gray-400 hover:text-white"
-            }`}
+            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "blogs" ? "text-accent" : "text-muted hover:text-white"}`}
           >
-            BLOGS
+            BLOGS{" "}
             {activeTab === "blogs" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
             )}
           </button>
           <button
             onClick={() => setActiveTab("saved")}
-            className={`pb-3 text-base font-medium transition-colors relative ${
-              activeTab === "saved"
-                ? "text-yellowShade"
-                : "text-gray-400 hover:text-white"
-            }`}
+            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "saved" ? "text-accent" : "text-muted hover:text-white"}`}
           >
-            SAVED
+            SAVED{" "}
             {activeTab === "saved" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellowShade"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
             )}
           </button>
         </div>
@@ -656,13 +601,13 @@ const ProfilePage = () => {
           <>
             {postsLoading && posts.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
-                <FileText size={48} className="text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400">No posts yet</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <FileText size={48} className="text-muted mx-auto mb-3" />
+                <p className="text-muted">No posts yet</p>
+                <p className="text-label text-sm mt-1">
                   Share your first post!
                 </p>
               </div>
@@ -672,13 +617,13 @@ const ProfilePage = () => {
                   <Link
                     key={post.id}
                     to={`/posts/${post.id}`}
-                    className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                    className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted">
                         <span>{formatRelativeDate(post.created_at)}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 text-xs text-muted">
                         <div className="flex items-center gap-1">
                           <Heart size={12} />
                           <span>{post.likes_count}</span>
@@ -696,11 +641,11 @@ const ProfilePage = () => {
                     <h3 className="text-white font-semibold mb-1">
                       {post.title}
                     </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2">
+                    <p className="text-muted text-sm line-clamp-2">
                       {post.body}
                     </p>
                     {post.code && (
-                      <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                      <div className="mt-2 flex items-center gap-1 text-xs text-muted">
                         <Code size={12} />
                         <span>{post.code_language}</span>
                       </div>
@@ -710,7 +655,7 @@ const ProfilePage = () => {
                         {post.tags.slice(0, 3).map((tag) => (
                           <span
                             key={tag.id}
-                            className="text-xs px-1.5 py-0.5 bg-yellowShade/10 text-yellowShade rounded-full"
+                            className="text-xs px-1.5 py-0.5 bg-accent/10 text-accent rounded-full"
                           >
                             #{tag.name}
                           </span>
@@ -721,7 +666,7 @@ const ProfilePage = () => {
                 ))}
                 {postsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
                   </div>
                 )}
               </div>
@@ -734,13 +679,13 @@ const ProfilePage = () => {
           <>
             {blogsLoading && blogs.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
               </div>
             ) : blogs.length === 0 ? (
               <div className="text-center py-12">
-                <BookOpen size={48} className="text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400">No blogs yet</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <BookOpen size={48} className="text-muted mx-auto mb-3" />
+                <p className="text-muted">No blogs yet</p>
+                <p className="text-label text-sm mt-1">
                   Write your first blog!
                 </p>
               </div>
@@ -750,13 +695,13 @@ const ProfilePage = () => {
                   <Link
                     key={blog.id}
                     to={`/blogs/${blog.id}`}
-                    className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                    className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted">
                         <span>{formatRelativeDate(blog.created_at)}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 text-xs text-muted">
                         <div className="flex items-center gap-1">
                           <Heart size={12} />
                           <span>{blog.likes_count}</span>
@@ -774,11 +719,11 @@ const ProfilePage = () => {
                     <h3 className="text-white font-semibold mb-1">
                       {blog.title}
                     </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2">
+                    <p className="text-muted text-sm line-clamp-2">
                       {blog.subtitle}
                     </p>
                     {blog.reading_time && (
-                      <div className="mt-2 text-xs text-gray-500">
+                      <div className="mt-2 text-xs text-muted">
                         📖 {blog.reading_time}
                       </div>
                     )}
@@ -786,7 +731,7 @@ const ProfilePage = () => {
                 ))}
                 {blogsLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
                   </div>
                 )}
               </div>
@@ -799,13 +744,13 @@ const ProfilePage = () => {
           <>
             {savedLoading && savedItems.length === 0 ? (
               <div className="flex justify-center py-12">
-                <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
               </div>
             ) : savedItems.length === 0 ? (
               <div className="text-center py-12">
-                <Heart size={48} className="text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400">No saved items yet</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <Heart size={48} className="text-muted mx-auto mb-3" />
+                <p className="text-muted">No saved items yet</p>
+                <p className="text-label text-sm mt-1">
                   Save posts and blogs to see them here
                 </p>
               </div>
@@ -820,18 +765,18 @@ const ProfilePage = () => {
                       to={
                         isBlog ? `/blogs/${content.id}` : `/posts/${content.id}`
                       }
-                      className="block bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-yellowShade/30 transition-all duration-200"
+                      className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 bg-yellowShade/20 text-yellowShade rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
                             {isBlog ? "BLOG" : "POST"}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted">
                             Saved {formatRelativeDate(item.saved_at)}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <div className="flex items-center gap-3 text-xs text-muted">
                           <div className="flex items-center gap-1">
                             <Heart size={12} />
                             <span>{content.likes_count}</span>
@@ -845,7 +790,7 @@ const ProfilePage = () => {
                       <h3 className="text-white font-semibold mb-1">
                         {content.title}
                       </h3>
-                      <p className="text-gray-400 text-sm line-clamp-2">
+                      <p className="text-muted text-sm line-clamp-2">
                         {isBlog ? content.subtitle : content.body}
                       </p>
                     </Link>
@@ -853,7 +798,7 @@ const ProfilePage = () => {
                 })}
                 {savedLoadingMore && (
                   <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
                   </div>
                 )}
               </div>
@@ -865,30 +810,28 @@ const ProfilePage = () => {
       {/* Blocked Users Modal */}
       {showBlockedList && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-darkShade border border-white/10 rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl mx-4">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <div className="bg-panel border border-panelEdge rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-panel mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-panelEdge">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Shield size={20} className="text-red-400" />
-                Blocked Users
+                <Shield size={20} className="text-error" /> Blocked Users
               </h2>
               <button
                 onClick={() => setShowBlockedList(false)}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
               >
-                <X size={20} className="text-gray-400 hover:text-white" />
+                <X size={20} className="text-muted hover:text-white" />
               </button>
             </div>
-
             <div className="flex-1 overflow-y-auto p-4">
               {blockedLoading ? (
                 <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-3 border-yellowShade/20 border-t-yellowShade rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-3 border-accent/20 border-t-accent rounded-full animate-spin"></div>
                 </div>
               ) : blockedUsers.length === 0 ? (
                 <div className="text-center py-8">
-                  <UserX size={48} className="text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400">No blocked users</p>
-                  <p className="text-gray-500 text-sm mt-1">
+                  <UserX size={48} className="text-muted mx-auto mb-3" />
+                  <p className="text-muted">No blocked users</p>
+                  <p className="text-label text-sm mt-1">
                     When you block someone, they'll appear here
                   </p>
                 </div>
@@ -897,7 +840,7 @@ const ProfilePage = () => {
                   {blockedUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="bg-white/5 rounded-lg p-3 flex items-center justify-between"
+                      className="bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-3 flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <img
@@ -909,15 +852,13 @@ const ProfilePage = () => {
                           <h3 className="text-white font-medium">
                             {user.name}
                           </h3>
-                          <p className="text-gray-400 text-sm">
-                            @{user.username}
-                          </p>
+                          <p className="text-muted text-sm">@{user.username}</p>
                         </div>
                       </div>
                       <button
                         onClick={() => handleUnblock(user.id, user.username)}
                         disabled={unblockLoading[user.id]}
-                        className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm disabled:opacity-50"
+                        className="px-3 py-1.5 bg-error/20 hover:bg-error/30 text-error rounded-lg transition-colors text-sm disabled:opacity-50"
                       >
                         {unblockLoading[user.id] ? "..." : "Unblock"}
                       </button>
