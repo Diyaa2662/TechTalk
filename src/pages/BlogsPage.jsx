@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Heart,
   Bookmark,
@@ -9,13 +10,25 @@ import {
   MoreHorizontal,
   Flag,
   X,
+  Edit,
+  Trash2,
+  Plus,
 } from "lucide-react";
 import api from "../services/api";
 import CommentsModal from "../components/comments/CommentsModal";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
+// BASE_URL بدون /api
+const BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+
 // مكون بطاقة المقالة المنفصل
-const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
+const BlogCard = ({
+  blog,
+  onLikeUpdate,
+  onSaveUpdate,
+  onBlogUpdate,
+  onBlogDelete,
+}) => {
   const [isLiked, setIsLiked] = useState(blog.is_liked_by_user || false);
   const [likesCount, setLikesCount] = useState(blog.likes_count || 0);
   const [isSaved, setIsSaved] = useState(blog.is_saved || false);
@@ -28,6 +41,9 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
   const [reporting, setReporting] = useState(false);
+
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isOwner = blog.user?.id === currentUser?.id;
 
   const menuRef = useRef(null);
 
@@ -112,6 +128,19 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
     }
   };
 
+  // حذف المقال
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this blog?")) return;
+    try {
+      await api.delete(`/blogs/${blog.id}`);
+      if (onBlogDelete) onBlogDelete(blog.id);
+      alert("Blog deleted successfully.");
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete blog. Please try again.");
+    }
+  };
+
   // تحديث عدد التعليقات
   const handleCommentAdded = () => {
     const newCount = commentsCount + 1;
@@ -137,11 +166,11 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
   return (
     <>
       <div className="glass-card-hover overflow-hidden">
-        {/* Cover Image */}
+        {/* Cover Image - مع BASE_URL */}
         {blog.cover_image_url && (
           <div className="w-full h-48 overflow-hidden">
             <img
-              src={blog.cover_image_url}
+              src={`${BASE_URL}${blog.cover_image_url}`}
               alt={blog.title}
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
@@ -187,30 +216,78 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
                 </div>
               </div>
 
-              {/* 3 Dots Menu */}
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="p-1 rounded-lg hover:bg-white/5 transition-colors"
-                >
-                  <MoreHorizontal size={16} className="text-muted" />
-                </button>
+              {/* 3 Dots Menu - للمالك فقط */}
+              {isOwner && (
+                <div className="relative" ref={menuRef}>
+                  <button
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+                  >
+                    <MoreHorizontal size={16} className="text-muted" />
+                  </button>
 
-                {showMenu && (
-                  <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
-                    <button
-                      onClick={() => {
-                        setShowMenu(false);
-                        setReportModalOpen(true);
-                      }}
-                      className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
-                    >
-                      <Flag size={14} />
-                      Report Blog
-                    </button>
-                  </div>
-                )}
-              </div>
+                  {showMenu && (
+                    <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          window.location.href = `/blogs/${blog.id}`;
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
+                      >
+                        <Edit size={14} /> Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          handleDelete();
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
+                      >
+                        <Trash2 size={14} /> Delete
+                      </button>
+                      <div className="border-t border-panelEdge my-1"></div>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          setReportModalOpen(true);
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
+                      >
+                        <Flag size={14} />
+                        Report Blog
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 3 Dots Menu - للمستخدمين الآخرين (تبليغ فقط) */}
+              {!isOwner && (
+                <div className="relative" ref={menuRef}>
+                  <button
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+                  >
+                    <MoreHorizontal size={16} className="text-muted" />
+                  </button>
+
+                  {showMenu && (
+                    <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          setReportModalOpen(true);
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
+                      >
+                        <Flag size={14} />
+                        Report Blog
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -349,16 +426,31 @@ const BlogCard = ({ blog, onLikeUpdate, onSaveUpdate }) => {
 };
 
 const BlogsPage = () => {
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [userBadge, setUserBadge] = useState("");
 
   const isLoadingRef = useRef(false);
-  // eslint-disable-next-line no-unused-vars
   const currentPageRef = useRef(1);
+
+  // جلب بيانات المستخدم الحالي للتحقق من البادج
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await api.get("/show-me");
+      setUserBadge(response.data.data.badge);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
 
   // جلب المقالات
   const fetchBlogs = useCallback(async (pageNum, append = false) => {
@@ -423,6 +515,20 @@ const BlogsPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMore]);
 
+  // تحديث المقال بعد التعديل
+  const handleBlogUpdate = (updatedBlog) => {
+    setBlogs((prevBlogs) =>
+      prevBlogs.map((blog) =>
+        blog.id === updatedBlog.id ? updatedBlog : blog,
+      ),
+    );
+  };
+
+  // حذف المقال
+  const handleBlogDelete = (blogId) => {
+    setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -466,7 +572,12 @@ const BlogsPage = () => {
 
       <div className="space-y-6">
         {blogs.map((blog) => (
-          <BlogCard key={blog.id} blog={blog} />
+          <BlogCard
+            key={blog.id}
+            blog={blog}
+            onBlogUpdate={handleBlogUpdate}
+            onBlogDelete={handleBlogDelete}
+          />
         ))}
       </div>
 
@@ -480,6 +591,16 @@ const BlogsPage = () => {
         <p className="text-center text-muted text-sm py-6">
           You've seen all blogs! 🎉
         </p>
+      )}
+
+      {/* Floating Action Button - يظهر فقط للمستخدمين الـ expert */}
+      {userBadge === "expert" && (
+        <button
+          onClick={() => navigate("/create-blog")}
+          className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-accent hover:bg-accentHover text-white rounded-full shadow-lg shadow-accent/30 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-accent/50"
+        >
+          <Plus size={28} />
+        </button>
       )}
     </div>
   );

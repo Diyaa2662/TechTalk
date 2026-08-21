@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Heart,
@@ -20,497 +19,14 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
+  Loader2,
+  Globe,
+  Lock,
+  Tag,
 } from "lucide-react";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
-
-// مكون إضافة كود للتعليق
-const CodeModal = ({
-  isOpen,
-  onClose,
-  onSave,
-  initialCode = "",
-  initialLanguage = "",
-}) => {
-  const [codeContent, setCodeContent] = useState(initialCode);
-  const [codeLanguage, setCodeLanguage] = useState(initialLanguage);
-
-  useEffect(() => {
-    if (isOpen) {
-      setCodeContent(initialCode);
-      setCodeLanguage(initialLanguage);
-    }
-  }, [isOpen, initialCode, initialLanguage]);
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Code size={20} className="text-accent" />
-            Add Code to Comment
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-white/5 transition-colors"
-          >
-            <X size={20} className="text-muted hover:text-white" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-label mb-1">
-              Code Language
-            </label>
-            <input
-              type="text"
-              value={codeLanguage}
-              onChange={(e) => setCodeLanguage(e.target.value)}
-              placeholder="e.g., javascript, python, php"
-              className="input-field"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-label mb-1">
-              Code
-            </label>
-            <textarea
-              value={codeContent}
-              onChange={(e) => setCodeContent(e.target.value)}
-              placeholder="Paste your code here..."
-              className="input-field font-mono text-sm"
-              rows="6"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave(codeContent, codeLanguage)}
-            className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 shadow-accent-sm"
-          >
-            Attach Code
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-};
-
-// مكون التعليق المنفصل
-const CommentItem = ({
-  comment,
-  postId,
-  currentUserId,
-  onCommentUpdate,
-  onCommentDelete,
-}) => {
-  const [isLiked, setIsLiked] = useState(comment.is_liked_by_user || false);
-  const [likesCount, setLikesCount] = useState(comment.likes_count || 0);
-  const [isDisliked, setIsDisliked] = useState(
-    comment.is_disliked_by_user || false,
-  );
-  const [dislikesCount, setDislikesCount] = useState(
-    comment.dislikes_count || 0,
-  );
-  const [showReplyInput, setShowReplyInput] = useState(false);
-  const [replyContent, setReplyContent] = useState("");
-  const [replyCode, setReplyCode] = useState(null);
-  const [submittingReply, setSubmittingReply] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(comment.body);
-  const [editCode, setEditCode] = useState(
-    comment.code
-      ? { content: comment.code, language: comment.code_language }
-      : null,
-  );
-  const [showCodeModal, setShowCodeModal] = useState(false);
-  const [pendingCode, setPendingCode] = useState(null);
-  const menuRef = useRef(null);
-  const editTextareaRef = useRef(null);
-
-  const isOwner = Number(comment.user_id) === currentUserId;
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target))
-        setShowMenu(false);
-    };
-    if (showMenu) window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
-  }, [showMenu]);
-
-  const handleLike = async () => {
-    try {
-      if (isLiked) {
-        await api.post(`/comments/${comment.id}/like`, {});
-        setIsLiked(false);
-        setLikesCount((prev) => Math.max(0, prev - 1));
-        return;
-      }
-      if (isDisliked) {
-        await api.post(`/comments/${comment.id}/dislike`, {});
-        setIsDisliked(false);
-        setDislikesCount((prev) => Math.max(0, prev - 1));
-      }
-      await api.post(`/comments/${comment.id}/like`, {});
-      setIsLiked(true);
-      setLikesCount((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error toggling like:", error);
-    }
-  };
-
-  const handleDislike = async () => {
-    try {
-      if (isDisliked) {
-        await api.post(`/comments/${comment.id}/dislike`, {});
-        setIsDisliked(false);
-        setDislikesCount((prev) => Math.max(0, prev - 1));
-        return;
-      }
-      if (isLiked) {
-        await api.post(`/comments/${comment.id}/like`, {});
-        setIsLiked(false);
-        setLikesCount((prev) => Math.max(0, prev - 1));
-      }
-      await api.post(`/comments/${comment.id}/dislike`, {});
-      setIsDisliked(true);
-      setDislikesCount((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error toggling dislike:", error);
-    }
-  };
-
-  const handleReply = async () => {
-    if (!replyContent.trim() && !replyCode?.content) return;
-    setSubmittingReply(true);
-    try {
-      const response = await api.post("/comments", {
-        body: replyContent || " ",
-        post_id: postId,
-        parent_id: comment.id,
-        code: replyCode?.content || null,
-        code_language: replyCode?.language || null,
-      });
-      if (onCommentUpdate) onCommentUpdate(response.data.data);
-      setReplyContent("");
-      setReplyCode(null);
-      setShowReplyInput(false);
-    } catch (error) {
-      console.error("Error adding reply:", error);
-      alert("Failed to add reply.");
-    } finally {
-      setSubmittingReply(false);
-    }
-  };
-
-  const handleEdit = async () => {
-    if (!editContent.trim() && !editCode?.content) return;
-    try {
-      const response = await api.post(`/comments/${comment.id}`, {
-        body: editContent || " ",
-        code: editCode?.content || null,
-        code_language: editCode?.language || null,
-      });
-      if (onCommentUpdate) onCommentUpdate(response.data.data);
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error editing comment:", error);
-      alert("Failed to edit comment.");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this comment?")) return;
-    try {
-      await api.delete(`/comments/${comment.id}`);
-      if (onCommentDelete) onCommentDelete(comment.id);
-    } catch (error) {
-      console.error("Error deleting comment:", error);
-      alert("Failed to delete comment.");
-    }
-  };
-
-  const openCodeModalForReply = () => {
-    setPendingCode({ isReply: true });
-    setShowCodeModal(true);
-  };
-  const openCodeModalForEdit = () => {
-    setShowCodeModal(true);
-  };
-  const saveCode = (content, language) => {
-    if (pendingCode?.isReply) setReplyCode({ content, language });
-    else setEditCode({ content, language });
-    setShowCodeModal(false);
-    setPendingCode(null);
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
-  if (isEditing) {
-    return (
-      <div className="border-b border-panelEdge pb-4 mb-4">
-        <div className="flex gap-3">
-          <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center">
-            <User size={14} className="text-accent" />
-          </div>
-          <div className="flex-1">
-            <div className="glass-card p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-semibold text-white text-sm">
-                  Editing comment
-                </span>
-              </div>
-              <textarea
-                ref={editTextareaRef}
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="input-field mb-2"
-                rows="3"
-              />
-              {editCode?.content && (
-                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between">
-                  <span className="text-xs text-accent">
-                    Code attached{" "}
-                    {editCode.language ? `(${editCode.language})` : ""}
-                  </span>
-                  <button
-                    onClick={() => setEditCode(null)}
-                    className="text-xs text-error"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <button
-                  onClick={handleEdit}
-                  className="px-3 py-1.5 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg text-sm"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={openCodeModalForEdit}
-                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm flex items-center gap-1"
-                >
-                  <Code size={14} /> Code
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <CodeModal
-          isOpen={showCodeModal}
-          onClose={() => {
-            setShowCodeModal(false);
-            setPendingCode(null);
-          }}
-          onSave={saveCode}
-          initialCode={editCode?.content || ""}
-          initialLanguage={editCode?.language || ""}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="border-b border-panelEdge pb-4 last:border-0">
-      <div className="flex gap-3">
-        <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
-          <User size={14} className="text-accent" />
-        </div>
-        <div className="flex-1">
-          <div className="glass-card p-3">
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-white text-sm">
-                  {comment.user_name}
-                </span>
-                <span className="text-xs text-muted">
-                  {formatDate(comment.created_at)}
-                </span>
-                {comment.is_modified && (
-                  <span className="text-xs text-muted">(edited)</span>
-                )}
-              </div>
-              {isOwner && (
-                <div className="relative" ref={menuRef}>
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 rounded-lg hover:bg-white/5"
-                  >
-                    <MoreHorizontal size={14} className="text-muted" />
-                  </button>
-                  {showMenu && (
-                    <div className="absolute right-0 mt-1 w-32 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          setIsEditing(true);
-                          setTimeout(
-                            () => editTextareaRef.current?.focus(),
-                            100,
-                          );
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
-                      >
-                        <Edit size={14} /> Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          handleDelete();
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
-                      >
-                        <Trash2 size={14} /> Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            <p className="text-muted text-sm">{comment.body}</p>
-            {comment.code && (
-              <pre className="mt-2 p-2 bg-bg/50 rounded text-xs text-muted overflow-x-auto">
-                <code className={`language-${comment.code_language || "text"}`}>
-                  {comment.code}
-                </code>
-              </pre>
-            )}
-          </div>
-          <div className="flex gap-4 mt-1 ml-2">
-            <button
-              onClick={handleLike}
-              className={`text-xs flex items-center gap-1 ${isLiked ? "text-error" : "text-muted hover:text-error"}`}
-            >
-              <Heart size={12} className={isLiked ? "fill-error" : ""} />
-              <span>{likesCount > 0 ? likesCount : "Like"}</span>
-            </button>
-            <button
-              onClick={handleDislike}
-              className={`text-xs flex items-center gap-1 ${isDisliked ? "text-accent" : "text-muted hover:text-accent"}`}
-            >
-              <ThumbsDown size={12} />
-              <span>{dislikesCount > 0 ? dislikesCount : "Dislike"}</span>
-            </button>
-            <button
-              onClick={() => setShowReplyInput(!showReplyInput)}
-              className="text-xs text-muted hover:text-accent flex items-center gap-1"
-            >
-              <MessageCircle size={12} /> Reply
-            </button>
-          </div>
-          {showReplyInput && (
-            <div className="mt-2">
-              <textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder={`Reply to ${comment.user_name}...`}
-                className="input-field text-sm"
-                rows="2"
-              />
-              {replyCode?.content && (
-                <div className="mt-1 p-1.5 bg-accent/10 rounded text-xs text-accent flex justify-between items-center">
-                  <span>
-                    Code attached{" "}
-                    {replyCode.language ? `(${replyCode.language})` : ""}
-                  </span>
-                  <button
-                    onClick={() => setReplyCode(null)}
-                    className="text-error"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={handleReply}
-                  disabled={
-                    submittingReply ||
-                    (!replyContent.trim() && !replyCode?.content)
-                  }
-                  className="px-3 py-1.5 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg"
-                >
-                  <Send size={14} />
-                </button>
-                <button
-                  onClick={openCodeModalForReply}
-                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm flex items-center gap-1"
-                >
-                  <Code size={14} /> Code
-                </button>
-                <button
-                  onClick={() => {
-                    setShowReplyInput(false);
-                    setReplyContent("");
-                    setReplyCode(null);
-                  }}
-                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-          {comment.has_childrens && (
-            <button className="mt-2 text-xs text-accent flex items-center gap-1">
-              <ChevronDown size={14} /> View replies
-            </button>
-          )}
-        </div>
-      </div>
-      <CodeModal
-        isOpen={showCodeModal && pendingCode?.isReply}
-        onClose={() => {
-          setShowCodeModal(false);
-          setPendingCode(null);
-        }}
-        onSave={saveCode}
-        initialCode={replyCode?.content || ""}
-        initialLanguage={replyCode?.language || ""}
-      />
-    </div>
-  );
-};
+import CommentsModal from "../components/comments/CommentsModal";
 
 const PostDetailsPage = () => {
   const { id } = useParams();
@@ -518,6 +34,8 @@ const PostDetailsPage = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
 
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
@@ -525,18 +43,57 @@ const PostDetailsPage = () => {
   const [saving, setSaving] = useState(false);
   const [liking, setLiking] = useState(false);
 
-  const [comments, setComments] = useState([]);
-  const [commentsLoading, setCommentsLoading] = useState(true);
-  const [newComment, setNewComment] = useState("");
-  const [newCommentCode, setNewCommentCode] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [showCodeModal, setShowCodeModal] = useState(false);
-  const [commentPage, setCommentPage] = useState(1);
-  const [hasMoreComments, setHasMoreComments] = useState(false);
-  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(0);
+
+  // Edit states
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editBody, setEditBody] = useState("");
+  const [editCode, setEditCode] = useState("");
+  const [editCodeLanguage, setEditCodeLanguage] = useState("");
+  const [editIsPublished, setEditIsPublished] = useState(true);
+  const [editTags, setEditTags] = useState([]);
+  const [editTagSearch, setEditTagSearch] = useState("");
+  const [allTags, setAllTags] = useState([]);
+  const [showEditTagDropdown, setShowEditTagDropdown] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editPhotos, setEditPhotos] = useState([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const currentUserId = currentUser?.id;
+  const isOwner = post?.user?.id === currentUser?.id;
+
+  // جلب التاجات للتعديل
+  useEffect(() => {
+    if (isEditing) {
+      const fetchTags = async () => {
+        try {
+          const response = await api.get("/tags");
+          setAllTags(response.data.data || []);
+        } catch (error) {
+          console.error("Error fetching tags:", error);
+        }
+      };
+      fetchTags();
+    }
+  }, [isEditing]);
+
+  // عند تحميل البوست، نحدد قيم التعديل
+  useEffect(() => {
+    if (post) {
+      setEditTitle(post.title);
+      setEditBody(post.body);
+      setEditCode(post.code || "");
+      setEditCodeLanguage(post.code_language || "");
+      setEditIsPublished(post.is_published);
+      setEditTags(post.tags || []);
+      setEditPhotos(post.photos || []);
+      setCommentsCount(post.comments_count || 0);
+    }
+  }, [post]);
 
   // تسجيل مشاهدة البوست
   useEffect(() => {
@@ -564,6 +121,7 @@ const PostDetailsPage = () => {
       setIsLiked(postData.is_liked_by_user || false);
       setLikesCount(postData.likes_count || 0);
       setIsSaved(postData.is_saved || false);
+      setCommentsCount(postData.comments_count || 0);
     } catch (err) {
       console.error("Error fetching post:", err);
       setError("Failed to load post. Please try again.");
@@ -572,28 +130,103 @@ const PostDetailsPage = () => {
     }
   };
 
-  const fetchComments = async (pageNum = 1, append = false) => {
+  useEffect(() => {
+    fetchPost();
+  }, [id]);
+
+  // حذف البوست
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
     try {
-      const response = await api.get(
-        `/posts/${id}/comments?page=${pageNum}&per_page=15`,
-      );
-      const newComments = response.data.data;
-      const pagination = response.data.pagination;
-      if (append) setComments((prev) => [...prev, ...newComments]);
-      else setComments(newComments);
-      setHasMoreComments(pagination.current_page < pagination.last_page);
+      await api.delete(`/posts/${id}`);
+      alert("Post deleted successfully.");
+      navigate("/");
     } catch (error) {
-      console.error("Error fetching comments:", error);
-    } finally {
-      setCommentsLoading(false);
-      setLoadingMoreComments(false);
+      console.error("Delete error:", error);
+      alert("Failed to delete post. Please try again.");
     }
   };
 
-  useEffect(() => {
-    fetchPost();
-    fetchComments(1, false);
-  }, [id]);
+  // معالجة تعديل البوست
+  const handleEditSubmit = async () => {
+    if (!editTitle.trim() || !editBody.trim()) {
+      setEditError("Title and body are required.");
+      return;
+    }
+
+    setEditing(true);
+    setEditError("");
+
+    try {
+      const response = await api.put(`/posts/${id}/content`, {
+        title: editTitle.trim(),
+        body: editBody.trim(),
+        code: editCode.trim() || null,
+        code_language: editCodeLanguage.trim() || null,
+        is_published: editIsPublished,
+        tags: editTags.map((t) => t.id),
+      });
+
+      const updatedPost = response.data.data;
+      setPost(updatedPost);
+      setIsEditing(false);
+      alert("Post updated successfully!");
+      fetchPost();
+    } catch (error) {
+      console.error("Edit error:", error);
+      setEditError(error.response?.data?.message || "Failed to update post.");
+    } finally {
+      setEditing(false);
+    }
+  };
+
+  // إضافة تاج في التعديل
+  const addEditTag = (tag) => {
+    if (!editTags.some((t) => t.id === tag.id)) {
+      setEditTags([...editTags, tag]);
+    }
+    setEditTagSearch("");
+    setShowEditTagDropdown(false);
+  };
+
+  // إزالة تاج في التعديل
+  const removeEditTag = (tagId) => {
+    setEditTags(editTags.filter((t) => t.id !== tagId));
+  };
+
+  // رفع صورة
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    try {
+      const response = await api.post(`/posts/${id}/photos`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setEditPhotos([...editPhotos, response.data.data]);
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload image.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  // حذف صورة
+  const handleDeletePhoto = async (photoId) => {
+    if (!confirm("Delete this photo?")) return;
+    try {
+      await api.delete(`/posts/${id}/photos/${photoId}`);
+      setEditPhotos(editPhotos.filter((p) => p.id !== photoId));
+    } catch (error) {
+      console.error("Delete photo error:", error);
+      alert("Failed to delete photo.");
+    }
+  };
 
   const handleLike = async () => {
     if (liking) return;
@@ -630,63 +263,9 @@ const PostDetailsPage = () => {
     }
   };
 
-  const handleSubmitComment = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim() && !newCommentCode?.content) return;
-    setSubmitting(true);
-    try {
-      const response = await api.post("/comments", {
-        body: newComment || " ",
-        post_id: parseInt(id),
-        code: newCommentCode?.content || null,
-        code_language: newCommentCode?.language || null,
-      });
-      setComments((prev) => [response.data.data, ...prev]);
-      setNewComment("");
-      setNewCommentCode(null);
-      if (post)
-        setPost({ ...post, comments_count: (post.comments_count || 0) + 1 });
-    } catch (error) {
-      console.error("Error adding comment:", error);
-      alert("Failed to add comment.");
-    } finally {
-      setSubmitting(false);
-    }
+  const handleCommentAdded = () => {
+    setCommentsCount((prev) => prev + 1);
   };
-
-  const handleCommentUpdate = (updatedComment) => {
-    const updateCommentInList = (list) =>
-      list.map((c) => (c.id === updatedComment.id ? updatedComment : c));
-    setComments((prev) => updateCommentInList(prev));
-  };
-
-  const handleCommentDelete = (commentId) => {
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
-    if (post)
-      setPost({
-        ...post,
-        comments_count: Math.max(0, (post.comments_count || 0) - 1),
-      });
-  };
-
-  const loadMoreComments = () => {
-    if (!hasMoreComments || loadingMoreComments) return;
-    setLoadingMoreComments(true);
-    setCommentPage((prev) => prev + 1);
-    fetchComments(commentPage + 1, true);
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.scrollY + window.innerHeight >=
-        document.documentElement.scrollHeight - 300
-      )
-        loadMoreComments();
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMoreComments, loadingMoreComments]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -697,13 +276,15 @@ const PostDetailsPage = () => {
     });
   };
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <LoadingSpinner size="lg" text="Loading post..." />
       </div>
     );
-  if (error || !post)
+  }
+
+  if (error || !post) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
@@ -717,6 +298,243 @@ const PostDetailsPage = () => {
         </div>
       </div>
     );
+  }
+
+  // مودال التعديل
+  if (isEditing) {
+    const filteredEditTags = allTags.filter(
+      (tag) =>
+        tag.name.toLowerCase().includes(editTagSearch.toLowerCase()) &&
+        !editTags.some((t) => t.id === tag.id),
+    );
+
+    return (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div className="bg-panel border border-panelEdge rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-panel">
+          <div className="flex items-center justify-between p-4 border-b border-panelEdge">
+            <h2 className="text-xl font-bold text-white">Edit Post</h2>
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                setEditError("");
+              }}
+              className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+            >
+              <X size={20} className="text-muted hover:text-white" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {editError && (
+              <div className="p-3 bg-error/20 border border-error/50 rounded-lg">
+                <p className="text-error text-sm text-center">{editError}</p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-label mb-1">
+                Title *
+              </label>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="input-field"
+                placeholder="Post title"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-label mb-1">
+                Body *
+              </label>
+              <textarea
+                value={editBody}
+                onChange={(e) => setEditBody(e.target.value)}
+                className="input-field resize-none"
+                rows="5"
+                placeholder="Write your post content..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-label mb-1">
+                Code (optional)
+              </label>
+              <textarea
+                value={editCode}
+                onChange={(e) => setEditCode(e.target.value)}
+                className="input-field resize-none font-mono text-sm"
+                rows="4"
+                placeholder="Paste your code here..."
+              />
+              <input
+                type="text"
+                value={editCodeLanguage}
+                onChange={(e) => setEditCodeLanguage(e.target.value)}
+                className="input-field mt-2"
+                placeholder="Code language (e.g., javascript, python)"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-label mb-1">
+                Tags
+              </label>
+              <div className="relative">
+                {editTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {editTags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                      >
+                        #{tag.name}
+                        <button
+                          type="button"
+                          onClick={() => removeEditTag(tag.id)}
+                          className="hover:text-error transition-colors"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <input
+                  type="text"
+                  value={editTagSearch}
+                  onChange={(e) => {
+                    setEditTagSearch(e.target.value);
+                    setShowEditTagDropdown(true);
+                  }}
+                  onFocus={() => setShowEditTagDropdown(true)}
+                  placeholder="Search tags..."
+                  className="input-field"
+                />
+                {showEditTagDropdown &&
+                  editTagSearch &&
+                  filteredEditTags.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-panel border border-panelEdge rounded-lg shadow-panel max-h-48 overflow-y-auto">
+                      {filteredEditTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => addEditTag(tag)}
+                          className="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center justify-between"
+                        >
+                          <span>#{tag.name}</span>
+                          <span className="text-xs text-muted">Add</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-label mb-2">
+                Photos
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {editPhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    className="relative group w-20 h-20 rounded-lg overflow-hidden border border-panelEdge"
+                  >
+                    <img
+                      src={photo.url}
+                      alt="Post"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePhoto(photo.id)}
+                      className="absolute top-1 right-1 p-1 bg-error/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={12} className="text-white" />
+                    </button>
+                  </div>
+                ))}
+                <label className="w-20 h-20 rounded-lg border-2 border-dashed border-panelEdge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    {uploadingPhoto ? (
+                      <Loader2 size={24} className="text-accent animate-spin" />
+                    ) : (
+                      <>
+                        <span className="text-2xl text-muted">+</span>
+                        <span className="text-xs text-muted">Add</span>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                    disabled={uploadingPhoto}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-label mb-2">
+                Privacy
+              </label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setEditIsPublished(true)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    editIsPublished
+                      ? "bg-accent text-white shadow-accent-sm"
+                      : "bg-white/5 text-muted hover:text-white"
+                  }`}
+                >
+                  <Globe size={16} /> Published
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditIsPublished(false)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    !editIsPublished
+                      ? "bg-accent text-white shadow-accent-sm"
+                      : "bg-white/5 text-muted hover:text-white"
+                  }`}
+                >
+                  <Lock size={16} /> Draft
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 p-4 border-t border-panelEdge">
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                setEditError("");
+              }}
+              className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleEditSubmit}
+              disabled={editing}
+              className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {editing ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                "Save Changes"
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
@@ -794,13 +612,52 @@ const PostDetailsPage = () => {
               <Eye size={14} />
               <span>{post.views_count || 0} views</span>
             </div>
+
+            {/* 3 Dots Menu - للمالك فقط */}
+            {isOwner && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+                >
+                  <MoreHorizontal size={18} className="text-muted" />
+                </button>
+
+                {showMenu && (
+                  <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        setIsEditing(true);
+                      }}
+                      className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
+                    >
+                      <Edit size={14} /> Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        handleDelete();
+                      }}
+                      className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-6">
           <button
             onClick={handleLike}
             disabled={liking}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isLiked ? "text-error bg-error/10" : "text-muted hover:text-error hover:bg-error/10"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+              isLiked
+                ? "text-error bg-error/10"
+                : "text-muted hover:text-error hover:bg-error/10"
+            }`}
           >
             <Heart size={20} className={isLiked ? "fill-error" : ""} />
             <span>{likesCount}</span>
@@ -808,105 +665,32 @@ const PostDetailsPage = () => {
           <button
             onClick={handleSave}
             disabled={saving}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isSaved ? "text-accent bg-accent/10" : "text-muted hover:text-accent hover:bg-accent/10"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+              isSaved
+                ? "text-accent bg-accent/10"
+                : "text-muted hover:text-accent hover:bg-accent/10"
+            }`}
           >
             <Bookmark size={20} className={isSaved ? "fill-accent" : ""} />
+          </button>
+          <button
+            onClick={() => setIsCommentsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
+          >
+            <MessageCircle size={20} />
+            <span>{commentsCount}</span>
           </button>
         </div>
       </div>
 
-      <div className="glass-card p-6">
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <MessageCircle size={20} className="text-accent" />
-          Comments ({post.comments_count || 0})
-        </h2>
-
-        <form onSubmit={handleSubmitComment} className="mb-8">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            className="input-field"
-            rows="3"
-          />
-          {newCommentCode?.content && (
-            <div className="mt-2 p-2 bg-accent/10 rounded flex justify-between items-center">
-              <span className="text-sm text-accent">
-                Code attached{" "}
-                {newCommentCode.language ? `(${newCommentCode.language})` : ""}
-              </span>
-              <button
-                onClick={() => setNewCommentCode(null)}
-                className="text-error text-sm"
-              >
-                Remove
-              </button>
-            </div>
-          )}
-          <div className="flex gap-3 mt-3">
-            <button
-              type="submit"
-              disabled={
-                submitting || (!newComment.trim() && !newCommentCode?.content)
-              }
-              className="px-5 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg shadow-accent-sm"
-            >
-              <Send size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowCodeModal(true)}
-              className="px-5 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg flex items-center gap-1"
-            >
-              <Code size={16} /> Add Code
-            </button>
-          </div>
-        </form>
-
-        {commentsLoading ? (
-          <div className="flex justify-center py-8">
-            <LoadingSpinner size="md" text="Loading comments..." />
-          </div>
-        ) : comments.length === 0 ? (
-          <div className="text-center py-8">
-            <MessageCircle size={40} className="text-muted mx-auto mb-2" />
-            <p className="text-muted">No comments yet</p>
-            <p className="text-label text-sm">Be the first to comment!</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {comments.map((comment) => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                postId={parseInt(id)}
-                currentUserId={currentUserId}
-                onCommentUpdate={handleCommentUpdate}
-                onCommentDelete={handleCommentDelete}
-              />
-            ))}
-            {hasMoreComments && (
-              <div className="flex justify-center pt-4">
-                <button
-                  onClick={loadMoreComments}
-                  disabled={loadingMoreComments}
-                  className="text-sm text-accent hover:text-accent/80"
-                >
-                  {loadingMoreComments ? "Loading..." : "Load more comments"}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <CodeModal
-        isOpen={showCodeModal}
-        onClose={() => setShowCodeModal(false)}
-        onSave={(content, language) => {
-          setNewCommentCode({ content, language });
-          setShowCodeModal(false);
-        }}
+      {/* Comments Modal - استخدام المكون المركزي */}
+      <CommentsModal
+        isOpen={isCommentsModalOpen}
+        onClose={() => setIsCommentsModalOpen(false)}
+        postId={parseInt(id)}
+        type="post"
+        onCommentAdded={handleCommentAdded}
+        isContentOwner={isOwner}
       />
     </div>
   );

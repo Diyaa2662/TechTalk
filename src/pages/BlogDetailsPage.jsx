@@ -13,10 +13,20 @@ import {
   MoreHorizontal,
   Flag,
   X,
+  Edit,
+  Trash2,
+  Loader2,
+  Globe,
+  Lock,
+  Plus,
+  GripVertical,
 } from "lucide-react";
 import api from "../services/api";
 import CommentsModal from "../components/comments/CommentsModal";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+
+// BASE_URL بدون /api
+const BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
 
 const BlogDetailsPage = () => {
   const { id } = useParams();
@@ -40,6 +50,9 @@ const BlogDetailsPage = () => {
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
   const [reporting, setReporting] = useState(false);
+
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isOwner = blog?.user?.id === currentUser?.id;
 
   // تسجيل مشاهدة المقال (مرة واحدة لكل مقال في الجلسة)
   useEffect(() => {
@@ -173,6 +186,25 @@ const BlogDetailsPage = () => {
     setCommentsCount(newCount);
   };
 
+  // حذف البلوغ بالكامل
+  const handleDeleteBlog = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this blog? This action cannot be undone.",
+      )
+    )
+      return;
+
+    try {
+      await api.delete(`/blogs/${id}`);
+      alert("Blog deleted successfully.");
+      navigate("/blogs");
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      alert("Failed to delete blog. Please try again.");
+    }
+  };
+
   // تنسيق التاريخ
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -219,11 +251,11 @@ const BlogDetailsPage = () => {
           <span>Back to Blogs</span>
         </button>
 
-        {/* Cover Image */}
+        {/* Cover Image - مع BASE_URL */}
         {blog.cover_image_url && (
           <div className="w-full h-64 md:h-96 rounded-xl overflow-hidden mb-6">
             <img
-              src={blog.cover_image_url}
+              src={`${BASE_URL}${blog.cover_image_url}`}
               alt={blog.title}
               className="w-full h-full object-cover"
             />
@@ -281,7 +313,7 @@ const BlogDetailsPage = () => {
               </div>
             </div>
 
-            {/* 3 Dots Menu */}
+            {/* 3 Dots Menu - مع Edit/Delete للمالك */}
             <div className="relative">
               <button
                 onClick={(e) => {
@@ -294,7 +326,30 @@ const BlogDetailsPage = () => {
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
+                <div className="absolute right-0 mt-1 w-44 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
+                  {isOwner && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          navigate(`/edit-blog/${id}`);
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
+                      >
+                        <Edit size={14} /> Edit Blog
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          handleDeleteBlog();
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
+                      >
+                        <Trash2 size={14} /> Delete Blog
+                      </button>
+                      <div className="border-t border-panelEdge my-1"></div>
+                    </>
+                  )}
                   <button
                     onClick={() => {
                       setShowMenu(false);
@@ -325,7 +380,7 @@ const BlogDetailsPage = () => {
           </div>
         )}
 
-        {/* Sections (Blog Content) */}
+        {/* Sections (Blog Content) - مع BASE_URL للصور */}
         <div className="space-y-8 mb-8">
           {blog.sections &&
             blog.sections.map((section) => (
@@ -337,7 +392,7 @@ const BlogDetailsPage = () => {
                 )}
                 {section.image_url && (
                   <img
-                    src={section.image_url}
+                    src={`${BASE_URL}${section.image_url}`}
                     alt={section.title}
                     className="w-full rounded-lg mb-4"
                   />

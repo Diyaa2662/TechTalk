@@ -108,10 +108,13 @@ const NotificationsPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMore]);
 
-  // تحديث إشعار واحد إلى مقروء
+  // تحديث إشعار واحد إلى مقروء (باستخدام الـ endpoint الجديد)
   const markAsRead = async (notificationId) => {
     try {
-      await api.patch(`/notifications/${notificationId}/read`);
+      // ✅ التعديل هنا: نرسل الـ ID في الـ body بدل المسار
+      await api.patch("/notifications/read", {
+        id: notificationId,
+      });
 
       setNotifications((prev) =>
         prev.map((notif) =>

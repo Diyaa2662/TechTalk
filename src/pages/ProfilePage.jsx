@@ -19,60 +19,10 @@ import {
   MessageCircle,
   Code,
   X,
+  Mail,
 } from "lucide-react";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
-
-// أيقونات SVG لوسائل التواصل
-const GithubIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-  </svg>
-);
-
-const TwitterIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-  </svg>
-);
-
-const LinkedInIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-    <rect x="2" y="9" width="4" height="12" />
-    <circle cx="4" cy="4" r="2" />
-  </svg>
-);
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -290,12 +240,27 @@ const ProfilePage = () => {
     }
   };
 
-  const getSocialIcon = (url) => {
-    if (url.includes("github")) return <GithubIcon />;
-    if (url.includes("twitter") || url.includes("x.com"))
-      return <TwitterIcon />;
-    if (url.includes("linkedin")) return <LinkedInIcon />;
-    return null;
+  const getBadgeIcon = (badge) => {
+    switch (badge) {
+      case "junior":
+        return "🌟";
+      case "senior":
+        return "🔥";
+      case "expert":
+        return "🏆";
+      default:
+        return "⭐";
+    }
+  };
+
+  const getSocialLabel = (url) => {
+    if (!url) return "Link";
+    if (url.includes("github")) return "GitHub";
+    if (url.includes("twitter") || url.includes("x.com")) return "Twitter";
+    if (url.includes("linkedin")) return "LinkedIn";
+    if (url.includes("instagram")) return "Instagram";
+    if (url.includes("facebook")) return "Facebook";
+    return "Link";
   };
 
   const loadMore = () => {
@@ -356,6 +321,12 @@ const ProfilePage = () => {
     );
   }
 
+  // حساب نسبة التقدم من 0 إلى 10000
+  const rankingPercentage = Math.min(
+    (profile.ranking_points / 10000) * 100,
+    100,
+  );
+
   return (
     <div className="max-w-5xl mx-auto py-6 px-4">
       {/* Cover Image */}
@@ -412,12 +383,22 @@ const ProfilePage = () => {
                 {profile.name}
               </h1>
               <span
-                className={`text-xs px-2 py-0.5 rounded-full ${getBadgeColor(profile.badge)}`}
+                className={`text-xs px-2 py-0.5 rounded-full ${getBadgeColor(profile.badge)} flex items-center gap-1`}
               >
+                <span>{getBadgeIcon(profile.badge)}</span>
                 {profile.badge}
               </span>
             </div>
             <p className="text-muted text-sm mt-1">@{profile.username}</p>
+
+            {/* البريد الإلكتروني */}
+            {profile.email && (
+              <div className="flex items-center gap-1 text-sm text-muted mt-1">
+                <Mail size={14} />
+                <span>{profile.email}</span>
+              </div>
+            )}
+
             {profile.bio && (
               <p className="text-muted mt-3 max-w-md">{profile.bio}</p>
             )}
@@ -446,17 +427,20 @@ const ProfilePage = () => {
                 <span>Joined {formatDate(profile.joined_at)}</span>
               </div>
             </div>
+
+            {/* Social Links - عرض كل الروابط */}
             {profile.social_links && profile.social_links.length > 0 && (
-              <div className="flex gap-3 mt-3">
+              <div className="flex flex-wrap gap-3 mt-3">
                 {profile.social_links.map((link, idx) => (
                   <a
                     key={idx}
                     href={link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted hover:text-accent transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-muted hover:text-accent"
                   >
-                    {getSocialIcon(link)}
+                    <LinkIcon size={16} />
+                    <span className="text-xs">{getSocialLabel(link)}</span>
                   </a>
                 ))}
               </div>
@@ -464,7 +448,10 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2">
+            <button
+              onClick={() => navigate("/edit-profile")}
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2"
+            >
               <Edit3 size={16} /> Edit Profile
             </button>
             <div className="relative" ref={menuRef}>
@@ -479,7 +466,7 @@ const ProfilePage = () => {
                   <button
                     onClick={() => {
                       setShowOptionsMenu(false);
-                      alert("Activity page coming soon");
+                      navigate("/activity");
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
                   >
@@ -498,7 +485,16 @@ const ProfilePage = () => {
                   <button
                     onClick={() => {
                       setShowOptionsMenu(false);
-                      alert("Settings page coming soon");
+                      navigate("/drafts");
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
+                  >
+                    <FileText size={16} /> Drafts
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowOptionsMenu(false);
+                      navigate("/settings");
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
                   >
@@ -535,12 +531,27 @@ const ProfilePage = () => {
             </p>
             <p className="text-xs text-muted">following</p>
           </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-white">
-              {profile.ranking_points || 0}
-            </p>
-            <p className="text-xs text-muted">points</p>
+        </div>
+
+        {/* Ranking Points Progress Bar */}
+        <div className="mt-4 max-w-md">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm text-muted">Ranking Points</span>
+            <span className="text-sm font-semibold text-accent">
+              {profile.ranking_points || 0} / 10,000
+            </span>
           </div>
+          <div className="w-full h-2 bg-panel rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-accent to-purple-500 rounded-full transition-all duration-500"
+              style={{ width: `${rankingPercentage}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted mt-1">
+            {rankingPercentage === 100
+              ? "🏆 Maximum level reached!"
+              : `${Math.round(rankingPercentage)}% to next level`}
+          </p>
         </div>
 
         {profile.tags && profile.tags.length > 0 && (

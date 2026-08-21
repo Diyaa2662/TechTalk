@@ -7,6 +7,10 @@ import {
   BellIcon,
   PlusCircleIcon,
   LogOutIcon,
+  MessageCircle,
+  MapPin,
+  Sparkles,
+  Code2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "/src/assets/logo.png";
@@ -155,6 +159,90 @@ const Sidebar = () => {
               `}
             >
               Create Post
+            </span>
+          </button>
+        </div>
+
+        {/* AI Chat Button */}
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => navigate("/chat")}
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/5 transition-colors group relative"
+          >
+            <div className="min-w-[24px]">
+              <MessageCircle size={24} className="text-accent" />
+            </div>
+            <span
+              className={`
+                text-base whitespace-nowrap text-accent font-medium
+                transition-all duration-300 ease-out
+                ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+              `}
+            >
+              AI Chat
+            </span>
+          </button>
+        </div>
+
+        {/* Road Maps Button */}
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => navigate("/roadmaps")}
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/5 transition-colors group relative"
+          >
+            <div className="min-w-[24px]">
+              <MapPin size={24} className="text-accent" />
+            </div>
+            <span
+              className={`
+                text-base whitespace-nowrap text-accent font-medium
+                transition-all duration-300 ease-out
+                ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+              `}
+            >
+              Road Maps
+            </span>
+          </button>
+        </div>
+
+        {/* UML Generator Button */}
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => navigate("/uml")}
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/5 transition-colors group relative"
+          >
+            <div className="min-w-[24px]">
+              <Sparkles size={24} className="text-accent" />
+            </div>
+            <span
+              className={`
+                text-base whitespace-nowrap text-accent font-medium
+                transition-all duration-300 ease-out
+                ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+              `}
+            >
+              UML Generator
+            </span>
+          </button>
+        </div>
+
+        {/* Compiler Button */}
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => navigate("/compiler")}
+            className="flex items-center gap-4 px-2 py-3 w-full rounded-lg hover:bg-white/5 transition-colors group relative"
+          >
+            <div className="min-w-[24px]">
+              <Code2 size={24} className="text-accent" />
+            </div>
+            <span
+              className={`
+                text-base whitespace-nowrap text-accent font-medium
+                transition-all duration-300 ease-out
+                ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 absolute pointer-events-none"}
+              `}
+            >
+              Compiler
             </span>
           </button>
         </div>

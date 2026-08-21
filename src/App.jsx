@@ -15,6 +15,17 @@ import ProfilePage from "./pages/ProfilePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import CreatePostPage from "./pages/CreatePostPage";
 import SearchPage from "./pages/SearchPage";
+import DraftsPage from "./pages/DraftsPage";
+import EditProfilePage from "./pages/EditProfilePage";
+import CreateBlogPage from "./pages/CreateBlogPage";
+import EditBlogPage from "./pages/EditBlogPage";
+import ActivityPage from "./pages/ActivityPage";
+import ChatPage from "./pages/ChatPage";
+import RoadMapsPage from "./pages/RoadMapsPage";
+import RoadMapDetailsPage from "./pages/RoadMapDetailsPage";
+import UmlGeneratorPage from "./pages/UmlGeneratorPage";
+import CompilerPage from "./pages/CompilerPage";
+import SettingsPage from "./pages/SettingsPage";
 
 // مكون لحماية الصفحات
 const PrivateRoute = ({ children }) => {
@@ -110,6 +121,16 @@ function App() {
           }
         />
         <Route
+          path="/edit-blog/:id"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <EditBlogPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/notifications"
           element={
             <PrivateRoute>
@@ -160,11 +181,111 @@ function App() {
           }
         />
         <Route
+          path="/create-blog"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <CreateBlogPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/search"
           element={
             <PrivateRoute>
               <MainLayout>
                 <SearchPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/drafts"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <DraftsPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit-profile"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <EditProfilePage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/activity"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <ActivityPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <ChatPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/roadmaps"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <RoadMapsPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/roadmaps/:id"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <RoadMapDetailsPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/uml"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <UmlGeneratorPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/compiler"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <CompilerPage />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <SettingsPage />
               </MainLayout>
             </PrivateRoute>
           }

@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Send,
@@ -15,6 +16,9 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
+  Pin,
+  PinOff,
+  Flag,
 } from "lucide-react";
 import api from "../../services/api";
 
@@ -25,6 +29,7 @@ const CommentsModal = ({
   blogId,
   type = "post",
   onCommentAdded,
+  isContentOwner = false,
 }) => {
   const [comments, setComments] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -39,38 +44,40 @@ const CommentsModal = ({
   const [loadingReplies, setLoadingReplies] = useState({});
   const [totalComments, setTotalComments] = useState(0);
 
-  // State for editing
   const [editingComment, setEditingComment] = useState(null);
   const editTextValueRef = useRef("");
   const [editingCode, setEditingCode] = useState(null);
 
-  // State for code attachment in main form
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [codeContent, setCodeContent] = useState("");
   const [codeLanguage, setCodeLanguage] = useState("");
   const [pendingCode, setPendingCode] = useState(null);
 
-  // Mention states
   const [mentionSuggestions, setMentionSuggestions] = useState([]);
   const [showMentionPopup, setShowMentionPopup] = useState(false);
   const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
-  // Refs for mention to avoid re-render
+  // Report states
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportCommentId, setReportCommentId] = useState(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reporting, setReporting] = useState(false);
+
   const mentionQueryRef = useRef("");
   const mentionCursorPosRef = useRef(0);
 
   const modalRef = useRef(null);
   const codeModalRef = useRef(null);
+  const reportModalRef = useRef(null); // 🆕 Report Modal ref
   const textareaRef = useRef(null);
   const editTextareaRef = useRef(null);
   const mentionPopupRef = useRef(null);
 
-  // جلب المستخدم الحالي من localStorage
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const currentUserId = currentUser?.id;
 
-  // جلب اقتراحات المنشن (حد أقصى 5)
   const fetchMentionSuggestions = async (query) => {
     if (query.length < 2) {
       setMentionSuggestions([]);
@@ -95,7 +102,6 @@ const CommentsModal = ({
     }
   };
 
-  // جلب التعليقات (يدعم البوستات والمقالات)
   const fetchComments = async (pageNum = 1, append = false) => {
     try {
       let response;
@@ -127,7 +133,6 @@ const CommentsModal = ({
     }
   };
 
-  // جلب الردود على تعليق
   const fetchReplies = async (commentId) => {
     if (repliesData[commentId]) return;
 
@@ -145,7 +150,6 @@ const CommentsModal = ({
     }
   };
 
-  // تبديل عرض الردود
   const toggleReplies = (commentId) => {
     if (!expandedReplies[commentId]) {
       fetchReplies(commentId);
@@ -153,7 +157,6 @@ const CommentsModal = ({
     setExpandedReplies((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
   };
 
-  // تحميل عند فتح المودال
   useEffect(() => {
     if (
       isOpen &&
@@ -174,7 +177,6 @@ const CommentsModal = ({
     }
   }, [isOpen, postId, blogId, type]);
 
-  // تحميل المزيد
   const loadMore = () => {
     if (!hasMore || loadingMore) return;
     setLoadingMore(true);
@@ -183,7 +185,6 @@ const CommentsModal = ({
     fetchComments(nextPage, true);
   };
 
-  // معالجة الإعجاب بتعليق (Toggle)
   const handleLikeComment = async (
     commentId,
     isLiked,
@@ -215,7 +216,6 @@ const CommentsModal = ({
     }
   };
 
-  // معالجة الديزلايك بتعليق (Toggle)
   const handleDislikeComment = async (
     commentId,
     isDisliked,
@@ -247,7 +247,61 @@ const CommentsModal = ({
     }
   };
 
-  // معالجة الكتابة في حقل التعليق الجديد (مع منشن - يظهر فوق)
+  const handleHighlight = async (commentId, isHighlighted) => {
+    try {
+      await api.post(`/comments/${commentId}/highlight`, {});
+
+      const updateCommentInList = (commentList) => {
+        return commentList.map((c) => {
+          if (c.id === commentId) {
+            return { ...c, is_highlighted: !isHighlighted };
+          }
+          return c;
+        });
+      };
+
+      setComments((prev) => updateCommentInList(prev));
+    } catch (error) {
+      console.error("Error toggling highlight:", error);
+      alert("Failed to update highlight status.");
+    }
+  };
+
+  const handleReportComment = (commentId) => {
+    setReportCommentId(commentId);
+    setReportModalOpen(true);
+    setReportReason("");
+    setReportDetails("");
+  };
+
+  const submitReport = async () => {
+    if (!reportReason.trim()) {
+      alert("Please provide a reason for reporting.");
+      return;
+    }
+
+    setReporting(true);
+    try {
+      const payload = {
+        kind: "comment",
+        id: reportCommentId,
+        reason: reportReason,
+        details: reportDetails || null,
+      };
+      await api.post("/reports", payload);
+      alert("Comment reported successfully. Our team will review it.");
+      setReportModalOpen(false);
+      setReportReason("");
+      setReportDetails("");
+      setReportCommentId(null);
+    } catch (error) {
+      console.error("Report error:", error);
+      alert("Failed to report comment. Please try again.");
+    } finally {
+      setReporting(false);
+    }
+  };
+
   const handleCommentChange = (e) => {
     const value = e.target.value;
     const cursorPos = e.target.selectionStart;
@@ -299,7 +353,6 @@ const CommentsModal = ({
     setShowMentionPopup(false);
   };
 
-  // معالجة الكتابة في حقل التعديل (مع منشن - يظهر فوق)
   const handleEditCommentChange = (e) => {
     const value = e.target.value;
     const cursorPos = e.target.selectionStart;
@@ -346,7 +399,6 @@ const CommentsModal = ({
     setShowMentionPopup(false);
   };
 
-  // اختيار منشن
   const selectMention = (user) => {
     const isEditing = !!editingComment;
     const textarea = isEditing ? editTextareaRef.current : textareaRef.current;
@@ -391,7 +443,6 @@ const CommentsModal = ({
     mentionQueryRef.current = "";
   };
 
-  // Keyboard navigation for mentions
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!showMentionPopup) return;
@@ -416,7 +467,6 @@ const CommentsModal = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showMentionPopup, mentionSuggestions, selectedSuggestionIndex]);
 
-  // بدء التعديل على تعليق
   const startEdit = (comment) => {
     setPendingCode(null);
     setCodeContent("");
@@ -442,7 +492,6 @@ const CommentsModal = ({
     }, 50);
   };
 
-  // حفظ التعديل
   const saveEdit = async () => {
     const currentText = editTextValueRef.current;
     if (!currentText.trim() && !editingCode?.content) return;
@@ -487,7 +536,6 @@ const CommentsModal = ({
     }
   };
 
-  // حذف تعليق
   const deleteComment = async (commentId) => {
     if (!confirm("Are you sure you want to delete this comment?")) return;
 
@@ -509,20 +557,17 @@ const CommentsModal = ({
     }
   };
 
-  // فتح نافذة إضافة كود للتعديل
   const openEditCodeModal = () => {
     setCodeContent(editingCode?.content || "");
     setCodeLanguage(editingCode?.language || "");
     setShowCodeModal(true);
   };
 
-  // حفظ الكود للتعديل
   const saveEditCode = () => {
     setEditingCode({ content: codeContent, language: codeLanguage });
     setShowCodeModal(false);
   };
 
-  // فتح نافذة إضافة كود للتعليق الجديد
   const openCodeModal = () => {
     if (codeContent || codeLanguage) {
       setPendingCode({ content: codeContent, language: codeLanguage });
@@ -530,13 +575,11 @@ const CommentsModal = ({
     setShowCodeModal(true);
   };
 
-  // حفظ الكود للتعليق الجديد
   const saveCode = () => {
     setPendingCode({ content: codeContent, language: codeLanguage });
     setShowCodeModal(false);
   };
 
-  // إلغاء الكود
   const cancelCode = () => {
     if (pendingCode) {
       setCodeContent(pendingCode.content);
@@ -548,59 +591,6 @@ const CommentsModal = ({
     setShowCodeModal(false);
   };
 
-  // إرسال التعليق مع كود (جديد)
-  // eslint-disable-next-line no-unused-vars
-  const submitWithCode = async () => {
-    setSubmitting(true);
-
-    const content = replyTo ? replyContent : newComment;
-
-    const payload = {
-      body: content || " ",
-      ...(type === "post" ? { post_id: postId } : { blog_id: blogId }),
-      code: pendingCode?.content || null,
-      code_language: pendingCode?.language || null,
-    };
-
-    if (replyTo) {
-      payload.parent_id = replyTo.id;
-    }
-
-    try {
-      const response = await api.post("/comments", payload);
-      const newCommentData = response.data.data;
-
-      if (replyTo) {
-        setRepliesData((prev) => ({
-          ...prev,
-          [replyTo.id]: [newCommentData, ...(prev[replyTo.id] || [])],
-        }));
-        if (!expandedReplies[replyTo.id]) {
-          setExpandedReplies((prev) => ({ ...prev, [replyTo.id]: true }));
-        }
-        setReplyTo(null);
-        setReplyContent("");
-      } else {
-        setComments((prev) => [newCommentData, ...prev]);
-        setNewComment("");
-        setTotalComments((prev) => prev + 1);
-        if (onCommentAdded) onCommentAdded();
-      }
-
-      setCodeContent("");
-      setCodeLanguage("");
-      setPendingCode(null);
-
-      if (textareaRef.current) textareaRef.current.focus();
-    } catch (error) {
-      console.error("Error adding comment with code:", error);
-      alert("Failed to add comment. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // إضافة تعليق عادي (بدون كود)
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     const content = replyTo ? replyContent : newComment;
@@ -653,27 +643,23 @@ const CommentsModal = ({
     }
   };
 
-  // بدء الرد على تعليق
   const startReply = (comment) => {
     setReplyTo(comment);
     setReplyContent("");
     if (textareaRef.current) textareaRef.current.focus();
   };
 
-  // إلغاء الرد
   const cancelReply = () => {
     setReplyTo(null);
     setReplyContent("");
   };
 
-  // إلغاء التعديل
   const cancelEdit = () => {
     setEditingComment(null);
     editTextValueRef.current = "";
     setEditingCode(null);
   };
 
-  // تنسيق التاريخ
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -689,18 +675,28 @@ const CommentsModal = ({
     return date.toLocaleDateString();
   };
 
-  // إغلاق المودال الرئيسي
   useEffect(() => {
     const handleClickOutside = (e) => {
+      // 🛑 إذا كان الهدف داخل القائمة المنبثقة، لا تغلق المودال
+      if (e.target.closest(".dropdown-menu-portal")) {
+        return;
+      }
+      // 🛑 إذا كان الهدف داخل Report Modal، لا تغلق المودال
+      if (reportModalRef.current && reportModalRef.current.contains(e.target)) {
+        return;
+      }
+      // 🛑 إذا كان الهدف داخل Code Modal، لا تغلق المودال
       if (codeModalRef.current && codeModalRef.current.contains(e.target)) {
         return;
       }
+      // 🛑 إذا كان الهدف داخل Mention Popup، لا تغلق المودال
       if (
         mentionPopupRef.current &&
         mentionPopupRef.current.contains(e.target)
       ) {
         return;
       }
+      // 🛑 إذا كان النقر خارج المودال، أغلق المودال
       if (modalRef.current && !modalRef.current.contains(e.target)) {
         onClose();
       }
@@ -708,15 +704,27 @@ const CommentsModal = ({
 
     const handleEsc = (e) => {
       if (e.key === "Escape") {
+        // 🛑 إذا كان Report Modal مفتوح، أغلق Report Modal فقط
+        if (reportModalOpen) {
+          setReportModalOpen(false);
+          setReportReason("");
+          setReportDetails("");
+          setReportCommentId(null);
+          return;
+        }
         if (showCodeModal) {
           cancelCode();
-        } else if (showMentionPopup) {
-          setShowMentionPopup(false);
-        } else if (editingComment) {
-          cancelEdit();
-        } else {
-          onClose();
+          return;
         }
+        if (showMentionPopup) {
+          setShowMentionPopup(false);
+          return;
+        }
+        if (editingComment) {
+          cancelEdit();
+          return;
+        }
+        onClose();
       }
     };
 
@@ -729,11 +737,18 @@ const CommentsModal = ({
       window.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("keydown", handleEsc);
     };
-  }, [isOpen, onClose, showCodeModal, editingComment, showMentionPopup]);
+  }, [
+    isOpen,
+    onClose,
+    showCodeModal,
+    editingComment,
+    showMentionPopup,
+    reportModalOpen,
+  ]);
 
   if (!isOpen) return null;
 
-  // مكون عرض التعليق الواحد
+  // 🔥 CommentItem Component with Portal-based dropdown
   const CommentItem = ({ comment, isReply = false }) => {
     const [isLiked, setIsLiked] = useState(comment.is_liked_by_user || false);
     const [likesCount, setLikesCount] = useState(0);
@@ -742,23 +757,29 @@ const CommentsModal = ({
     );
     const [dislikesCount, setDislikesCount] = useState(0);
     const [showMenu, setShowMenu] = useState(false);
-    const menuRefLocal = useRef(null);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+    const menuButtonRef = useRef(null);
 
     const replies = repliesData[comment.id] || [];
     const isLoadingReplies = loadingReplies[comment.id];
     const isExpanded = expandedReplies[comment.id];
-    const isOwner = Number(comment.user_id) === currentUserId;
+
+    const isCommentOwner = Number(comment.user_id) === Number(currentUserId);
+    const isHighlighted = comment.is_highlighted || false;
 
     useEffect(() => {
       const handleClickOutside = (e) => {
-        if (menuRefLocal.current && !menuRefLocal.current.contains(e.target)) {
+        if (
+          menuButtonRef.current &&
+          !menuButtonRef.current.contains(e.target)
+        ) {
           setShowMenu(false);
         }
       };
       if (showMenu) {
-        window.addEventListener("click", handleClickOutside);
+        document.addEventListener("click", handleClickOutside);
       }
-      return () => window.removeEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
     }, [showMenu]);
 
     const handleLocalLike = () => {
@@ -785,7 +806,104 @@ const CommentsModal = ({
       );
     };
 
-    // وضع التعديل
+    // 🚀 فتح القائمة مع منع انتشار الحدث
+    const openMenu = (e) => {
+      e.stopPropagation();
+      const rect = e.currentTarget.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 4,
+        left: rect.right - 144,
+      });
+      setShowMenu(true);
+    };
+
+    // 🚀 إغلاق القائمة
+    const closeMenu = () => {
+      setShowMenu(false);
+    };
+
+    // 🚀 عرض القائمة باستخدام React Portal
+    const renderDropdownMenu = () => {
+      if (!showMenu) return null;
+
+      const menuContent = (
+        <div
+          className="dropdown-menu-portal fixed z-[300] w-36 bg-panel border border-panelEdge rounded-lg shadow-panel py-1"
+          style={{
+            top: menuPosition.top,
+            left: menuPosition.left,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Highlight - يظهر فقط لمالك البوست/المقال */}
+          {isContentOwner && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                closeMenu();
+                handleHighlight(comment.id, isHighlighted);
+              }}
+              className="w-full px-3 py-1.5 text-left text-sm text-accent hover:bg-white/5 flex items-center gap-2 transition-colors"
+            >
+              {isHighlighted ? (
+                <>
+                  <PinOff size={14} />
+                  Unhighlight
+                </>
+              ) : (
+                <>
+                  <Pin size={14} />
+                  Highlight
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Edit/Delete - يظهر فقط لمالك التعليق */}
+          {isCommentOwner && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeMenu();
+                  startEdit(comment);
+                }}
+                className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2 transition-colors"
+              >
+                <Edit size={14} /> Edit
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeMenu();
+                  deleteComment(comment.id);
+                }}
+                className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2 transition-colors"
+              >
+                <Trash2 size={14} /> Delete
+              </button>
+            </>
+          )}
+
+          {/* Report - يظهر فقط إذا المستخدم مش مالك التعليق */}
+          {!isCommentOwner && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                closeMenu();
+                handleReportComment(comment.id);
+              }}
+              className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2 transition-colors"
+            >
+              <Flag size={14} /> Report
+            </button>
+          )}
+        </div>
+      );
+
+      return createPortal(menuContent, document.body);
+    };
+
     if (editingComment?.id === comment.id) {
       return (
         <div className={`flex gap-3 ${!isReply ? "mb-4" : "mb-3 ml-11"}`}>
@@ -868,13 +986,25 @@ const CommentsModal = ({
     }
 
     return (
-      <div className={`flex gap-3 ${!isReply ? "mb-4" : "mb-3 ml-11"}`}>
+      <div
+        className={`flex gap-3 ${!isReply ? "mb-4" : "mb-3 ml-11"} ${
+          isHighlighted ? "relative" : ""
+        }`}
+      >
+        {isHighlighted && (
+          <div className="absolute -left-1 top-0 bottom-0 w-1 bg-accent rounded-full"></div>
+        )}
+
         <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
           <User size={16} className="text-accent" />
         </div>
 
         <div className="flex-1">
-          <div className="glass-card p-3">
+          <div
+            className={`glass-card p-3 ${
+              isHighlighted ? "border-accent/50 bg-accent/5" : ""
+            }`}
+          >
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-white text-sm">
@@ -886,46 +1016,26 @@ const CommentsModal = ({
                 {comment.is_modified && (
                   <span className="text-xs text-muted">(edited)</span>
                 )}
+                {isHighlighted && (
+                  <span className="text-xs px-2 py-0.5 bg-accent/20 text-accent rounded-full flex items-center gap-1">
+                    <Pin size={10} />
+                    Highlighted
+                  </span>
+                )}
               </div>
 
-              {isOwner && (
-                <div className="relative" ref={menuRefLocal}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowMenu(!showMenu);
-                    }}
-                    className="p-1 rounded-lg hover:bg-white/5 transition-colors"
-                  >
-                    <MoreHorizontal size={14} className="text-muted" />
-                  </button>
-                  {showMenu && (
-                    <div className="absolute right-0 mt-1 w-32 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          startEdit(comment);
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
-                      >
-                        <Edit size={14} />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          deleteComment(comment.id);
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
-                      >
-                        <Trash2 size={14} />
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* ✅ زر الـ 3 dots مع Portal */}
+              <div ref={menuButtonRef}>
+                <button
+                  onClick={openMenu}
+                  className="p-1 rounded-lg hover:bg-white/5 transition-colors relative z-10"
+                >
+                  <MoreHorizontal size={14} className="text-muted" />
+                </button>
+                {renderDropdownMenu()}
+              </div>
             </div>
+
             <p className="text-muted text-sm">{comment.body}</p>
 
             {comment.code && (
@@ -1019,7 +1129,6 @@ const CommentsModal = ({
     );
   };
 
-  // عرض مؤشر وجود كود
   const hasCodeAttached = pendingCode?.content || codeContent;
 
   return (
@@ -1054,9 +1163,19 @@ const CommentsModal = ({
               </div>
             ) : (
               <>
-                {comments.map((comment) => (
-                  <CommentItem key={comment.id} comment={comment} />
-                ))}
+                {comments
+                  .filter((c) => c.is_highlighted)
+                  .map((comment) => (
+                    <CommentItem
+                      key={`highlighted-${comment.id}`}
+                      comment={comment}
+                    />
+                  ))}
+                {comments
+                  .filter((c) => !c.is_highlighted)
+                  .map((comment) => (
+                    <CommentItem key={comment.id} comment={comment} />
+                  ))}
 
                 {hasMore && (
                   <div className="flex justify-center pt-2">
@@ -1169,7 +1288,82 @@ const CommentsModal = ({
         </div>
       </div>
 
-      {/* Mention Popup - يظهر فوق مع سكرول */}
+      {/* Report Modal */}
+      {reportModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div
+            ref={reportModalRef} // 🆕 تم إضافة الـ ref
+            className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Flag size={20} className="text-error" />
+                Report Comment
+              </h3>
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                  setReportCommentId(null);
+                }}
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                <X size={20} className="text-muted hover:text-white" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-label mb-1">
+                  Reason <span className="text-error">*</span>
+                </label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Why are you reporting this comment?"
+                  rows="3"
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-label mb-1">
+                  Additional Details (Optional)
+                </label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Any additional information..."
+                  rows="2"
+                  className="input-field"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportReason("");
+                  setReportDetails("");
+                  setReportCommentId(null);
+                }}
+                className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitReport}
+                disabled={reporting}
+                className="flex-1 px-4 py-2 bg-error hover:bg-error/80 text-white rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {reporting ? "Reporting..." : "Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showMentionPopup && mentionSuggestions.length > 0 && (
         <div
           ref={mentionPopupRef}
@@ -1211,7 +1405,6 @@ const CommentsModal = ({
         </div>
       )}
 
-      {/* Code Modal */}
       {showCodeModal && (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm"
