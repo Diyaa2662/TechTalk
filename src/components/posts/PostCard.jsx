@@ -504,7 +504,7 @@ const PostCard = ({
 
   return (
     <>
-      <div className="glass-card-hover p-5">
+      <div className="glass-card hover:border-[#5CA1FC]/40 hover:shadow-[0_4px_20px_rgba(92,161,252,0.15)] transition-all duration-300 p-5">
         {/* Header - معلومات المستخدم */}
         <div className="flex items-start justify-between mb-3">
           <Link
@@ -587,17 +587,53 @@ const PostCard = ({
             : post.body}
         </p>
 
+        {/* ✅ Code Block - مع إمكانية التوسيع والطي */}
         {post.code && (
           <div className="mb-3 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
             <div className="flex items-center justify-between px-3 py-2 bg-panel/50 border-b border-panelEdge">
-              <span className="text-xs text-muted">
-                {post.code_language || "code"}
-              </span>
-              <button className="text-muted hover:text-[#5CA1FC] transition-colors">
-                <Code size={14} />
+              <div className="flex items-center gap-2">
+                <Code size={14} className="text-[#5CA1FC]" />
+                <span className="text-xs text-muted">
+                  {post.code_language || "code"}
+                </span>
+                <span className="text-xs text-muted">
+                  • {post.code.split("\n").length} lines
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  const pre = document.getElementById(`code-${post.id}`);
+                  const btn = document.getElementById(`code-btn-${post.id}`);
+                  if (pre) {
+                    if (
+                      pre.style.maxHeight === "none" ||
+                      pre.style.maxHeight === ""
+                    ) {
+                      pre.style.maxHeight = "80px";
+                      pre.style.overflowY = "auto";
+                      if (btn) btn.textContent = "Expand";
+                    } else {
+                      pre.style.maxHeight = "none";
+                      pre.style.overflowY = "visible";
+                      if (btn) btn.textContent = "Collapse";
+                    }
+                  }
+                }}
+                id={`code-btn-${post.id}`}
+                className="text-xs text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors font-medium"
+              >
+                Expand
               </button>
             </div>
-            <pre className="p-3 text-sm text-muted overflow-x-auto">
+            <pre
+              id={`code-${post.id}`}
+              className="p-3 text-sm text-muted font-mono whitespace-pre-wrap break-words"
+              style={{
+                maxHeight: "80px",
+                overflowY: "auto",
+                overflowX: "hidden",
+              }}
+            >
               <code>{post.code}</code>
             </pre>
           </div>
