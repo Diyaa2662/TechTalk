@@ -609,7 +609,7 @@ const PostCard = ({
                       pre.style.maxHeight === "none" ||
                       pre.style.maxHeight === ""
                     ) {
-                      pre.style.maxHeight = "80px";
+                      pre.style.maxHeight = "180px";
                       pre.style.overflowY = "auto";
                       if (btn) btn.textContent = "Expand";
                     } else {
@@ -629,7 +629,7 @@ const PostCard = ({
               id={`code-${post.id}`}
               className="p-3 text-sm text-muted font-mono whitespace-pre-wrap break-words"
               style={{
-                maxHeight: "80px",
+                maxHeight: "180px",
                 overflowY: "auto",
                 overflowX: "hidden",
               }}
