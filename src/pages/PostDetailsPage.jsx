@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Heart,
   Bookmark,
@@ -10,11 +10,6 @@ import {
   ArrowLeft,
   Calendar,
   Code,
-  Send,
-  ThumbsDown,
-  ChevronDown,
-  ChevronUp,
-  User,
   X,
   MoreHorizontal,
   Edit,
@@ -22,11 +17,11 @@ import {
   Loader2,
   Globe,
   Lock,
-  Tag,
 } from "lucide-react";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import CommentsModal from "../components/comments/CommentsModal";
+import ImageViewer from "../components/common/ImageViewer";
 
 const PostDetailsPage = () => {
   const { id } = useParams();
@@ -45,6 +40,10 @@ const PostDetailsPage = () => {
 
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
+
+  // Image Viewer states
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   // Edit states
   const [isEditing, setIsEditing] = useState(false);
@@ -276,6 +275,22 @@ const PostDetailsPage = () => {
     });
   };
 
+  // تنسيق التاريخ النسبي
+  const formatRelativeDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -291,7 +306,7 @@ const PostDetailsPage = () => {
           <p className="text-error mb-3">{error || "Post not found"}</p>
           <button
             onClick={() => navigate("/")}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Back to Home
           </button>
@@ -387,7 +402,7 @@ const PostDetailsPage = () => {
                     {editTags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                        className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full"
                       >
                         #{tag.name}
                         <button
@@ -456,10 +471,13 @@ const PostDetailsPage = () => {
                     </button>
                   </div>
                 ))}
-                <label className="w-20 h-20 rounded-lg border-2 border-dashed border-panelEdge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
+                <label className="w-20 h-20 rounded-lg border-2 border-dashed border-panelEdge flex items-center justify-center cursor-pointer hover:border-[#5CA1FC]/50 transition-colors">
                   <div className="flex flex-col items-center">
                     {uploadingPhoto ? (
-                      <Loader2 size={24} className="text-accent animate-spin" />
+                      <Loader2
+                        size={24}
+                        className="text-[#5CA1FC] animate-spin"
+                      />
                     ) : (
                       <>
                         <span className="text-2xl text-muted">+</span>
@@ -488,7 +506,7 @@ const PostDetailsPage = () => {
                   onClick={() => setEditIsPublished(true)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     editIsPublished
-                      ? "bg-accent text-white shadow-accent-sm"
+                      ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                       : "bg-white/5 text-muted hover:text-white"
                   }`}
                 >
@@ -499,7 +517,7 @@ const PostDetailsPage = () => {
                   onClick={() => setEditIsPublished(false)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     !editIsPublished
-                      ? "bg-accent text-white shadow-accent-sm"
+                      ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                       : "bg-white/5 text-muted hover:text-white"
                   }`}
                 >
@@ -522,7 +540,7 @@ const PostDetailsPage = () => {
             <button
               onClick={handleEditSubmit}
               disabled={editing}
-              className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)]"
             >
               {editing ? (
                 <Loader2 size={18} className="animate-spin" />
@@ -538,79 +556,53 @@ const PostDetailsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
+      {/* Back Button */}
       <button
         onClick={() => navigate("/")}
-        className="flex items-center gap-2 text-muted hover:text-accent mb-6"
+        className="flex items-center gap-2 text-muted hover:text-[#5CA1FC] transition-colors mb-6 group"
       >
-        <ArrowLeft size={20} /> Back to Home
+        <ArrowLeft
+          size={20}
+          className="group-hover:-translate-x-1 transition-transform"
+        />
+        <span>Back to Home</span>
       </button>
 
-      <div className="glass-card p-6 mb-8">
-        <h1 className="gradient-title text-3xl md:text-4xl font-bold mb-4">
-          {post.title}
-        </h1>
-        <p className="text-muted text-lg mb-6 leading-relaxed">{post.body}</p>
-
-        {/* Photos */}
-        {post.photos && post.photos.length > 0 && (
-          <div className="mb-6">
-            <div
-              className={`grid gap-3 ${post.photos.length === 1 ? "grid-cols-1" : "grid-cols-2 md:grid-cols-3"}`}
-            >
-              {post.photos.map((photo, idx) => (
-                <img
-                  key={photo.id || idx}
-                  src={photo.url}
-                  alt={`Post image ${idx + 1}`}
-                  className="rounded-xl w-full h-48 md:h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {post.code && (
-          <div className="mb-6 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
-            <div className="flex items-center justify-between px-3 py-2 bg-panel/50 border-b border-panelEdge">
+      {/* Post Card */}
+      <div className="glass-card p-6 md:p-8">
+        {/* Header - User Info */}
+        <div className="flex items-center justify-between mb-4">
+          <Link
+            to={`/profile/${post.user.username}`}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
+            <img
+              src={post.user.avatar_url}
+              alt={post.user.name}
+              className="w-12 h-12 rounded-full object-cover border-2 border-panelEdge"
+            />
+            <div>
               <div className="flex items-center gap-2">
-                <Code size={14} className="text-accent" />
-                <span className="text-xs text-muted">
-                  {post.code_language || "code"}
+                <h4 className="text-white font-semibold hover:text-[#5CA1FC] transition-colors">
+                  {post.user.name}
+                </h4>
+                <span className="text-xs px-2 py-0.5 bg-[#5CA1FC]/15 text-[#5CA1FC] rounded-full">
+                  {post.user.badge}
                 </span>
               </div>
-            </div>
-            <pre className="p-4 text-sm text-muted overflow-x-auto font-mono">
-              <code>{post.code}</code>
-            </pre>
-          </div>
-        )}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-panelEdge">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <img
-                src={post.user.avatar_url}
-                alt={post.user.name}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="text-white font-semibold">{post.user.name}</h4>
-                  <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
-                    {post.user.badge}
-                  </span>
-                </div>
-                <div className="text-xs text-muted">@{post.user.username}</div>
+              <div className="flex items-center gap-2 text-xs text-muted">
+                <span>@{post.user.username}</span>
+                <span>•</span>
+                <span>{formatRelativeDate(post.created_at)}</span>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-sm text-muted">
-              <Calendar size={14} />
-              <span>{formatDate(post.created_at)}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-sm text-muted">
+          </Link>
+
+          <div className="flex items-center gap-3">
+            {/* Views */}
+            <div className="flex items-center gap-1 text-xs text-muted">
               <Eye size={14} />
-              <span>{post.views_count || 0} views</span>
+              <span>{post.views_count || 0}</span>
             </div>
 
             {/* 3 Dots Menu - للمالك فقط */}
@@ -618,7 +610,7 @@ const PostDetailsPage = () => {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
                 >
                   <MoreHorizontal size={18} className="text-muted" />
                 </button>
@@ -649,41 +641,139 @@ const PostDetailsPage = () => {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-6">
-          <button
-            onClick={handleLike}
-            disabled={liking}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-              isLiked
-                ? "text-error bg-error/10"
-                : "text-muted hover:text-error hover:bg-error/10"
-            }`}
-          >
-            <Heart size={20} className={isLiked ? "fill-error" : ""} />
-            <span>{likesCount}</span>
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-              isSaved
-                ? "text-accent bg-accent/10"
-                : "text-muted hover:text-accent hover:bg-accent/10"
-            }`}
-          >
-            <Bookmark size={20} className={isSaved ? "fill-accent" : ""} />
-          </button>
-          <button
-            onClick={() => setIsCommentsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
-          >
-            <MessageCircle size={20} />
-            <span>{commentsCount}</span>
-          </button>
+
+        {/* Title */}
+        <h1 className="gradient-title text-3xl md:text-4xl font-bold mb-4">
+          {post.title}
+        </h1>
+
+        {/* Body */}
+        <p className="text-muted text-base md:text-lg leading-relaxed mb-6">
+          {post.body}
+        </p>
+
+        {/* Photos - مع حاوية بنسبة أبعاد ثابتة */}
+        {post.photos && post.photos.length > 0 && (
+          <div className="mb-6">
+            <div
+              className={`grid gap-3 ${
+                post.photos.length === 1
+                  ? "grid-cols-1"
+                  : post.photos.length === 2
+                    ? "grid-cols-2"
+                    : "grid-cols-2 md:grid-cols-3"
+              }`}
+            >
+              {post.photos.map((photo, idx) => (
+                <div
+                  key={photo.id || idx}
+                  className="relative rounded-xl overflow-hidden bg-panel/50"
+                  style={{ aspectRatio: "4/3" }}
+                >
+                  <img
+                    src={photo.url}
+                    alt={`Post image ${idx + 1}`}
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity hover:scale-[1.02]"
+                    onClick={() => {
+                      setViewerIndex(idx);
+                      setViewerOpen(true);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Code Block */}
+        {post.code && (
+          <div className="mb-6 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
+            <div className="flex items-center justify-between px-3 py-2 bg-panel/50 border-b border-panelEdge">
+              <div className="flex items-center gap-2">
+                <Code size={14} className="text-[#5CA1FC]" />
+                <span className="text-xs text-muted">
+                  {post.code_language || "code"}
+                </span>
+              </div>
+            </div>
+            <pre className="p-4 text-sm text-muted overflow-x-auto font-mono">
+              <code>{post.code}</code>
+            </pre>
+          </div>
+        )}
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {post.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="text-xs px-3 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full hover:bg-[#5CA1FC]/20 transition-colors cursor-pointer"
+              >
+                #{tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Divider */}
+        <div className="border-t border-panelEdge pt-4">
+          <div className="flex items-center gap-6">
+            {/* Like Button */}
+            <button
+              onClick={handleLike}
+              disabled={liking}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                isLiked
+                  ? "text-error bg-error/10"
+                  : "text-muted hover:text-error hover:bg-error/10"
+              }`}
+            >
+              <Heart size={20} className={isLiked ? "fill-error" : ""} />
+              <span>{likesCount}</span>
+            </button>
+
+            {/* Comment Button */}
+            <button
+              onClick={() => setIsCommentsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10 transition-all duration-200"
+            >
+              <MessageCircle size={20} />
+              <span>{commentsCount}</span>
+            </button>
+
+            {/* Save Button */}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                isSaved
+                  ? "text-[#5CA1FC] bg-[#5CA1FC]/10"
+                  : "text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10"
+              }`}
+            >
+              <Bookmark size={20} className={isSaved ? "fill-[#5CA1FC]" : ""} />
+            </button>
+
+            {/* Date */}
+            <div className="flex items-center gap-1 text-sm text-muted ml-auto">
+              <Calendar size={14} />
+              <span>{formatDate(post.created_at)}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Comments Modal - استخدام المكون المركزي */}
+      {/* Image Viewer */}
+      {viewerOpen && (
+        <ImageViewer
+          images={post.photos}
+          initialIndex={viewerIndex}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
+
+      {/* Comments Modal */}
       <CommentsModal
         isOpen={isCommentsModalOpen}
         onClose={() => setIsCommentsModalOpen(false)}

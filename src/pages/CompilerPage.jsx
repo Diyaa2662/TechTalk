@@ -116,12 +116,17 @@ const CompilerPage = () => {
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate("/")}
-          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted hover:text-white"
+          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted hover:text-white group"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
         </button>
         <div className="flex items-center gap-2">
-          <Code2 size={28} className="text-accent" />
+          <div className="p-1.5 rounded-lg bg-[#5CA1FC]/10">
+            <Code2 size={22} className="text-[#5CA1FC]" />
+          </div>
           <h1 className="gradient-title text-2xl font-bold">Code Compiler</h1>
         </div>
       </div>
@@ -129,7 +134,7 @@ const CompilerPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Panel - Code Editor */}
         <div className="lg:col-span-2">
-          <div className="glass-card p-4">
+          <div className="glass-card p-4 hover:border-[#5CA1FC]/20 transition-all duration-300">
             {/* Language Selector */}
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <div className="flex-1 min-w-[150px]">
@@ -139,7 +144,7 @@ const CompilerPage = () => {
                 <select
                   value={language}
                   onChange={handleLanguageChange}
-                  className="input-field py-2"
+                  className="input-field py-2 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 >
                   {LANGUAGES.map((lang) => (
                     <option key={lang.value} value={lang.value}>
@@ -152,7 +157,7 @@ const CompilerPage = () => {
                 <button
                   onClick={runCode}
                   disabled={loading}
-                  className="px-5 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center gap-2 shadow-accent-sm"
+                  className="px-5 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 flex items-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)] hover:scale-[1.02]"
                 >
                   {loading ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -172,7 +177,7 @@ const CompilerPage = () => {
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="Write your code here..."
                 rows="10"
-                className="input-field resize-none font-mono text-sm"
+                className="input-field resize-none font-mono text-sm focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 style={{ tabSize: 2 }}
                 spellCheck={false}
               />
@@ -188,7 +193,7 @@ const CompilerPage = () => {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Enter input for your program..."
                 rows="2"
-                className="input-field resize-none font-mono text-sm"
+                className="input-field resize-none font-mono text-sm focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 spellCheck={false}
               />
             </div>
@@ -201,7 +206,7 @@ const CompilerPage = () => {
                   <button
                     key={lang.value}
                     onClick={() => loadExample(lang.value)}
-                    className="text-xs px-3 py-1 bg-accent/10 hover:bg-accent/20 text-accent rounded-full transition-colors"
+                    className="text-xs px-3 py-1 bg-[#5CA1FC]/10 hover:bg-[#5CA1FC]/20 text-[#5CA1FC] rounded-full transition-colors hover:scale-[1.05]"
                   >
                     {lang.label}
                   </button>
@@ -210,7 +215,7 @@ const CompilerPage = () => {
             </div>
 
             {error && (
-              <div className="mt-3 p-3 bg-error/20 border border-error/50 rounded-lg">
+              <div className="mt-3 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
                 <p className="text-error text-sm">{error}</p>
               </div>
             )}
@@ -219,15 +224,18 @@ const CompilerPage = () => {
 
         {/* Right Panel - Output */}
         <div className="lg:col-span-1">
-          <div className="glass-card p-4 h-full">
+          <div className="glass-card p-4 h-full hover:border-[#5CA1FC]/20 transition-all duration-300">
             <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-              <Terminal size={18} className="text-accent" />
+              <Terminal size={18} className="text-[#5CA1FC]" />
               Output
             </h3>
 
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 size={32} className="text-accent animate-spin mb-3" />
+                <Loader2
+                  size={32}
+                  className="text-[#5CA1FC] animate-spin mb-3"
+                />
                 <p className="text-muted text-sm">Running...</p>
               </div>
             ) : result ? (
@@ -236,7 +244,7 @@ const CompilerPage = () => {
                 {result.output && (
                   <div>
                     <p className="text-xs text-label mb-1">Output</p>
-                    <pre className="bg-bg/50 p-3 rounded-lg text-sm text-white font-mono whitespace-pre-wrap max-h-[150px] overflow-auto">
+                    <pre className="bg-bg/50 p-3 rounded-lg text-sm text-white font-mono whitespace-pre-wrap max-h-[150px] overflow-auto border border-panelEdge/50">
                       {result.output}
                     </pre>
                   </div>
@@ -287,7 +295,7 @@ const CompilerPage = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Terminal size={32} className="text-muted/30 mb-3" />
+                <Terminal size={32} className="text-[#5CA1FC]/30 mb-3" />
                 <p className="text-muted text-sm">
                   Run your code to see output
                 </p>

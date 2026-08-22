@@ -69,7 +69,6 @@ const ChatPage = () => {
       ]);
     } finally {
       setLoading(false);
-      // إعادة التركيز على حقل الإدخال بعد الانتهاء
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
@@ -104,12 +103,17 @@ const ChatPage = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted hover:text-white"
+            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted hover:text-white group"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft
+              size={20}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
           </button>
           <div className="flex items-center gap-2">
-            <Bot size={28} className="text-accent" />
+            <div className="p-1.5 rounded-lg bg-[#5CA1FC]/10">
+              <Bot size={22} className="text-[#5CA1FC]" />
+            </div>
             <h1 className="gradient-title text-2xl font-bold">AI Chat</h1>
           </div>
         </div>
@@ -123,10 +127,10 @@ const ChatPage = () => {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto bg-panel/30 rounded-xl border border-panelEdge p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto bg-panel/30 rounded-xl border border-panelEdge p-4 space-y-4 hover:border-[#5CA1FC]/20 transition-all duration-300">
         {messages.length === 0 ? (
           <div className="text-center py-12">
-            <Bot size={64} className="text-accent/30 mx-auto mb-4" />
+            <Bot size={64} className="text-[#5CA1FC]/30 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">Hello! 👋</h3>
             <p className="text-muted text-sm max-w-md mx-auto">
               Ask me anything about coding, debugging, or how to use the
@@ -141,7 +145,7 @@ const ChatPage = () => {
                   <button
                     key={idx}
                     onClick={() => handleSuggestedQuestion(q.text)}
-                    className="text-xs px-3 py-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg transition-colors text-left max-w-[200px]"
+                    className="text-xs px-3 py-2 bg-[#5CA1FC]/10 hover:bg-[#5CA1FC]/20 text-[#5CA1FC] rounded-lg transition-all duration-300 hover:scale-[1.05] text-left max-w-[200px]"
                   >
                     <span className="mr-1">{q.icon}</span>
                     {q.text.length > 30 ? `${q.text.slice(0, 30)}...` : q.text}
@@ -162,21 +166,21 @@ const ChatPage = () => {
 
         {loading && (
           <div className="flex gap-3 justify-start">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-              <Bot size={16} className="text-accent" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5CA1FC]/20 flex items-center justify-center">
+              <Bot size={16} className="text-[#5CA1FC]" />
             </div>
             <div className="bg-panel border border-panelEdge p-3 rounded-xl rounded-bl-none">
               <div className="flex gap-1">
                 <span
-                  className="w-2 h-2 bg-accent/60 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#5CA1FC]/60 rounded-full animate-bounce"
                   style={{ animationDelay: "0ms" }}
                 ></span>
                 <span
-                  className="w-2 h-2 bg-accent/60 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#5CA1FC]/60 rounded-full animate-bounce"
                   style={{ animationDelay: "150ms" }}
                 ></span>
                 <span
-                  className="w-2 h-2 bg-accent/60 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#5CA1FC]/60 rounded-full animate-bounce"
                   style={{ animationDelay: "300ms" }}
                 ></span>
               </div>
@@ -197,7 +201,7 @@ const ChatPage = () => {
             onKeyDown={handleKeyDown}
             placeholder="Ask anything about coding or TechTalk..."
             rows="2"
-            className="flex-1 input-field resize-none py-2 px-3 text-sm min-h-[50px] max-h-[120px]"
+            className="flex-1 input-field resize-none py-2 px-3 text-sm min-h-[50px] max-h-[120px] focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
             disabled={loading}
           />
           <button
@@ -206,7 +210,7 @@ const ChatPage = () => {
               handleSend();
             }}
             disabled={!input.trim() || loading}
-            className="px-5 py-2 bg-accent hover:bg-accentHover text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center self-end"
+            className="px-5 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center self-end shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)] hover:scale-[1.02]"
             type="button"
           >
             {loading ? (

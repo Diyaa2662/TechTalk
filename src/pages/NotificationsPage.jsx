@@ -108,10 +108,9 @@ const NotificationsPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMore]);
 
-  // تحديث إشعار واحد إلى مقروء (باستخدام الـ endpoint الجديد)
+  // تحديث إشعار واحد إلى مقروء
   const markAsRead = async (notificationId) => {
     try {
-      // ✅ التعديل هنا: نرسل الـ ID في الـ body بدل المسار
       await api.patch("/notifications/read", {
         id: notificationId,
       });
@@ -148,11 +147,36 @@ const NotificationsPage = () => {
     }
   };
 
-  // الحصول على رابط حسب نوع الإشعار
+  // ✅ الحصول على رابط حسب نوع الإشعار (محسّن)
   const getNotificationLink = (notification) => {
     const { entity, context } = notification;
 
+    // إذا كان الإشعار عن تعليق
     if (entity?.type === "comment") {
+      if (context?.post_id) {
+        return `/posts/${context.post_id}`;
+      } else if (context?.blog_id) {
+        return `/blogs/${context.blog_id}`;
+      }
+    }
+
+    // إذا كان الإشعار عن بوست
+    if (entity?.type === "post") {
+      return `/posts/${entity.id}`;
+    }
+
+    // إذا كان الإشعار عن بلوق
+    if (entity?.type === "blog") {
+      return `/blogs/${entity.id}`;
+    }
+
+    // إذا كان الإشعار عن متابعة (يودي لبروفايل المستخدم)
+    if (notification.type === "follow") {
+      return `/profile/${context?.follower_username || entity?.username}`;
+    }
+
+    // إذا كان الإشعار عن إعجاب أو عدم إعجاب
+    if (notification.type === "like" || notification.type === "dislike") {
       if (context?.post_id) {
         return `/posts/${context.post_id}`;
       } else if (context?.blog_id) {
@@ -196,15 +220,15 @@ const NotificationsPage = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case "comment_verified":
-        return <Code size={18} className="text-accent" />;
+        return <Code size={18} className="text-[#5CA1FC]" />;
       case "like":
         return <Heart size={18} className="text-error" />;
       case "dislike":
-        return <ThumbsDown size={18} className="text-accent" />;
+        return <ThumbsDown size={18} className="text-[#5CA1FC]" />;
       case "comment":
-        return <MessageCircle size={18} className="text-accent" />;
+        return <MessageCircle size={18} className="text-[#5CA1FC]" />;
       case "follow":
-        return <User size={18} className="text-accent" />;
+        return <User size={18} className="text-[#5CA1FC]" />;
       default:
         return <Bell size={18} className="text-muted" />;
     }
@@ -225,7 +249,7 @@ const NotificationsPage = () => {
           <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Try Again
           </button>
@@ -240,7 +264,7 @@ const NotificationsPage = () => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Bell size={28} className="text-accent" />
+            <Bell size={28} className="text-[#5CA1FC]" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {unreadCount > 9 ? "9+" : unreadCount}
@@ -254,7 +278,7 @@ const NotificationsPage = () => {
           <button
             onClick={markAllAsRead}
             disabled={markingAll}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-accent hover:text-accent/80 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors disabled:opacity-50"
           >
             <CheckCheck size={16} />
             Mark all as read
@@ -284,13 +308,13 @@ const NotificationsPage = () => {
                 onClick={() => hasLink && handleNotificationClick(notification)}
                 className={`group relative glass-card p-4 transition-all duration-200 ${
                   isRead
-                    ? "hover:border-accent/30"
-                    : "border-accent/50 bg-accent/5 hover:border-accent"
+                    ? "hover:border-[#5CA1FC]/30"
+                    : "border-[#5CA1FC]/50 bg-[#5CA1FC]/5 hover:border-[#5CA1FC]"
                 } ${hasLink ? "cursor-pointer" : "cursor-default"}`}
               >
                 <div className="flex gap-4">
                   {/* Icon */}
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center">
                     {getNotificationIcon(notification.type)}
                   </div>
 
@@ -324,7 +348,7 @@ const NotificationsPage = () => {
                               e.stopPropagation();
                               markAsRead(notification.id);
                             }}
-                            className="text-xs text-accent hover:text-accent/80 transition-colors"
+                            className="text-xs text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors"
                           >
                             Mark as read
                           </button>
@@ -336,7 +360,7 @@ const NotificationsPage = () => {
 
                 {/* Unread indicator dot */}
                 {!isRead && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-r-full"></div>
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#5CA1FC] rounded-r-full"></div>
                 )}
               </div>
             );

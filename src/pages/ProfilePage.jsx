@@ -20,9 +20,25 @@ import {
   Code,
   X,
   Mail,
+  Grid3X3,
+  Bookmark,
+  User,
+  Globe,
+  Briefcase,
 } from "lucide-react";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+
+const BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+
+// ✅ دالة للحصول على الرابط الصحيح
+const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `${BASE_URL}${url}`;
+};
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -230,11 +246,11 @@ const ProfilePage = () => {
   const getBadgeColor = (badge) => {
     switch (badge) {
       case "junior":
-        return "bg-accent/15 text-accent";
+        return "bg-[#5CA1FC]/15 text-[#5CA1FC]";
       case "senior":
         return "bg-purple-500/20 text-purple-400";
       case "expert":
-        return "bg-accent/20 text-accent";
+        return "bg-[#5CA1FC]/20 text-[#5CA1FC]";
       default:
         return "bg-gray-500/20 text-gray-400";
     }
@@ -256,7 +272,7 @@ const ProfilePage = () => {
   const getSocialLabel = (url) => {
     if (!url) return "Link";
     if (url.includes("github")) return "GitHub";
-    if (url.includes("twitter") || url.includes("x.com")) return "Twitter";
+    if (url.includes("twitter") || url.includes("x.com")) return "Twitter/X";
     if (url.includes("linkedin")) return "LinkedIn";
     if (url.includes("instagram")) return "Instagram";
     if (url.includes("facebook")) return "Facebook";
@@ -312,7 +328,7 @@ const ProfilePage = () => {
           <p className="text-error mb-3">{error || "Profile not found"}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Try Again
           </button>
@@ -321,7 +337,6 @@ const ProfilePage = () => {
     );
   }
 
-  // حساب نسبة التقدم من 0 إلى 10000
   const rankingPercentage = Math.min(
     (profile.ranking_points / 10000) * 100,
     100,
@@ -333,12 +348,12 @@ const ProfilePage = () => {
       <div className="relative h-48 md:h-56 rounded-xl overflow-hidden mb-16">
         {profile.cover_image_url ? (
           <img
-            src={profile.cover_image_url}
+            src={getImageUrl(profile.cover_image_url)}
             alt="Cover"
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-accent/40 via-purple-500/20 to-bg">
+          <div className="w-full h-full bg-gradient-to-r from-[#5CA1FC]/40 via-purple-500/20 to-bg">
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-white/10 flex items-center justify-center">
@@ -367,92 +382,35 @@ const ProfilePage = () => {
       <div className="relative px-6">
         <div className="absolute -top-32 left-6 md:left-8">
           <img
-            src={profile.avatar_url}
+            src={getImageUrl(profile.avatar_url)}
             alt={profile.name}
             className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-bg object-cover shadow-xl"
           />
         </div>
       </div>
 
-      {/* Profile Info */}
-      <div className="ml-6 md:ml-8 mt-20">
+      {/* ======================== قسم المعلومات ======================== */}
+      <div className="ml-6 md:ml-8 mt-16">
+        {/* الصف الأول: الاسم (بتدرج) + البادج وزر التعديل */}
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl md:text-3xl font-bold text-white">
-                {profile.name}
-              </h1>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full ${getBadgeColor(profile.badge)} flex items-center gap-1`}
-              >
-                <span>{getBadgeIcon(profile.badge)}</span>
-                {profile.badge}
-              </span>
-            </div>
-            <p className="text-muted text-sm mt-1">@{profile.username}</p>
-
-            {/* البريد الإلكتروني */}
-            {profile.email && (
-              <div className="flex items-center gap-1 text-sm text-muted mt-1">
-                <Mail size={14} />
-                <span>{profile.email}</span>
-              </div>
-            )}
-
-            {profile.bio && (
-              <p className="text-muted mt-3 max-w-md">{profile.bio}</p>
-            )}
-            <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted">
-              {profile.location && (
-                <div className="flex items-center gap-1">
-                  <MapPin size={14} />
-                  <span>{profile.location}</span>
-                </div>
-              )}
-              {profile.website && (
-                <div className="flex items-center gap-1">
-                  <LinkIcon size={14} />
-                  <a
-                    href={profile.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-accent transition-colors"
-                  >
-                    {profile.website}
-                  </a>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Calendar size={14} />
-                <span>Joined {formatDate(profile.joined_at)}</span>
-              </div>
-            </div>
-
-            {/* Social Links - عرض كل الروابط */}
-            {profile.social_links && profile.social_links.length > 0 && (
-              <div className="flex flex-wrap gap-3 mt-3">
-                {profile.social_links.map((link, idx) => (
-                  <a
-                    key={idx}
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-muted hover:text-accent"
-                  >
-                    <LinkIcon size={16} />
-                    <span className="text-xs">{getSocialLabel(link)}</span>
-                  </a>
-                ))}
-              </div>
-            )}
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="gradient-title text-2xl md:text-3xl font-bold">
+              {profile.name}
+            </h1>
+            <span
+              className={`text-xs px-3 py-1 rounded-full ${getBadgeColor(profile.badge)} flex items-center gap-1.5 font-medium`}
+            >
+              <span>{getBadgeIcon(profile.badge)}</span>
+              {profile.badge}
+            </span>
           </div>
-
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("/edit-profile")}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white font-medium transition-all duration-300 flex items-center gap-2 hover:text-[#5CA1FC] hover:scale-[1.02]"
             >
-              <Edit3 size={16} /> Edit Profile
+              <Edit3 size={16} />
+              <span className="hidden sm:inline">Edit Profile</span>
             </button>
             <div className="relative" ref={menuRef}>
               <button
@@ -468,7 +426,7 @@ const ProfilePage = () => {
                       setShowOptionsMenu(false);
                       navigate("/activity");
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3 transition-colors"
                   >
                     <Activity size={16} /> Activity
                   </button>
@@ -478,7 +436,7 @@ const ProfilePage = () => {
                       setShowBlockedList(true);
                       fetchBlockedUsers();
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3 transition-colors"
                   >
                     <Shield size={16} /> Blocked Users
                   </button>
@@ -487,7 +445,7 @@ const ProfilePage = () => {
                       setShowOptionsMenu(false);
                       navigate("/drafts");
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3 transition-colors"
                   >
                     <FileText size={16} /> Drafts
                   </button>
@@ -496,7 +454,7 @@ const ProfilePage = () => {
                       setShowOptionsMenu(false);
                       navigate("/settings");
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3"
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-3 transition-colors"
                   >
                     <Settings size={16} /> Settings
                   </button>
@@ -506,98 +464,183 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        <div className="flex gap-10 mt-6">
-          <div className="text-center">
-            <p className="text-xl font-bold text-white">
-              {profile.posts_count || 0}
-            </p>
-            <p className="text-xs text-muted">posts</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-white">
-              {profile.blogs_count || 0}
-            </p>
-            <p className="text-xs text-muted">blogs</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-white">
-              {profile.followers_count || 0}
-            </p>
-            <p className="text-xs text-muted">followers</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-white">
-              {profile.following_count || 0}
-            </p>
-            <p className="text-xs text-muted">following</p>
-          </div>
+        {/* الصف الثاني: اليوزرنيم + الإيميل */}
+        <div className="flex flex-wrap items-center gap-3 mt-1">
+          <p className="text-muted text-sm">@{profile.username}</p>
+          {profile.email && (
+            <>
+              <span className="text-muted text-xs">•</span>
+              <div className="flex items-center gap-1 text-sm text-muted">
+                <Mail size={14} />
+                <span>{profile.email}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Ranking Points Progress Bar */}
-        <div className="mt-4 max-w-md">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-muted">Ranking Points</span>
-            <span className="text-sm font-semibold text-accent">
-              {profile.ranking_points || 0} / 10,000
-            </span>
-          </div>
-          <div className="w-full h-2 bg-panel rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-accent to-purple-500 rounded-full transition-all duration-500"
-              style={{ width: `${rankingPercentage}%` }}
-            />
-          </div>
-          <p className="text-xs text-muted mt-1">
-            {rankingPercentage === 100
-              ? "🏆 Maximum level reached!"
-              : `${Math.round(rankingPercentage)}% to next level`}
-          </p>
-        </div>
-
-        {profile.tags && profile.tags.length > 0 && (
-          <div className="mt-4">
-            <div className="flex flex-wrap gap-2">
-              {profile.tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
-                >
-                  #{tag.name}
-                </span>
-              ))}
-            </div>
+        {/* الصف الثالث: البايو (بحاوية خفيفة) */}
+        {profile.bio && (
+          <div className="mt-3 p-4 bg-white/5 border border-panelEdge/30 rounded-xl max-w-2xl">
+            <p className="text-muted text-sm leading-relaxed">{profile.bio}</p>
           </div>
         )}
+
+        {/* الصف الرابع: الموقع + الويبسايت + تاريخ الانضمام */}
+        <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted">
+          {profile.location && (
+            <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full">
+              <MapPin size={14} className="text-[#5CA1FC]" />
+              <span>{profile.location}</span>
+            </div>
+          )}
+          {profile.website && (
+            <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full">
+              <Globe size={14} className="text-[#5CA1FC]" />
+              <a
+                href={profile.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#5CA1FC] transition-colors"
+              >
+                {profile.website.replace(/^https?:\/\//, "").slice(0, 30)}
+              </a>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full">
+            <Calendar size={14} className="text-[#5CA1FC]" />
+            <span>Joined {formatDate(profile.joined_at)}</span>
+          </div>
+        </div>
+
+        {/* الصف الخامس: الروابط الاجتماعية */}
+        {profile.social_links && profile.social_links.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <span className="text-xs text-muted mr-1">Connect:</span>
+            {profile.social_links.map((link, idx) => (
+              <a
+                key={idx}
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-[#5CA1FC]/10 rounded-full transition-all duration-300 text-muted hover:text-[#5CA1FC] text-xs hover:scale-[1.05]"
+              >
+                <LinkIcon size={12} />
+                <span>{getSocialLabel(link)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* الصف السادس: التاجات */}
+        {profile.tags && profile.tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <span className="text-xs text-muted mr-1">Skills:</span>
+            {profile.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="text-xs px-3 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full hover:bg-[#5CA1FC]/20 transition-colors cursor-default"
+              >
+                #{tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* الصف السابع: الإحصائيات + Ranking Points */}
+        <div className="flex flex-wrap items-center gap-8 mt-4 pt-4 border-t border-panelEdge/50">
+          <div className="flex items-center gap-6">
+            <div className="text-center">
+              <p className="text-xl font-bold text-white">
+                {profile.posts_count || 0}
+              </p>
+              <p className="text-xs text-muted">Posts</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-white">
+                {profile.blogs_count || 0}
+              </p>
+              <p className="text-xs text-muted">Blogs</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-white">
+                {profile.followers_count || 0}
+              </p>
+              <p className="text-xs text-muted">Followers</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-white">
+                {profile.following_count || 0}
+              </p>
+              <p className="text-xs text-muted">Following</p>
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-[200px]">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-muted">Ranking Points</span>
+              <span className="text-xs font-semibold text-[#5CA1FC]">
+                {profile.ranking_points || 0} / 10,000
+              </span>
+            </div>
+            <div className="w-full h-1.5 bg-panel rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#5CA1FC] to-purple-500 rounded-full transition-all duration-500"
+                style={{ width: `${rankingPercentage}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-muted mt-0.5">
+              {rankingPercentage === 100
+                ? "🏆 Maximum level reached!"
+                : `${Math.round(rankingPercentage)}% to next level`}
+            </p>
+          </div>
+        </div>
       </div>
+      {/* ======================== نهاية قسم المعلومات ======================== */}
 
       {/* Tabs */}
-      <div className="mt-10 border-t border-panelEdge pt-6">
+      <div className="mt-8 border-t border-panelEdge pt-6">
         <div className="flex gap-8 justify-center">
           <button
             onClick={() => setActiveTab("posts")}
-            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "posts" ? "text-accent" : "text-muted hover:text-white"}`}
+            className={`pb-3 text-base font-medium transition-colors relative ${
+              activeTab === "posts"
+                ? "text-[#5CA1FC]"
+                : "text-muted hover:text-white"
+            }`}
           >
-            POSTS{" "}
+            <Grid3X3 size={18} className="inline mr-2" />
+            POSTS
             {activeTab === "posts" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5CA1FC]"></div>
             )}
           </button>
           <button
             onClick={() => setActiveTab("blogs")}
-            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "blogs" ? "text-accent" : "text-muted hover:text-white"}`}
+            className={`pb-3 text-base font-medium transition-colors relative ${
+              activeTab === "blogs"
+                ? "text-[#5CA1FC]"
+                : "text-muted hover:text-white"
+            }`}
           >
-            BLOGS{" "}
+            <BookOpen size={18} className="inline mr-2" />
+            BLOGS
             {activeTab === "blogs" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5CA1FC]"></div>
             )}
           </button>
           <button
             onClick={() => setActiveTab("saved")}
-            className={`pb-3 text-base font-medium transition-colors relative ${activeTab === "saved" ? "text-accent" : "text-muted hover:text-white"}`}
+            className={`pb-3 text-base font-medium transition-colors relative ${
+              activeTab === "saved"
+                ? "text-[#5CA1FC]"
+                : "text-muted hover:text-white"
+            }`}
           >
-            SAVED{" "}
+            <Bookmark size={18} className="inline mr-2" />
+            SAVED
             {activeTab === "saved" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5CA1FC]"></div>
             )}
           </button>
         </div>
@@ -613,7 +656,7 @@ const ProfilePage = () => {
                 <LoadingSpinner size="md" text="Loading posts..." />
               </div>
             ) : posts.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 glass-card">
                 <FileText size={48} className="text-muted mx-auto mb-3" />
                 <p className="text-muted">No posts yet</p>
                 <p className="text-label text-sm mt-1">
@@ -621,60 +664,58 @@ const ProfilePage = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {posts.map((post) => (
                   <Link
                     key={post.id}
                     to={`/posts/${post.id}`}
-                    className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
+                    className="group block glass-card overflow-hidden hover:border-[#5CA1FC]/40 transition-all duration-300"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-xs text-muted">
-                        <span>{formatRelativeDate(post.created_at)}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted">
-                        <div className="flex items-center gap-1">
-                          <Heart size={12} />
-                          <span>{post.likes_count}</span>
+                    {post.photos && post.photos.length > 0 ? (
+                      <div className="relative aspect-square">
+                        <img
+                          src={getImageUrl(post.photos[0].url)}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                          <p className="text-white text-sm font-medium line-clamp-2">
+                            {post.title}
+                          </p>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 rounded-full px-2 py-1 text-xs text-white">
+                          <Heart size={12} className="fill-white" />
+                          <span>{post.likes_count || 0}</span>
                           <MessageCircle size={12} />
-                          <span>{post.comments_count}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye size={12} />
-                          <span>{post.views_count}</span>
+                          <span>{post.comments_count || 0}</span>
                         </div>
                       </div>
-                    </div>
-                    <h3 className="text-white font-semibold mb-1">
-                      {post.title}
-                    </h3>
-                    <p className="text-muted text-sm line-clamp-2">
-                      {post.body}
-                    </p>
-                    {post.code && (
-                      <div className="mt-2 flex items-center gap-1 text-xs text-muted">
-                        <Code size={12} />
-                        <span>{post.code_language}</span>
-                      </div>
-                    )}
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {post.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag.id}
-                            className="text-xs px-1.5 py-0.5 bg-accent/10 text-accent rounded-full"
-                          >
-                            #{tag.name}
+                    ) : (
+                      <div className="p-4">
+                        <h3 className="text-white font-semibold mb-1 line-clamp-2">
+                          {post.title}
+                        </h3>
+                        <p className="text-muted text-sm line-clamp-3">
+                          {post.body}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-muted">
+                          <span className="flex items-center gap-1">
+                            <Heart size={12} /> {post.likes_count || 0}
                           </span>
-                        ))}
+                          <span className="flex items-center gap-1">
+                            <MessageCircle size={12} />{" "}
+                            {post.comments_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Eye size={12} /> {post.views_count || 0}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </Link>
                 ))}
                 {postsLoadingMore && (
-                  <div className="flex justify-center py-4">
+                  <div className="col-span-full flex justify-center py-4">
                     <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}
@@ -691,7 +732,7 @@ const ProfilePage = () => {
                 <LoadingSpinner size="md" text="Loading blogs..." />
               </div>
             ) : blogs.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 glass-card">
                 <BookOpen size={48} className="text-muted mx-auto mb-3" />
                 <p className="text-muted">No blogs yet</p>
                 <p className="text-label text-sm mt-1">
@@ -699,47 +740,58 @@ const ProfilePage = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {blogs.map((blog) => (
                   <Link
                     key={blog.id}
                     to={`/blogs/${blog.id}`}
-                    className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
+                    className="group block glass-card overflow-hidden hover:border-[#5CA1FC]/40 transition-all duration-300"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-xs text-muted">
-                        <span>{formatRelativeDate(blog.created_at)}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted">
-                        <div className="flex items-center gap-1">
-                          <Heart size={12} />
-                          <span>{blog.likes_count}</span>
+                    {blog.cover_image_url ? (
+                      <div className="relative aspect-square">
+                        <img
+                          src={getImageUrl(blog.cover_image_url)}
+                          alt={blog.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                          <p className="text-white text-sm font-medium line-clamp-2">
+                            {blog.title}
+                          </p>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 rounded-full px-2 py-1 text-xs text-white">
+                          <Heart size={12} className="fill-white" />
+                          <span>{blog.likes_count || 0}</span>
                           <MessageCircle size={12} />
-                          <span>{blog.comments_count}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye size={12} />
-                          <span>{blog.views_count}</span>
+                          <span>{blog.comments_count || 0}</span>
                         </div>
                       </div>
-                    </div>
-                    <h3 className="text-white font-semibold mb-1">
-                      {blog.title}
-                    </h3>
-                    <p className="text-muted text-sm line-clamp-2">
-                      {blog.subtitle}
-                    </p>
-                    {blog.reading_time && (
-                      <div className="mt-2 text-xs text-muted">
-                        📖 {blog.reading_time}
+                    ) : (
+                      <div className="p-4">
+                        <h3 className="text-white font-semibold mb-1 line-clamp-2">
+                          {blog.title}
+                        </h3>
+                        <p className="text-muted text-sm line-clamp-3">
+                          {blog.subtitle}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-muted">
+                          <span className="flex items-center gap-1">
+                            <Heart size={12} /> {blog.likes_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MessageCircle size={12} />{" "}
+                            {blog.comments_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Eye size={12} /> {blog.views_count || 0}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </Link>
                 ))}
                 {blogsLoadingMore && (
-                  <div className="flex justify-center py-4">
+                  <div className="col-span-full flex justify-center py-4">
                     <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}
@@ -756,7 +808,7 @@ const ProfilePage = () => {
                 <LoadingSpinner size="md" text="Loading saved items..." />
               </div>
             ) : savedItems.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 glass-card">
                 <Heart size={48} className="text-muted mx-auto mb-3" />
                 <p className="text-muted">No saved items yet</p>
                 <p className="text-label text-sm mt-1">
@@ -764,49 +816,62 @@ const ProfilePage = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {savedItems.map((item, idx) => {
                   const content = item.data;
                   const isBlog = item.kind === "blog";
+                  const coverImage = isBlog
+                    ? content.cover_image_url
+                    : content.photos?.[0]?.url;
+
                   return (
                     <Link
                       key={idx}
                       to={
                         isBlog ? `/blogs/${content.id}` : `/posts/${content.id}`
                       }
-                      className="block bg-panel/90 backdrop-blur-sm border border-panelEdge rounded-xl p-4 hover:border-accent/50 transition-all duration-300"
+                      className="group block glass-card overflow-hidden hover:border-[#5CA1FC]/40 transition-all duration-300"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
+                      {coverImage ? (
+                        <div className="relative aspect-square">
+                          <img
+                            src={getImageUrl(coverImage)}
+                            alt={content.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                            <p className="text-white text-sm font-medium line-clamp-2">
+                              {content.title}
+                            </p>
+                          </div>
+                          <div className="absolute top-2 left-2 bg-[#5CA1FC]/80 text-white text-[10px] px-2 py-0.5 rounded-full">
+                            {isBlog ? "BLOG" : "POST"}
+                          </div>
+                          <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 rounded-full px-2 py-1 text-xs text-white">
+                            <Heart size={12} className="fill-white" />
+                            <span>{content.likes_count || 0}</span>
+                            <MessageCircle size={12} />
+                            <span>{content.comments_count || 0}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-4">
+                          <span className="text-[10px] px-2 py-0.5 bg-[#5CA1FC]/15 text-[#5CA1FC] rounded-full inline-block mb-2">
                             {isBlog ? "BLOG" : "POST"}
                           </span>
-                          <span className="text-xs text-muted">
-                            Saved {formatRelativeDate(item.saved_at)}
-                          </span>
+                          <h3 className="text-white font-semibold mb-1 line-clamp-2">
+                            {content.title}
+                          </h3>
+                          <p className="text-muted text-sm line-clamp-3">
+                            {isBlog ? content.subtitle : content.body}
+                          </p>
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-muted">
-                          <div className="flex items-center gap-1">
-                            <Heart size={12} />
-                            <span>{content.likes_count}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MessageCircle size={12} />
-                            <span>{content.comments_count}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <h3 className="text-white font-semibold mb-1">
-                        {content.title}
-                      </h3>
-                      <p className="text-muted text-sm line-clamp-2">
-                        {isBlog ? content.subtitle : content.body}
-                      </p>
+                      )}
                     </Link>
                   );
                 })}
                 {savedLoadingMore && (
-                  <div className="flex justify-center py-4">
+                  <div className="col-span-full flex justify-center py-4">
                     <LoadingSpinner size="sm" text={null} />
                   </div>
                 )}

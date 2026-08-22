@@ -248,7 +248,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {editError && (
-              <div className="p-3 bg-error/20 border border-error/50 rounded-lg">
+              <div className="p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
                 <p className="text-error text-sm text-center">{editError}</p>
               </div>
             )}
@@ -261,7 +261,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="input-field"
+                className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 placeholder="Title"
               />
             </div>
@@ -273,7 +273,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
               <textarea
                 value={editBody}
                 onChange={(e) => setEditBody(e.target.value)}
-                className="input-field resize-none"
+                className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 rows={type === "post" ? 5 : 3}
                 placeholder={
                   type === "post"
@@ -292,7 +292,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                   <textarea
                     value={editCode}
                     onChange={(e) => setEditCode(e.target.value)}
-                    className="input-field resize-none font-mono text-sm"
+                    className="input-field resize-none font-mono text-sm focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                     rows="4"
                     placeholder="Paste your code here..."
                   />
@@ -300,7 +300,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                     type="text"
                     value={editCodeLanguage}
                     onChange={(e) => setEditCodeLanguage(e.target.value)}
-                    className="input-field mt-2"
+                    className="input-field mt-2 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                     placeholder="Code language (e.g., javascript, python)"
                   />
                 </div>
@@ -315,7 +315,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                         {editTags.map((tag) => (
                           <span
                             key={tag.id}
-                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full"
                           >
                             #{tag.name}
                             <button
@@ -338,7 +338,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                       }}
                       onFocus={() => setShowEditTagDropdown(true)}
                       placeholder="Search tags..."
-                      className="input-field"
+                      className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                     />
                     {showEditTagDropdown &&
                       editTagSearch &&
@@ -384,12 +384,12 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                         </button>
                       </div>
                     ))}
-                    <label className="w-20 h-20 rounded-lg border-2 border-dashed border-panelEdge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
+                    <label className="w-20 h-20 rounded-lg border-2 border-dashed border-panelEdge flex items-center justify-center cursor-pointer hover:border-[#5CA1FC]/50 transition-colors">
                       <div className="flex flex-col items-center">
                         {uploadingPhoto ? (
                           <Loader2
                             size={24}
-                            className="text-accent animate-spin"
+                            className="text-[#5CA1FC] animate-spin"
                           />
                         ) : (
                           <>
@@ -421,7 +421,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                   onClick={() => setEditIsPublished(true)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     editIsPublished
-                      ? "bg-accent text-white shadow-accent-sm"
+                      ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                       : "bg-white/5 text-muted hover:text-white"
                   }`}
                 >
@@ -432,7 +432,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
                   onClick={() => setEditIsPublished(false)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     !editIsPublished
-                      ? "bg-accent text-white shadow-accent-sm"
+                      ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                       : "bg-white/5 text-muted hover:text-white"
                   }`}
                 >
@@ -455,7 +455,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
             <button
               onClick={handleEditSubmit}
               disabled={editing}
-              className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
             >
               {editing ? (
                 <Loader2 size={18} className="animate-spin" />
@@ -470,7 +470,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
   }
 
   return (
-    <div className="glass-card-hover p-4">
+    <div className="glass-card hover:border-[#5CA1FC]/40 hover:shadow-[0_4px_20px_rgba(92,161,252,0.15)] transition-all duration-300 p-4">
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
@@ -478,7 +478,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
             <Lock size={10} />
             Draft
           </span>
-          <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
+          <span className="text-xs px-2 py-0.5 bg-[#5CA1FC]/15 text-[#5CA1FC] rounded-full">
             {type === "post" ? "POST" : "BLOG"}
           </span>
           {item.is_modified && (
@@ -543,7 +543,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
 
       {/* Title - رابط لصفحة التفاصيل */}
       <Link to={type === "post" ? `/posts/${item.id}` : `/blogs/${item.id}`}>
-        <h3 className="text-lg font-bold text-white mb-1 hover:text-accent transition-colors cursor-pointer">
+        <h3 className="text-lg font-bold text-white mb-1 hover:text-[#5CA1FC] transition-colors cursor-pointer">
           {item.title}
         </h3>
       </Link>
@@ -586,7 +586,7 @@ const DraftCard = ({ item, type, onUpdate, onDelete }) => {
       <div className="flex items-center gap-4 pt-2 border-t border-panelEdge">
         <button
           onClick={() => setIsEditing(true)}
-          className="flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors"
+          className="flex items-center gap-1 text-xs text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors"
         >
           <Edit size={12} />
           Edit
@@ -630,13 +630,10 @@ const DraftsPage = () => {
       const posts = postsRes.data.data || [];
       const blogs = blogsRes.data.data || [];
 
-      // دمج المسودات مع تحديد النوع
       const postsWithType = posts.map((p) => ({ ...p, __type: "post" }));
       const blogsWithType = blogs.map((b) => ({ ...b, __type: "blog" }));
 
       let allDrafts = [...postsWithType, ...blogsWithType];
-
-      // ترتيب حسب التاريخ (الأحدث أولاً)
       allDrafts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       if (append) {
@@ -725,7 +722,7 @@ const DraftsPage = () => {
           <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Try Again
           </button>
@@ -738,12 +735,12 @@ const DraftsPage = () => {
     <div className="max-w-4xl mx-auto py-6 px-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="gradient-title text-2xl font-bold flex items-center gap-2">
-          <FileText size={28} className="text-accent" />
+          <FileText size={28} className="text-[#5CA1FC]" />
           Drafts
         </h1>
         <button
           onClick={() => navigate("/profile")}
-          className="text-sm text-muted hover:text-accent transition-colors"
+          className="text-sm text-muted hover:text-[#5CA1FC] transition-colors"
         >
           ← Back to Profile
         </button>
@@ -754,34 +751,40 @@ const DraftsPage = () => {
         <button
           onClick={() => setActiveTab("all")}
           className={`pb-3 text-sm font-medium transition-colors relative ${
-            activeTab === "all" ? "text-accent" : "text-muted hover:text-white"
+            activeTab === "all"
+              ? "text-[#5CA1FC]"
+              : "text-muted hover:text-white"
           }`}
         >
           All
           {activeTab === "all" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5CA1FC]"></div>
           )}
         </button>
         <button
           onClick={() => setActiveTab("post")}
           className={`pb-3 text-sm font-medium transition-colors relative ${
-            activeTab === "post" ? "text-accent" : "text-muted hover:text-white"
+            activeTab === "post"
+              ? "text-[#5CA1FC]"
+              : "text-muted hover:text-white"
           }`}
         >
           Posts
           {activeTab === "post" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5CA1FC]"></div>
           )}
         </button>
         <button
           onClick={() => setActiveTab("blog")}
           className={`pb-3 text-sm font-medium transition-colors relative ${
-            activeTab === "blog" ? "text-accent" : "text-muted hover:text-white"
+            activeTab === "blog"
+              ? "text-[#5CA1FC]"
+              : "text-muted hover:text-white"
           }`}
         >
           Blogs
           {activeTab === "blog" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5CA1FC]"></div>
           )}
         </button>
       </div>
@@ -789,7 +792,7 @@ const DraftsPage = () => {
       {/* Drafts List */}
       {filteredDrafts.length === 0 ? (
         <div className="text-center py-12 glass-card">
-          <FileText size={48} className="text-muted mx-auto mb-3" />
+          <FileText size={48} className="text-[#5CA1FC]/30 mx-auto mb-3" />
           <p className="text-muted text-lg">No drafts yet</p>
           <p className="text-label text-sm mt-1">
             Drafts you save will appear here

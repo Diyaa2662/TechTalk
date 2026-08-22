@@ -70,7 +70,7 @@ const CommentsModal = ({
 
   const modalRef = useRef(null);
   const codeModalRef = useRef(null);
-  const reportModalRef = useRef(null); // 🆕 Report Modal ref
+  const reportModalRef = useRef(null);
   const textareaRef = useRef(null);
   const editTextareaRef = useRef(null);
   const mentionPopupRef = useRef(null);
@@ -677,26 +677,21 @@ const CommentsModal = ({
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      // 🛑 إذا كان الهدف داخل القائمة المنبثقة، لا تغلق المودال
       if (e.target.closest(".dropdown-menu-portal")) {
         return;
       }
-      // 🛑 إذا كان الهدف داخل Report Modal، لا تغلق المودال
       if (reportModalRef.current && reportModalRef.current.contains(e.target)) {
         return;
       }
-      // 🛑 إذا كان الهدف داخل Code Modal، لا تغلق المودال
       if (codeModalRef.current && codeModalRef.current.contains(e.target)) {
         return;
       }
-      // 🛑 إذا كان الهدف داخل Mention Popup، لا تغلق المودال
       if (
         mentionPopupRef.current &&
         mentionPopupRef.current.contains(e.target)
       ) {
         return;
       }
-      // 🛑 إذا كان النقر خارج المودال، أغلق المودال
       if (modalRef.current && !modalRef.current.contains(e.target)) {
         onClose();
       }
@@ -704,7 +699,6 @@ const CommentsModal = ({
 
     const handleEsc = (e) => {
       if (e.key === "Escape") {
-        // 🛑 إذا كان Report Modal مفتوح، أغلق Report Modal فقط
         if (reportModalOpen) {
           setReportModalOpen(false);
           setReportReason("");
@@ -748,7 +742,6 @@ const CommentsModal = ({
 
   if (!isOpen) return null;
 
-  // 🔥 CommentItem Component with Portal-based dropdown
   const CommentItem = ({ comment, isReply = false }) => {
     const [isLiked, setIsLiked] = useState(comment.is_liked_by_user || false);
     const [likesCount, setLikesCount] = useState(0);
@@ -806,7 +799,6 @@ const CommentsModal = ({
       );
     };
 
-    // 🚀 فتح القائمة مع منع انتشار الحدث
     const openMenu = (e) => {
       e.stopPropagation();
       const rect = e.currentTarget.getBoundingClientRect();
@@ -817,12 +809,10 @@ const CommentsModal = ({
       setShowMenu(true);
     };
 
-    // 🚀 إغلاق القائمة
     const closeMenu = () => {
       setShowMenu(false);
     };
 
-    // 🚀 عرض القائمة باستخدام React Portal
     const renderDropdownMenu = () => {
       if (!showMenu) return null;
 
@@ -835,7 +825,6 @@ const CommentsModal = ({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Highlight - يظهر فقط لمالك البوست/المقال */}
           {isContentOwner && (
             <button
               onClick={(e) => {
@@ -843,7 +832,7 @@ const CommentsModal = ({
                 closeMenu();
                 handleHighlight(comment.id, isHighlighted);
               }}
-              className="w-full px-3 py-1.5 text-left text-sm text-accent hover:bg-white/5 flex items-center gap-2 transition-colors"
+              className="w-full px-3 py-1.5 text-left text-sm text-[#5CA1FC] hover:bg-white/5 flex items-center gap-2 transition-colors"
             >
               {isHighlighted ? (
                 <>
@@ -859,7 +848,6 @@ const CommentsModal = ({
             </button>
           )}
 
-          {/* Edit/Delete - يظهر فقط لمالك التعليق */}
           {isCommentOwner && (
             <>
               <button
@@ -885,7 +873,6 @@ const CommentsModal = ({
             </>
           )}
 
-          {/* Report - يظهر فقط إذا المستخدم مش مالك التعليق */}
           {!isCommentOwner && (
             <button
               onClick={(e) => {
@@ -907,8 +894,8 @@ const CommentsModal = ({
     if (editingComment?.id === comment.id) {
       return (
         <div className={`flex gap-3 ${!isReply ? "mb-4" : "mb-3 ml-11"}`}>
-          <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
-            <User size={16} className="text-accent" />
+          <div className="w-8 h-8 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center flex-shrink-0">
+            <User size={16} className="text-[#5CA1FC]" />
           </div>
           <div className="flex-1">
             <div className="glass-card p-3">
@@ -927,10 +914,10 @@ const CommentsModal = ({
               />
 
               {editingCode?.content && (
-                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between border border-accent/20">
+                <div className="mb-2 p-2 bg-[#5CA1FC]/10 rounded-lg flex items-center justify-between border border-[#5CA1FC]/20">
                   <div className="flex items-center gap-2">
-                    <Code size={14} className="text-accent" />
-                    <span className="text-xs text-accent">
+                    <Code size={14} className="text-[#5CA1FC]" />
+                    <span className="text-xs text-[#5CA1FC]">
                       Code attached{" "}
                       {editingCode.language ? `(${editingCode.language})` : ""}
                     </span>
@@ -939,7 +926,7 @@ const CommentsModal = ({
                     <button
                       type="button"
                       onClick={openEditCodeModal}
-                      className="text-xs text-accent hover:text-accent/80"
+                      className="text-xs text-[#5CA1FC] hover:text-[#4A8BE8]"
                     >
                       Edit
                     </button>
@@ -961,7 +948,7 @@ const CommentsModal = ({
                     submitting ||
                     (!editTextValueRef.current.trim() && !editingCode?.content)
                   }
-                  className="px-3 py-1.5 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 text-sm disabled:opacity-50 shadow-accent-sm"
+                  className="px-3 py-1.5 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 text-sm disabled:opacity-50 shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                 >
                   {submitting ? "Saving..." : "Save"}
                 </button>
@@ -992,17 +979,17 @@ const CommentsModal = ({
         }`}
       >
         {isHighlighted && (
-          <div className="absolute -left-1 top-0 bottom-0 w-1 bg-accent rounded-full"></div>
+          <div className="absolute -left-1 top-0 bottom-0 w-1 bg-[#5CA1FC] rounded-full"></div>
         )}
 
-        <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
-          <User size={16} className="text-accent" />
+        <div className="w-8 h-8 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center flex-shrink-0">
+          <User size={16} className="text-[#5CA1FC]" />
         </div>
 
         <div className="flex-1">
           <div
             className={`glass-card p-3 ${
-              isHighlighted ? "border-accent/50 bg-accent/5" : ""
+              isHighlighted ? "border-[#5CA1FC]/50 bg-[#5CA1FC]/5" : ""
             }`}
           >
             <div className="flex items-center justify-between mb-1">
@@ -1017,14 +1004,13 @@ const CommentsModal = ({
                   <span className="text-xs text-muted">(edited)</span>
                 )}
                 {isHighlighted && (
-                  <span className="text-xs px-2 py-0.5 bg-accent/20 text-accent rounded-full flex items-center gap-1">
+                  <span className="text-xs px-2 py-0.5 bg-[#5CA1FC]/20 text-[#5CA1FC] rounded-full flex items-center gap-1">
                     <Pin size={10} />
                     Highlighted
                   </span>
                 )}
               </div>
 
-              {/* ✅ زر الـ 3 dots مع Portal */}
               <div ref={menuButtonRef}>
                 <button
                   onClick={openMenu}
@@ -1042,7 +1028,7 @@ const CommentsModal = ({
               <div className="mt-2 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
                 <div className="flex items-center justify-between px-3 py-1.5 bg-panel/50 border-b border-panelEdge">
                   <div className="flex items-center gap-2">
-                    <Code size={12} className="text-accent" />
+                    <Code size={12} className="text-[#5CA1FC]" />
                     <span className="text-xs text-muted">
                       {comment.code_language || "code"}
                     </span>
@@ -1085,7 +1071,9 @@ const CommentsModal = ({
             <button
               onClick={handleLocalDislike}
               className={`text-xs transition-colors flex items-center gap-1 ${
-                isDisliked ? "text-accent" : "text-muted hover:text-accent"
+                isDisliked
+                  ? "text-[#5CA1FC]"
+                  : "text-muted hover:text-[#5CA1FC]"
               }`}
             >
               <ThumbsDown size={12} />
@@ -1094,7 +1082,7 @@ const CommentsModal = ({
 
             <button
               onClick={() => startReply(comment)}
-              className="text-xs text-muted hover:text-accent transition-colors flex items-center gap-1"
+              className="text-xs text-muted hover:text-[#5CA1FC] transition-colors flex items-center gap-1"
             >
               <MessageCircle size={12} />
               Reply
@@ -1104,7 +1092,7 @@ const CommentsModal = ({
           {comment.has_childrens && (
             <button
               onClick={() => toggleReplies(comment.id)}
-              className="mt-2 text-xs text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
+              className="mt-2 text-xs text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors flex items-center gap-1"
             >
               {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               {isExpanded ? "Hide replies" : `View replies`}
@@ -1115,7 +1103,7 @@ const CommentsModal = ({
             <div className="mt-3">
               {isLoadingReplies ? (
                 <div className="flex justify-center py-2">
-                  <div className="w-4 h-4 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-[#5CA1FC]/20 border-t-[#5CA1FC] rounded-full animate-spin"></div>
                 </div>
               ) : (
                 replies.map((reply) => (
@@ -1141,7 +1129,7 @@ const CommentsModal = ({
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-panelEdge">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <MessageCircle size={20} className="text-accent" />
+              <MessageCircle size={20} className="text-[#5CA1FC]" />
               Comments
               <span className="text-sm text-muted">({totalComments})</span>
             </h2>
@@ -1182,7 +1170,7 @@ const CommentsModal = ({
                     <button
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className="text-sm text-accent hover:text-accent/80 transition-colors disabled:opacity-50"
+                      className="text-sm text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors disabled:opacity-50"
                     >
                       {loadingMore ? "Loading..." : "Load more comments"}
                     </button>
@@ -1199,8 +1187,8 @@ const CommentsModal = ({
               className="p-4 border-t border-panelEdge"
             >
               {replyTo && (
-                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between">
-                  <span className="text-xs text-accent">
+                <div className="mb-2 p-2 bg-[#5CA1FC]/10 rounded-lg flex items-center justify-between">
+                  <span className="text-xs text-[#5CA1FC]">
                     Replying to{" "}
                     <span className="font-semibold">@{replyTo.user_name}</span>
                   </span>
@@ -1215,10 +1203,10 @@ const CommentsModal = ({
               )}
 
               {hasCodeAttached && (
-                <div className="mb-2 p-2 bg-accent/10 rounded-lg flex items-center justify-between border border-accent/20">
+                <div className="mb-2 p-2 bg-[#5CA1FC]/10 rounded-lg flex items-center justify-between border border-[#5CA1FC]/20">
                   <div className="flex items-center gap-2">
-                    <Code size={14} className="text-accent" />
-                    <span className="text-xs text-accent">
+                    <Code size={14} className="text-[#5CA1FC]" />
+                    <span className="text-xs text-[#5CA1FC]">
                       Code attached{" "}
                       {pendingCode?.language ? `(${pendingCode.language})` : ""}
                     </span>
@@ -1227,7 +1215,7 @@ const CommentsModal = ({
                     <button
                       type="button"
                       onClick={openCodeModal}
-                      className="text-xs text-accent hover:text-accent/80"
+                      className="text-xs text-[#5CA1FC] hover:text-[#4A8BE8]"
                     >
                       Edit
                     </button>
@@ -1269,7 +1257,7 @@ const CommentsModal = ({
                         !pendingCode?.content) ||
                       (replyTo && !replyContent.trim() && !pendingCode?.content)
                     }
-                    className="px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-accent-sm"
+                    className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   >
                     <Send size={18} />
                   </button>
@@ -1292,7 +1280,7 @@ const CommentsModal = ({
       {reportModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div
-            ref={reportModalRef} // 🆕 تم إضافة الـ ref
+            ref={reportModalRef}
             className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4"
           >
             <div className="flex items-center justify-between mb-4">
@@ -1383,7 +1371,7 @@ const CommentsModal = ({
                 selectedSuggestionIndex === idx ? "bg-white/5" : ""
               }`}
             >
-              <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center">
                 {user.avatar ? (
                   <img
                     src={user.avatar}
@@ -1391,7 +1379,7 @@ const CommentsModal = ({
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 ) : (
-                  <User size={12} className="text-accent" />
+                  <User size={12} className="text-[#5CA1FC]" />
                 )}
               </div>
               <div>
@@ -1417,7 +1405,7 @@ const CommentsModal = ({
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Code size={20} className="text-accent" />
+                <Code size={20} className="text-[#5CA1FC]" />
                 {editingComment
                   ? "Edit Code in Comment"
                   : "Add Code to Comment"}
@@ -1469,7 +1457,7 @@ const CommentsModal = ({
               </button>
               <button
                 onClick={editingComment ? saveEditCode : saveCode}
-                className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 shadow-accent-sm"
+                className="flex-1 px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
               >
                 {editingComment ? "Update Code" : "Attach Code"}
               </button>

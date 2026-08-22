@@ -21,6 +21,8 @@ import {
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
+const BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+
 const EditProfilePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -134,7 +136,6 @@ const EditProfilePage = () => {
   const addSocialLink = () => {
     if (!newSocialLink.trim()) return;
 
-    // تحقق من صحة الرابط
     try {
       new URL(newSocialLink);
     } catch {
@@ -217,7 +218,6 @@ const EditProfilePage = () => {
   };
 
   // تغيير الاسم
-  // تغيير الاسم
   const handleChangeName = async () => {
     if (!name.trim()) {
       setError("Name is required.");
@@ -241,14 +241,12 @@ const EditProfilePage = () => {
 
       setSuccess("Name updated successfully!");
       setCurrentPassword("");
-      // تحديث localStorage
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       user.name = name.trim();
       localStorage.setItem("user", JSON.stringify(user));
     } catch (err) {
       console.error("Error changing name:", err);
 
-      // معالجة الأخطاء المختلفة
       if (err.response?.status === 429) {
         setError(
           "Too many name change requests. Please wait a few minutes and try again.",
@@ -291,14 +289,12 @@ const EditProfilePage = () => {
 
       setSuccess("Username updated successfully!");
       setCurrentPassword("");
-      // تحديث localStorage
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       user.username = username.trim();
       localStorage.setItem("user", JSON.stringify(user));
     } catch (err) {
       console.error("Error changing username:", err);
 
-      // معالجة خطأ 429
       if (err.response?.status === 429) {
         setError(
           "Too many username change requests. Please wait a few minutes and try again.",
@@ -337,14 +333,12 @@ const EditProfilePage = () => {
 
       setSuccess("Email updated successfully!");
       setCurrentPassword("");
-      // تحديث localStorage
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       user.email = email.trim();
       localStorage.setItem("user", JSON.stringify(user));
     } catch (err) {
       console.error("Error changing email:", err);
 
-      // معالجة خطأ 429
       if (err.response?.status === 429) {
         setError(
           "Too many email change requests. Please wait a few minutes and try again.",
@@ -399,7 +393,6 @@ const EditProfilePage = () => {
     } catch (err) {
       console.error("Error changing password:", err);
 
-      // معالجة خطأ 429
       if (err.response?.status === 429) {
         setError(
           "Too many password change requests. Please wait a few minutes and try again.",
@@ -414,7 +407,7 @@ const EditProfilePage = () => {
     }
   };
 
-  // حفظ معلومات الملف الشخصي (Bio, Location, Website, Social Links, Tags, Images)
+  // حفظ معلومات الملف الشخصي
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     setError("");
@@ -425,12 +418,10 @@ const EditProfilePage = () => {
     formData.append("location", location.trim() || "");
     formData.append("website", website.trim() || "");
 
-    // نبعت social_links كـ array
     socialLinks.forEach((link, index) => {
       formData.append(`social_links[${index}]`, link);
     });
 
-    // نبعت tags كـ array
     selectedTags.forEach((tag, index) => {
       formData.append(`tags[${index}]`, tag.id);
     });
@@ -446,7 +437,6 @@ const EditProfilePage = () => {
     try {
       const response = await api.post("/profile", formData);
 
-      // تحديث localStorage
       if (response.data.data?.user) {
         localStorage.setItem("user", JSON.stringify(response.data.data.user));
       }
@@ -483,9 +473,12 @@ const EditProfilePage = () => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate("/profile")}
-          className="flex items-center gap-2 text-muted hover:text-accent transition-colors"
+          className="flex items-center gap-2 text-muted hover:text-[#5CA1FC] transition-colors group"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           <span>Back to Profile</span>
         </button>
         <h1 className="gradient-title text-2xl font-bold">Edit Profile</h1>
@@ -494,12 +487,12 @@ const EditProfilePage = () => {
 
       {/* Error & Success messages */}
       {error && (
-        <div className="mb-4 p-3 bg-error/20 border border-error/50 rounded-lg">
+        <div className="mb-4 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
           <p className="text-error text-sm text-center">{error}</p>
         </div>
       )}
       {success && (
-        <div className="mb-4 p-3 bg-success/20 border border-success/50 rounded-lg">
+        <div className="mb-4 p-3 bg-success/20 border border-success/30 rounded-lg slide-up">
           <p className="text-success text-sm text-center">{success}</p>
         </div>
       )}
@@ -507,7 +500,7 @@ const EditProfilePage = () => {
       {/* ========== SECTION 1: IMAGES ========== */}
       <div className="glass-card p-6 mb-6">
         <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <ImageIcon size={20} className="text-accent" />
+          <ImageIcon size={20} className="text-[#5CA1FC]" />
           Profile Images
         </h2>
 
@@ -544,7 +537,7 @@ const EditProfilePage = () => {
               />
               <label
                 htmlFor="avatar-upload"
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2 hover:text-[#5CA1FC]"
               >
                 <ImageIcon size={18} />
                 Upload Photo
@@ -561,11 +554,11 @@ const EditProfilePage = () => {
           </label>
           <div className="relative">
             {coverPreview ? (
-              <div className="relative">
+              <div className="relative rounded-lg overflow-hidden">
                 <img
                   src={coverPreview}
                   alt="Cover"
-                  className="w-full h-32 object-cover rounded-lg border border-panelEdge"
+                  className="w-full h-32 object-cover border border-panelEdge"
                 />
                 <button
                   type="button"
@@ -576,7 +569,7 @@ const EditProfilePage = () => {
                 </button>
               </div>
             ) : (
-              <div className="w-full h-32 bg-panel/50 border-2 border-dashed border-panelEdge rounded-lg flex items-center justify-center">
+              <div className="w-full h-32 bg-panel/50 border-2 border-dashed border-panelEdge rounded-lg flex items-center justify-center hover:border-[#5CA1FC]/30 transition-colors">
                 <div className="text-center">
                   <ImageIcon size={32} className="text-muted mx-auto mb-2" />
                   <p className="text-muted text-sm">No cover image</p>
@@ -594,7 +587,7 @@ const EditProfilePage = () => {
               />
               <label
                 htmlFor="cover-upload"
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2 hover:text-[#5CA1FC]"
               >
                 <ImageIcon size={18} />
                 {coverPreview ? "Change Cover" : "Upload Cover"}
@@ -608,14 +601,13 @@ const EditProfilePage = () => {
       {/* ========== SECTION 2: BASIC INFORMATION ========== */}
       <div className="glass-card p-6 mb-6">
         <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <User size={20} className="text-accent" />
+          <User size={20} className="text-[#5CA1FC]" />
           Basic Information
         </h2>
         <p className="text-xs text-muted mb-4">
           Current password is required for any change in this section.
         </p>
 
-        {/* Current Password Field - مخفي بشكل افتراضي */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-label mb-1">
             Current Password <span className="text-error">*</span>
@@ -626,12 +618,12 @@ const EditProfilePage = () => {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Enter your current password"
-              className="input-field pr-10"
+              className="input-field pr-10 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
             />
             <button
               type="button"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-accent transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[#5CA1FC] transition-colors"
             >
               {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -653,13 +645,13 @@ const EditProfilePage = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your full name"
-                className="input-field flex-1"
+                className="input-field flex-1 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               />
               <button
                 type="button"
                 onClick={handleChangeName}
                 disabled={savingName || !currentPassword}
-                className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+                className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
               >
                 {savingName ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -681,13 +673,13 @@ const EditProfilePage = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Your username"
-                className="input-field flex-1"
+                className="input-field flex-1 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               />
               <button
                 type="button"
                 onClick={handleChangeUsername}
                 disabled={savingUsername || !currentPassword}
-                className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+                className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
               >
                 {savingUsername ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -709,13 +701,13 @@ const EditProfilePage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your email"
-                className="input-field flex-1"
+                className="input-field flex-1 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               />
               <button
                 type="button"
                 onClick={handleChangeEmail}
                 disabled={savingEmail || !currentPassword}
-                className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+                className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
               >
                 {savingEmail ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -738,12 +730,12 @@ const EditProfilePage = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="New password (min 8 chars)"
-                  className="input-field pr-10"
+                  className="input-field pr-10 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-accent transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[#5CA1FC] transition-colors"
                 >
                   {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -754,12 +746,12 @@ const EditProfilePage = () => {
                   value={newPasswordConfirmation}
                   onChange={(e) => setNewPasswordConfirmation(e.target.value)}
                   placeholder="Confirm new password"
-                  className="input-field pr-10"
+                  className="input-field pr-10 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-accent transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[#5CA1FC] transition-colors"
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={18} />
@@ -772,7 +764,7 @@ const EditProfilePage = () => {
                 type="button"
                 onClick={handleChangePassword}
                 disabled={savingPassword || !currentPassword || !newPassword}
-                className="w-full px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg transition-colors disabled:opacity-50 text-sm"
+                className="w-full px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-colors disabled:opacity-50 text-sm shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
               >
                 {savingPassword ? (
                   <Loader2 size={16} className="animate-spin mx-auto" />
@@ -788,7 +780,7 @@ const EditProfilePage = () => {
       {/* ========== SECTION 3: PROFILE INFORMATION ========== */}
       <div className="glass-card p-6">
         <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <User size={20} className="text-accent" />
+          <User size={20} className="text-[#5CA1FC]" />
           Profile Information
         </h2>
         <p className="text-xs text-muted mb-4">
@@ -805,7 +797,7 @@ const EditProfilePage = () => {
             onChange={(e) => setBio(e.target.value)}
             placeholder="Tell us about yourself..."
             rows="3"
-            className="input-field resize-none"
+            className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
             maxLength={500}
           />
           <p className="text-xs text-muted mt-1">{bio.length}/500 characters</p>
@@ -826,7 +818,7 @@ const EditProfilePage = () => {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="City, Country"
-              className="input-field pl-10"
+              className="input-field pl-10 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               style={{ paddingLeft: "2.5rem" }}
             />
           </div>
@@ -847,7 +839,7 @@ const EditProfilePage = () => {
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="https://yourwebsite.com"
-              className="input-field pl-10"
+              className="input-field pl-10 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               style={{ paddingLeft: "2.5rem" }}
             />
           </div>
@@ -864,12 +856,12 @@ const EditProfilePage = () => {
               value={newSocialLink}
               onChange={(e) => setNewSocialLink(e.target.value)}
               placeholder="https://github.com/yourusername"
-              className="input-field flex-1"
+              className="input-field flex-1 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
             />
             <button
               type="button"
               onClick={addSocialLink}
-              className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-colors shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
             >
               <Plus size={18} />
             </button>
@@ -908,7 +900,7 @@ const EditProfilePage = () => {
                 {selectedTags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full"
                   >
                     #{tag.name}
                     <button
@@ -932,7 +924,7 @@ const EditProfilePage = () => {
               }}
               onFocus={() => setShowTagDropdown(true)}
               placeholder="Search tags..."
-              className="input-field"
+              className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
             />
             {showTagDropdown && tagSearch && filteredTags.length > 0 && (
               <div className="absolute z-10 w-full mt-1 bg-panel border border-panelEdge rounded-lg shadow-panel max-h-48 overflow-y-auto">
@@ -963,7 +955,7 @@ const EditProfilePage = () => {
           type="button"
           onClick={handleSaveProfile}
           disabled={savingProfile}
-          className="w-full px-4 py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-accent-sm"
+          className="w-full px-4 py-3 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)]"
         >
           {savingProfile ? (
             <>

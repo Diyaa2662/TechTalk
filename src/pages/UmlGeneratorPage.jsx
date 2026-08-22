@@ -81,7 +81,6 @@ const UmlGeneratorPage = () => {
         const imageUrl = URL.createObjectURL(response.data);
         setImageUrl(imageUrl);
         setGenerated(true);
-        // إعادة تعيين التكبير عند تحميل صورة جديدة
         setTimeout(() => {
           if (transformRef.current) {
             transformRef.current.resetTransform();
@@ -139,19 +138,24 @@ const UmlGeneratorPage = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/")}
-            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted hover:text-white"
+            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted hover:text-white group"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft
+              size={20}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
           </button>
           <div className="flex items-center gap-2">
-            <Sparkles size={28} className="text-accent" />
+            <div className="p-1.5 rounded-lg bg-[#5CA1FC]/10">
+              <Sparkles size={22} className="text-[#5CA1FC]" />
+            </div>
             <h1 className="gradient-title text-2xl font-bold">UML Generator</h1>
           </div>
         </div>
         {generated && imageUrl && (
           <button
             onClick={downloadImage}
-            className="flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-all duration-300 hover:scale-[1.02] shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
           >
             <Download size={18} />
             Download
@@ -160,7 +164,7 @@ const UmlGeneratorPage = () => {
       </div>
 
       {/* Description Input */}
-      <div className="glass-card p-6 mb-6">
+      <div className="glass-card p-6 mb-6 hover:border-[#5CA1FC]/20 transition-all duration-300">
         <label className="block text-sm font-medium text-label mb-2">
           System Description
         </label>
@@ -169,7 +173,7 @@ const UmlGeneratorPage = () => {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Describe the system you want to generate UML diagram for..."
           rows="4"
-          className="input-field resize-none"
+          className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
         />
 
         {/* Examples */}
@@ -180,7 +184,7 @@ const UmlGeneratorPage = () => {
               <button
                 key={idx}
                 onClick={() => handleExampleClick(example)}
-                className="text-xs px-3 py-1.5 bg-accent/10 hover:bg-accent/20 text-accent rounded-full transition-colors"
+                className="text-xs px-3 py-1.5 bg-[#5CA1FC]/10 hover:bg-[#5CA1FC]/20 text-[#5CA1FC] rounded-full transition-colors hover:scale-[1.05]"
               >
                 {example.title}
               </button>
@@ -192,7 +196,7 @@ const UmlGeneratorPage = () => {
           <button
             onClick={generateUml}
             disabled={loading || !description.trim()}
-            className="flex-1 px-6 py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-accent-sm"
+            className="flex-1 px-6 py-3 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)] hover:scale-[1.02]"
           >
             {loading ? (
               <>
@@ -209,7 +213,7 @@ const UmlGeneratorPage = () => {
           {generated && (
             <button
               onClick={resetForm}
-              className="px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors flex items-center gap-2"
+              className="px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-all duration-300 hover:text-[#5CA1FC] hover:scale-[1.02] flex items-center gap-2"
             >
               <RefreshCw size={18} />
               New
@@ -218,7 +222,7 @@ const UmlGeneratorPage = () => {
         </div>
 
         {error && (
-          <div className="mt-3 p-3 bg-error/20 border border-error/50 rounded-lg">
+          <div className="mt-3 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
             <p className="text-error text-sm text-center">{error}</p>
           </div>
         )}
@@ -227,14 +231,14 @@ const UmlGeneratorPage = () => {
       {/* Result */}
       {loading && (
         <div className="glass-card p-12 flex flex-col items-center justify-center">
-          <Loader2 size={48} className="text-accent animate-spin mb-4" />
+          <Loader2 size={48} className="text-[#5CA1FC] animate-spin mb-4" />
           <p className="text-muted">Generating UML diagram...</p>
           <p className="text-label text-sm">This may take a few moments</p>
         </div>
       )}
 
       {generated && imageUrl && (
-        <div className="glass-card p-4">
+        <div className="glass-card p-4 hover:border-[#5CA1FC]/20 transition-all duration-300">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-white font-semibold">Generated UML Diagram</h3>
             <div className="flex items-center gap-2">
@@ -245,7 +249,7 @@ const UmlGeneratorPage = () => {
                       transformRef.current.zoomIn();
                     }
                   }}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-white"
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-[#5CA1FC]"
                   title="Zoom In"
                 >
                   <ZoomIn size={16} />
@@ -256,7 +260,7 @@ const UmlGeneratorPage = () => {
                       transformRef.current.zoomOut();
                     }
                   }}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-white"
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-[#5CA1FC]"
                   title="Zoom Out"
                 >
                   <ZoomOut size={16} />
@@ -267,7 +271,7 @@ const UmlGeneratorPage = () => {
                       transformRef.current.resetTransform();
                     }
                   }}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-white"
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-[#5CA1FC]"
                   title="Reset"
                 >
                   <RefreshCw size={16} />
@@ -279,16 +283,25 @@ const UmlGeneratorPage = () => {
                       transformRef.current.setTransform(0, 0, 1);
                     }
                   }}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-white"
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-muted hover:text-[#5CA1FC]"
                   title="Fit to Screen"
                 >
                   <Maximize size={16} />
                 </button>
               </div>
+
+              {/* ✅ زر التحميل جنب أزرار التحكم */}
+              <button
+                onClick={downloadImage}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg transition-all duration-300 hover:scale-[1.05] text-sm font-medium shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
+                title="Download Image"
+              >
+                <Download size={16} />
+                Download
+              </button>
             </div>
           </div>
 
-          {/* Image Container with Zoom/Pan */}
           <div
             className="w-full bg-white/5 rounded-lg overflow-hidden"
             style={{ height: "500px" }}
@@ -323,7 +336,6 @@ const UmlGeneratorPage = () => {
                     />
                   </TransformComponent>
 
-                  {/* Zoom Info */}
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-bg/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-muted">
                     {Math.round(state.scale * 100)}% • Scroll to zoom • Drag to
                     pan

@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Sparkles,
+  Users,
+  Code,
+  Network,
+} from "lucide-react";
 import logo from "/src/assets/logo.png";
 import api from "../services/api";
 
@@ -75,113 +83,87 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl w-full glass-card overflow-hidden">
+      <div className="max-w-5xl w-full glass-card overflow-hidden scale-in">
         <div className="flex flex-col md:flex-row">
           {/* Left Side - Platform Info */}
-          <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg to-bg/80">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="relative">
-                <div className="absolute inset-0 w-10 h-10 bg-accent/20 rounded-full blur-lg"></div>
-                <img
-                  src={logo}
-                  alt="TechTalk Logo"
-                  className="h-8 w-auto relative z-10"
-                />
+          <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg via-bg to-accent/5 relative overflow-hidden">
+            {/* Glow Effects - محدثة باللون الجديد */}
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#5CA1FC]/10 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#5CA1FC]/5 rounded-full blur-3xl"></div>
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="relative">
+                  <div className="absolute inset-0 w-10 h-10 bg-[#5CA1FC]/30 rounded-full blur-xl animate-pulse"></div>
+                  <img
+                    src={logo}
+                    alt="TechTalk Logo"
+                    className="h-8 w-auto relative z-10"
+                  />
+                </div>
+                <span className="gradient-title font-bold text-xl">
+                  TechTalk
+                </span>
               </div>
-              <span className="gradient-title font-bold text-xl">TechTalk</span>
-            </div>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Join Our Community!
-            </h2>
-            <p className="text-muted mb-8">
-              Create your account to connect with developers worldwide.
-            </p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                Join Our Community!
+              </h2>
+              <p className="text-muted mb-8">
+                Create your account to connect with developers worldwide.
+              </p>
 
-            <div className="space-y-5">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+              <div className="space-y-5">
+                <div className="flex items-start gap-3 group">
+                  <div className="w-5 h-5 bg-[#5CA1FC]/20 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0 group-hover:bg-[#5CA1FC]/30 transition-all duration-300">
+                    <Code size={12} className="text-[#5CA1FC]" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium">Share Your Code</h4>
+                    <p className="text-muted text-sm">
+                      Post snippets and get feedback
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 group">
+                  <div className="w-5 h-5 bg-[#5CA1FC]/20 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0 group-hover:bg-[#5CA1FC]/30 transition-all duration-300">
+                    <Users size={12} className="text-[#5CA1FC]" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium">
+                      Solve Problems Together
+                    </h4>
+                    <p className="text-muted text-sm">
+                      Get help from expert developers
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 group">
+                  <div className="w-5 h-5 bg-[#5CA1FC]/20 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0 group-hover:bg-[#5CA1FC]/30 transition-all duration-300">
+                    <Network size={12} className="text-[#5CA1FC]" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium">
+                      Build Your Network
+                    </h4>
+                    <p className="text-muted text-sm">
+                      Connect with tech professionals
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-10 pt-6 border-t border-panelEdge/50">
+                <div>
+                  <p className="text-2xl font-bold text-[#5CA1FC]">10K+</p>
+                  <p className="text-label text-sm">Active Developers</p>
                 </div>
                 <div>
-                  <h4 className="text-white font-medium">Share Your Code</h4>
-                  <p className="text-muted text-sm">
-                    Post snippets and get feedback
-                  </p>
+                  <p className="text-2xl font-bold text-[#5CA1FC]">4.9</p>
+                  <p className="text-label text-sm">Community Rating</p>
                 </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-white font-medium">
-                    Solve Problems Together
-                  </h4>
-                  <p className="text-muted text-sm">
-                    Get help from expert developers
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-white font-medium">Build Your Network</h4>
-                  <p className="text-muted text-sm">
-                    Connect with tech professionals
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mt-10 pt-6 border-t border-panelEdge">
-              <div>
-                <p className="text-2xl font-bold text-accent">10K+</p>
-                <p className="text-label text-sm">Active Developers</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-accent">4.9</p>
-                <p className="text-label text-sm">Community Rating</p>
               </div>
             </div>
           </div>
@@ -189,14 +171,19 @@ const SignupPage = () => {
           {/* Right Side - Signup Form */}
           <div className="md:w-1/2 p-8 md:p-10">
             <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white">Create Account</h3>
+              <div className="flex items-center gap-2">
+                <Sparkles size={24} className="text-[#5CA1FC]" />
+                <h3 className="text-2xl font-bold text-white">
+                  Create Account
+                </h3>
+              </div>
               <p className="text-muted text-sm mt-1">
                 Enter your details to get started
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-error/20 border border-error/50 rounded-lg">
+              <div className="mb-4 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
                 <p className="text-error text-sm text-center">{error}</p>
               </div>
             )}
@@ -281,14 +268,14 @@ const SignupPage = () => {
                     className="input-field pr-11"
                   />
                   {password && password.length < 8 && (
-                    <p className="text-error text-xs mt-1">
+                    <p className="text-error text-xs mt-1 animate-pulse">
                       * Password must be at least 8 characters
                     </p>
                   )}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted hover:text-accent transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted hover:text-[#5CA1FC] transition-colors"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -318,7 +305,7 @@ const SignupPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted hover:text-accent transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted hover:text-[#5CA1FC] transition-colors"
                   >
                     {showConfirmPassword ? (
                       <EyeOff size={20} />
@@ -329,14 +316,26 @@ const SignupPage = () => {
                 </div>
               </div>
 
-              {/* Sign Up Button */}
+              {/* Sign Up Button - يستخدم gradient-button من CSS */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-accent-sm"
+                className="w-full py-3 gradient-button text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)] active:scale-[0.98]"
               >
-                {loading ? "Creating account..." : "Sign Up"}
-                {!loading && <ArrowRight size={18} />}
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    Sign Up
+                    <ArrowRight
+                      size={18}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </>
+                )}
               </button>
             </form>
 
@@ -345,7 +344,7 @@ const SignupPage = () => {
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="font-medium text-accent hover:text-accent/80 transition-colors"
+                  className="font-medium text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors hover:underline"
                 >
                   Sign In
                 </Link>

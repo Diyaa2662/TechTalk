@@ -24,6 +24,7 @@ import {
 import api from "../services/api";
 import CommentsModal from "../components/comments/CommentsModal";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import ImageViewer from "../components/common/ImageViewer";
 
 // BASE_URL بدون /api
 const BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
@@ -35,6 +36,11 @@ const BlogDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+
+  // Image Viewer states
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerImages, setViewerImages] = useState([]);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   // States for interactions
   const [isLiked, setIsLiked] = useState(false);
@@ -108,6 +114,43 @@ const BlogDetailsPage = () => {
       return () => window.removeEventListener("click", handleClickOutside);
     }
   }, [showMenu]);
+
+  // جمع كل الصور من المقال (الغلاف + صور السكشنات)
+  const getAllImages = () => {
+    const images = [];
+
+    // إضافة صورة الغلاف
+    if (blog?.cover_image_url) {
+      images.push({
+        url: `${BASE_URL}${blog.cover_image_url}`,
+        title: blog.title,
+      });
+    }
+
+    // إضافة صور السكشنات
+    if (blog?.sections) {
+      blog.sections.forEach((section) => {
+        if (section.image_url) {
+          images.push({
+            url: `${BASE_URL}${section.image_url}`,
+            title: section.title || "Section image",
+          });
+        }
+      });
+    }
+
+    return images;
+  };
+
+  // فتح الـ Image Viewer
+  const openImageViewer = (index = 0) => {
+    const images = getAllImages();
+    if (images.length > 0) {
+      setViewerImages(images);
+      setViewerIndex(index);
+      setViewerOpen(true);
+    }
+  };
 
   // معالجة الإعجاب
   const handleLike = async () => {
@@ -230,7 +273,7 @@ const BlogDetailsPage = () => {
           <p className="text-error mb-3">{error || "Blog not found"}</p>
           <button
             onClick={() => navigate("/blogs")}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Back to Blogs
           </button>
@@ -245,19 +288,26 @@ const BlogDetailsPage = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate("/blogs")}
-          className="flex items-center gap-2 text-muted hover:text-accent transition-colors mb-6"
+          className="flex items-center gap-2 text-muted hover:text-[#5CA1FC] transition-colors mb-6 group"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           <span>Back to Blogs</span>
         </button>
 
-        {/* Cover Image - مع BASE_URL */}
+        {/* Cover Image - مع ImageViewer */}
         {blog.cover_image_url && (
-          <div className="w-full h-64 md:h-96 rounded-xl overflow-hidden mb-6">
+          <div
+            className="w-full rounded-xl overflow-hidden mb-6 bg-panel/50 cursor-pointer hover:opacity-95 transition-opacity"
+            style={{ aspectRatio: "16/9" }}
+            onClick={() => openImageViewer(0)}
+          >
             <img
               src={`${BASE_URL}${blog.cover_image_url}`}
               alt={blog.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
             />
           </div>
         )}
@@ -274,16 +324,21 @@ const BlogDetailsPage = () => {
         <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-panelEdge">
           <div className="flex items-center gap-4">
             {/* Author */}
-            <div className="flex items-center gap-3">
+            <Link
+              to={`/profile/${blog.user.username}`}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
               <img
                 src={blog.user.avatar_url}
                 alt={blog.user.name}
-                className="w-12 h-12 rounded-full object-cover"
+                className="w-12 h-12 rounded-full object-cover border-2 border-panelEdge"
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="text-white font-semibold">{blog.user.name}</h4>
-                  <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
+                  <h4 className="text-white font-semibold hover:text-[#5CA1FC] transition-colors">
+                    {blog.user.name}
+                  </h4>
+                  <span className="text-xs px-2 py-0.5 bg-[#5CA1FC]/15 text-[#5CA1FC] rounded-full">
                     {blog.user.badge}
                   </span>
                 </div>
@@ -291,7 +346,7 @@ const BlogDetailsPage = () => {
                   <span>@{blog.user.username}</span>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Date */}
             <div className="flex items-center gap-1 text-sm text-muted">
@@ -313,7 +368,7 @@ const BlogDetailsPage = () => {
               </div>
             </div>
 
-            {/* 3 Dots Menu - مع Edit/Delete للمالك */}
+            {/* 3 Dots Menu - مع Edit/Delete للمالك فقط */}
             <div className="relative">
               <button
                 onClick={(e) => {
@@ -327,7 +382,8 @@ const BlogDetailsPage = () => {
 
               {showMenu && (
                 <div className="absolute right-0 mt-1 w-44 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
-                  {isOwner && (
+                  {isOwner ? (
+                    // ✅ للمالك: Edit + Delete فقط
                     <>
                       <button
                         onClick={() => {
@@ -347,19 +403,20 @@ const BlogDetailsPage = () => {
                       >
                         <Trash2 size={14} /> Delete Blog
                       </button>
-                      <div className="border-t border-panelEdge my-1"></div>
                     </>
+                  ) : (
+                    // ✅ للمستخدمين الآخرين: Report فقط
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        setReportModalOpen(true);
+                      }}
+                      className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
+                    >
+                      <Flag size={14} />
+                      Report Blog
+                    </button>
                   )}
-                  <button
-                    onClick={() => {
-                      setShowMenu(false);
-                      setReportModalOpen(true);
-                    }}
-                    className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
-                  >
-                    <Flag size={14} />
-                    Report Blog
-                  </button>
                 </div>
               )}
             </div>
@@ -372,7 +429,7 @@ const BlogDetailsPage = () => {
             {blog.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="text-sm px-3 py-1 bg-accent/10 text-accent rounded-full"
+                className="text-sm px-3 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full hover:bg-[#5CA1FC]/20 transition-colors"
               >
                 #{tag.name}
               </span>
@@ -380,26 +437,51 @@ const BlogDetailsPage = () => {
           </div>
         )}
 
-        {/* Sections (Blog Content) - مع BASE_URL للصور */}
+        {/* Sections (Blog Content) - مع ImageViewer للصور */}
         <div className="space-y-8 mb-8">
           {blog.sections &&
-            blog.sections.map((section) => (
-              <div key={section.id} className="glass-card p-6">
-                {section.title && (
-                  <h2 className="text-xl font-bold text-white mb-3">
-                    {section.title}
-                  </h2>
-                )}
-                {section.image_url && (
-                  <img
-                    src={`${BASE_URL}${section.image_url}`}
-                    alt={section.title}
-                    className="w-full rounded-lg mb-4"
-                  />
-                )}
-                <p className="text-muted leading-relaxed">{section.content}</p>
-              </div>
-            ))}
+            // eslint-disable-next-line no-unused-vars
+            blog.sections.map((section, index) => {
+              // حساب index الصورة في مصفوفة الصور الكاملة
+              const getImageIndex = () => {
+                const images = getAllImages();
+                return images.findIndex(
+                  (img) => img.url === `${BASE_URL}${section.image_url}`,
+                );
+              };
+
+              return (
+                <div
+                  key={section.id}
+                  className="glass-card p-6 hover:border-[#5CA1FC]/20 transition-all duration-300"
+                >
+                  {section.title && (
+                    <h2 className="text-xl font-bold text-white mb-3">
+                      {section.title}
+                    </h2>
+                  )}
+                  {section.image_url && (
+                    <div
+                      className="w-full rounded-lg overflow-hidden mb-4 bg-panel/50 cursor-pointer hover:opacity-95 transition-opacity"
+                      style={{ aspectRatio: "16/9" }}
+                      onClick={() => {
+                        const idx = getImageIndex();
+                        openImageViewer(idx >= 0 ? idx : 0);
+                      }}
+                    >
+                      <img
+                        src={`${BASE_URL}${section.image_url}`}
+                        alt={section.title || "Section image"}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <p className="text-muted leading-relaxed">
+                    {section.content}
+                  </p>
+                </div>
+              );
+            })}
         </div>
 
         {/* Actions Buttons */}
@@ -421,7 +503,7 @@ const BlogDetailsPage = () => {
           {/* Comment Button */}
           <button
             onClick={() => setIsCommentsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10 transition-all duration-200"
           >
             <MessageCircle size={20} />
             <span>{commentsCount}</span>
@@ -433,14 +515,23 @@ const BlogDetailsPage = () => {
             disabled={saving}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
               isSaved
-                ? "text-accent bg-accent/10"
-                : "text-muted hover:text-accent hover:bg-accent/10"
+                ? "text-[#5CA1FC] bg-[#5CA1FC]/10"
+                : "text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10"
             }`}
           >
-            <Bookmark size={20} className={isSaved ? "fill-accent" : ""} />
+            <Bookmark size={20} className={isSaved ? "fill-[#5CA1FC]" : ""} />
           </button>
         </div>
       </div>
+
+      {/* Image Viewer */}
+      {viewerOpen && (
+        <ImageViewer
+          images={viewerImages.map((img) => img.url)}
+          initialIndex={viewerIndex}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
 
       {/* Report Modal */}
       {reportModalOpen && (

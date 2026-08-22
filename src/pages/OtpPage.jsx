@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Mail,
+  Shield,
+  Sparkles,
+  CheckCircle,
+  RotateCcw,
+} from "lucide-react";
 import logo from "/src/assets/logo.png";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -133,104 +140,76 @@ const OtpPage = () => {
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl w-full glass-card overflow-hidden">
+      <div className="max-w-5xl w-full glass-card overflow-hidden scale-in">
         <div className="flex flex-col md:flex-row">
           {/* Left Side - Platform Info */}
-          <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg to-bg/80">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="relative">
-                <div className="absolute inset-0 w-10 h-10 bg-accent/20 rounded-full blur-lg"></div>
-                <img
-                  src={logo}
-                  alt="TechTalk Logo"
-                  className="h-8 w-auto relative z-10"
-                />
-              </div>
-              <span className="gradient-title font-bold text-xl">TechTalk</span>
-            </div>
+          <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg via-bg to-[#5CA1FC]/5 relative overflow-hidden">
+            {/* Glow Effects */}
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#5CA1FC]/10 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#5CA1FC]/5 rounded-full blur-3xl"></div>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Verify Your Email
-            </h2>
-            <p className="text-muted mb-8">
-              We've sent a verification code to your email address.
-            </p>
-
-            <div className="space-y-5">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="relative">
+                  <div className="absolute inset-0 w-10 h-10 bg-[#5CA1FC]/30 rounded-full blur-xl animate-pulse"></div>
+                  <img
+                    src={logo}
+                    alt="TechTalk Logo"
+                    className="h-8 w-auto relative z-10"
+                  />
                 </div>
-                <div>
-                  <h4 className="text-white font-medium">Check Your Inbox</h4>
-                  <p className="text-muted text-sm">
-                    Enter the 6-digit code we sent to:
-                  </p>
-                  <p className="text-accent text-sm font-medium mt-1">
-                    {email || "your email"}
-                  </p>
-                </div>
+                <span className="gradient-title font-bold text-xl">
+                  TechTalk
+                </span>
               </div>
 
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-white font-medium">
-                    Secure Verification
-                  </h4>
-                  <p className="text-muted text-sm">
-                    Protecting your developer account
-                  </p>
-                </div>
-              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                Verify Your Email
+              </h2>
+              <p className="text-muted mb-8">
+                We've sent a verification code to your email address.
+              </p>
 
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+              <div className="space-y-5">
+                <div className="flex items-start gap-3 group">
+                  <div className="w-5 h-5 bg-[#5CA1FC]/20 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0 group-hover:bg-[#5CA1FC]/30 transition-all duration-300">
+                    <Mail size={12} className="text-[#5CA1FC]" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium">Check Your Inbox</h4>
+                    <p className="text-muted text-sm">
+                      Enter the 6-digit code we sent to:
+                    </p>
+                    <p className="text-[#5CA1FC] text-sm font-medium mt-1 break-all">
+                      {email || "your email"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-white font-medium">Get Started</h4>
-                  <p className="text-muted text-sm">
-                    Access all TechTalk features
-                  </p>
+
+                <div className="flex items-start gap-3 group">
+                  <div className="w-5 h-5 bg-[#5CA1FC]/20 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0 group-hover:bg-[#5CA1FC]/30 transition-all duration-300">
+                    <Shield size={12} className="text-[#5CA1FC]" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium">
+                      Secure Verification
+                    </h4>
+                    <p className="text-muted text-sm">
+                      Protecting your developer account
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 group">
+                  <div className="w-5 h-5 bg-[#5CA1FC]/20 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0 group-hover:bg-[#5CA1FC]/30 transition-all duration-300">
+                    <CheckCircle size={12} className="text-[#5CA1FC]" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium">Get Started</h4>
+                    <p className="text-muted text-sm">
+                      Access all TechTalk features
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -239,16 +218,19 @@ const OtpPage = () => {
           {/* Right Side - OTP Form */}
           <div className="md:w-1/2 p-8 md:p-10">
             <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white">
-                Verification Code
-              </h3>
+              <div className="flex items-center gap-2">
+                <Sparkles size={24} className="text-[#5CA1FC]" />
+                <h3 className="text-2xl font-bold text-white">
+                  Verification Code
+                </h3>
+              </div>
               <p className="text-muted text-sm mt-1">
                 Enter the 6-digit code sent to your email
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-error/20 border border-error/50 rounded-lg">
+              <div className="mb-4 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
                 <p className="text-error text-sm text-center">{error}</p>
               </div>
             )}
@@ -266,7 +248,7 @@ const OtpPage = () => {
                     value={digit}
                     onChange={(e) => handleCodeChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-semibold text-white bg-panel border border-panelEdge rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all shadow-field-focus"
+                    className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-semibold text-white bg-panel border-2 border-panelEdge rounded-xl focus:outline-none focus:border-[#5CA1FC] focus:ring-2 focus:ring-[#5CA1FC]/30 transition-all duration-200 hover:border-[#5CA1FC]/30"
                     autoFocus={index === 0}
                   />
                 ))}
@@ -276,10 +258,22 @@ const OtpPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 mb-4 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-accent-sm"
+                className="w-full py-3 mb-4 gradient-button text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)] active:scale-[0.98]"
               >
-                {loading ? "Verifying..." : "Verify Code"}
-                {!loading && <ArrowRight size={18} />}
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    Verify Code
+                    <ArrowRight
+                      size={18}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </>
+                )}
               </button>
 
               {/* Resend Section */}
@@ -291,9 +285,19 @@ const OtpPage = () => {
                       type="button"
                       onClick={handleResendCode}
                       disabled={resendLoading}
-                      className="text-accent hover:text-accent/80 font-medium transition-colors disabled:opacity-50"
+                      className="text-[#5CA1FC] hover:text-[#4A8BE8] font-medium transition-colors disabled:opacity-50 hover:underline inline-flex items-center gap-1"
                     >
-                      {resendLoading ? "Sending..." : "Resend Code"}
+                      {resendLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-[#5CA1FC]/30 border-t-[#5CA1FC] rounded-full animate-spin"></div>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw size={14} />
+                          Resend Code
+                        </>
+                      )}
                     </button>
                   ) : (
                     <span className="text-label">
@@ -308,7 +312,7 @@ const OtpPage = () => {
             <div className="mt-6 text-center">
               <button
                 onClick={() => navigate("/signup")}
-                className="text-sm text-muted hover:text-accent transition-colors"
+                className="text-sm text-muted hover:text-[#5CA1FC] transition-colors hover:underline inline-flex items-center gap-1"
               >
                 ← Back to Sign Up
               </button>

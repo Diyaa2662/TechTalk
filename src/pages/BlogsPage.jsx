@@ -29,6 +29,7 @@ const BlogCard = ({
   onBlogUpdate,
   onBlogDelete,
 }) => {
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(blog.is_liked_by_user || false);
   const [likesCount, setLikesCount] = useState(blog.likes_count || 0);
   const [isSaved, setIsSaved] = useState(blog.is_saved || false);
@@ -47,7 +48,6 @@ const BlogCard = ({
 
   const menuRef = useRef(null);
 
-  // إغلاق القائمة عند الضغط خارجها
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -58,7 +58,6 @@ const BlogCard = ({
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // معالجة الإعجاب
   const handleLike = async () => {
     if (liking) return;
     setLiking(true);
@@ -81,7 +80,6 @@ const BlogCard = ({
     }
   };
 
-  // معالجة الحفظ
   const handleSave = async () => {
     if (saving) return;
     setSaving(true);
@@ -101,7 +99,6 @@ const BlogCard = ({
     }
   };
 
-  // معالجة التبليغ
   const handleReport = async () => {
     if (!reportReason.trim()) {
       alert("Please provide a reason for reporting.");
@@ -128,7 +125,6 @@ const BlogCard = ({
     }
   };
 
-  // حذف المقال
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
@@ -141,13 +137,11 @@ const BlogCard = ({
     }
   };
 
-  // تحديث عدد التعليقات
   const handleCommentAdded = () => {
     const newCount = commentsCount + 1;
     setCommentsCount(newCount);
   };
 
-  // تنسيق التاريخ
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -165,22 +159,26 @@ const BlogCard = ({
 
   return (
     <>
-      <div className="glass-card-hover overflow-hidden">
-        {/* Cover Image - مع BASE_URL */}
+      <div className="glass-card hover:border-[#5CA1FC]/40 hover:shadow-[0_4px_20px_rgba(92,161,252,0.15)] transition-all duration-300 overflow-hidden">
         {blog.cover_image_url && (
-          <div className="w-full h-48 overflow-hidden">
+          <div
+            className="w-full overflow-hidden bg-panel/50"
+            style={{ aspectRatio: "16/9" }}
+          >
             <img
               src={`${BASE_URL}${blog.cover_image_url}`}
               alt={blog.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
             />
           </div>
         )}
 
         <div className="p-5">
-          {/* Header - معلومات الكاتب */}
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
+            <Link
+              to={`/profile/${blog.user.username}`}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
               <img
                 src={blog.user.avatar_url}
                 alt={blog.user.name}
@@ -188,10 +186,10 @@ const BlogCard = ({
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="text-white font-semibold hover:text-accent transition-colors">
+                  <h4 className="text-white font-semibold hover:text-[#5CA1FC] transition-colors">
                     {blog.user.name}
                   </h4>
-                  <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
+                  <span className="text-xs px-2 py-0.5 bg-[#5CA1FC]/15 text-[#5CA1FC] rounded-full">
                     {blog.user.badge}
                   </span>
                 </div>
@@ -201,10 +199,9 @@ const BlogCard = ({
                   <span>{formatDate(blog.created_at)}</span>
                 </div>
               </div>
-            </div>
+            </Link>
 
             <div className="flex items-center gap-2">
-              {/* Views و Reading Time */}
               <div className="flex items-center gap-3 text-xs text-muted">
                 <div className="flex items-center gap-1">
                   <Eye size={14} />
@@ -216,37 +213,38 @@ const BlogCard = ({
                 </div>
               </div>
 
-              {/* 3 Dots Menu - للمالك فقط */}
-              {isOwner && (
-                <div className="relative" ref={menuRef}>
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 rounded-lg hover:bg-white/5 transition-colors"
-                  >
-                    <MoreHorizontal size={16} className="text-muted" />
-                  </button>
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+                >
+                  <MoreHorizontal size={16} className="text-muted" />
+                </button>
 
-                  {showMenu && (
-                    <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          window.location.href = `/blogs/${blog.id}`;
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
-                      >
-                        <Edit size={14} /> Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          handleDelete();
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
-                      >
-                        <Trash2 size={14} /> Delete
-                      </button>
-                      <div className="border-t border-panelEdge my-1"></div>
+                {showMenu && (
+                  <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
+                    {isOwner ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            setShowMenu(false);
+                            navigate(`/edit-blog/${blog.id}`);
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <Edit size={14} /> Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowMenu(false);
+                            handleDelete();
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </>
+                    ) : (
                       <button
                         onClick={() => {
                           setShowMenu(false);
@@ -257,43 +255,15 @@ const BlogCard = ({
                         <Flag size={14} />
                         Report Blog
                       </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* 3 Dots Menu - للمستخدمين الآخرين (تبليغ فقط) */}
-              {!isOwner && (
-                <div className="relative" ref={menuRef}>
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 rounded-lg hover:bg-white/5 transition-colors"
-                  >
-                    <MoreHorizontal size={16} className="text-muted" />
-                  </button>
-
-                  {showMenu && (
-                    <div className="absolute right-0 mt-1 w-40 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          setReportModalOpen(true);
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-sm text-error hover:bg-white/5 flex items-center gap-2"
-                      >
-                        <Flag size={14} />
-                        Report Blog
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Title & Subtitle - رابط للمقال */}
           <Link to={`/blogs/${blog.id}`}>
-            <h2 className="text-xl font-bold text-white mb-2 hover:text-accent transition-colors cursor-pointer">
+            <h2 className="text-xl font-bold text-white mb-2 hover:text-[#5CA1FC] transition-colors cursor-pointer">
               {blog.title}
             </h2>
             <p className="text-muted text-sm mb-4 line-clamp-2">
@@ -301,9 +271,7 @@ const BlogCard = ({
             </p>
           </Link>
 
-          {/* Actions Buttons */}
           <div className="flex items-center gap-6 pt-3 border-t border-panelEdge">
-            {/* Like Button */}
             <button
               onClick={handleLike}
               disabled={liking}
@@ -317,32 +285,29 @@ const BlogCard = ({
               <span className="text-sm">{likesCount}</span>
             </button>
 
-            {/* Comment Button */}
             <button
               onClick={() => setIsCommentsModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10 transition-all duration-200"
             >
               <MessageCircle size={18} />
               <span className="text-sm">{commentsCount}</span>
             </button>
 
-            {/* Save Button */}
             <button
               onClick={handleSave}
               disabled={saving}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
                 isSaved
-                  ? "text-accent bg-accent/10"
-                  : "text-muted hover:text-accent hover:bg-accent/10"
+                  ? "text-[#5CA1FC] bg-[#5CA1FC]/10"
+                  : "text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10"
               }`}
             >
-              <Bookmark size={18} className={isSaved ? "fill-accent" : ""} />
+              <Bookmark size={18} className={isSaved ? "fill-[#5CA1FC]" : ""} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Report Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="bg-panel border border-panelEdge rounded-2xl w-full max-w-md p-6 shadow-panel mx-4">
@@ -413,7 +378,6 @@ const BlogCard = ({
         </div>
       )}
 
-      {/* Comments Modal - للمقالات */}
       <CommentsModal
         isOpen={isCommentsModalOpen}
         onClose={() => setIsCommentsModalOpen(false)}
@@ -434,11 +398,12 @@ const BlogsPage = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [userBadge, setUserBadge] = useState("");
+  const [showCreateBtn, setShowCreateBtn] = useState(true);
 
   const isLoadingRef = useRef(false);
   const currentPageRef = useRef(1);
+  const lastScrollY = useRef(0);
 
-  // جلب بيانات المستخدم الحالي للتحقق من البادج
   const fetchCurrentUser = async () => {
     try {
       const response = await api.get("/show-me");
@@ -452,7 +417,6 @@ const BlogsPage = () => {
     fetchCurrentUser();
   }, []);
 
-  // جلب المقالات
   const fetchBlogs = useCallback(async (pageNum, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -480,7 +444,6 @@ const BlogsPage = () => {
     }
   }, []);
 
-  // تحميل أول صفحة
   useEffect(() => {
     setPage(1);
     setBlogs([]);
@@ -489,7 +452,6 @@ const BlogsPage = () => {
     fetchBlogs(1, false);
   }, [fetchBlogs]);
 
-  // تحميل المزيد عند التمرير
   const loadMore = useCallback(() => {
     if (loadingMore || isLoadingRef.current || !hasMore) return;
 
@@ -499,23 +461,32 @@ const BlogsPage = () => {
     fetchBlogs(nextPage, true);
   }, [loadingMore, hasMore, page, fetchBlogs]);
 
-  // كشف التمرير لأسفل الصفحة
   useEffect(() => {
     const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
+      const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
 
-      if (scrollTop + windowHeight >= documentHeight - 500) {
+      if (scrollPercentage > 0.8) {
         loadMore();
       }
+
+      if (currentScrollY > 150 && currentScrollY > lastScrollY.current) {
+        setShowCreateBtn(false);
+      } else if (currentScrollY < lastScrollY.current || currentScrollY < 50) {
+        setShowCreateBtn(true);
+      }
+
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMore]);
 
-  // تحديث المقال بعد التعديل
   const handleBlogUpdate = (updatedBlog) => {
     setBlogs((prevBlogs) =>
       prevBlogs.map((blog) =>
@@ -524,7 +495,6 @@ const BlogsPage = () => {
     );
   };
 
-  // حذف المقال
   const handleBlogDelete = (blogId) => {
     setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
   };
@@ -544,7 +514,7 @@ const BlogsPage = () => {
           <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Try Again
           </button>
@@ -557,6 +527,7 @@ const BlogsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
+          <Bookmark size={48} className="text-[#5CA1FC]/30 mx-auto mb-3" />
           <p className="text-white text-lg">No blogs yet</p>
           <p className="text-muted text-sm mt-1">
             Check back later for new articles
@@ -568,7 +539,26 @@ const BlogsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
-      <h1 className="gradient-title text-2xl font-bold mb-6">Tech Blogs</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="gradient-title text-2xl font-bold">Tech Blogs</h1>
+
+        {userBadge === "expert" && (
+          <button
+            onClick={() => navigate("/create-blog")}
+            className={`
+              fixed top-10 right-6 z-40
+              flex items-center gap-2 px-4 py-2.5 gradient-button text-white font-medium rounded-lg
+              transition-all duration-400 ease-in-out
+              hover:scale-[1.05] active:scale-[0.95]
+              shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)]
+              ${showCreateBtn ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20 pointer-events-none"}
+            `}
+          >
+            <Plus size={18} />
+            <span className="hidden sm:inline">Create Blog</span>
+          </button>
+        )}
+      </div>
 
       <div className="space-y-6">
         {blogs.map((blog) => (
@@ -591,16 +581,6 @@ const BlogsPage = () => {
         <p className="text-center text-muted text-sm py-6">
           You've seen all blogs! 🎉
         </p>
-      )}
-
-      {/* Floating Action Button - يظهر فقط للمستخدمين الـ expert */}
-      {userBadge === "expert" && (
-        <button
-          onClick={() => navigate("/create-blog")}
-          className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-accent hover:bg-accentHover text-white rounded-full shadow-lg shadow-accent/30 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-accent/50"
-        >
-          <Plus size={28} />
-        </button>
       )}
     </div>
   );

@@ -92,14 +92,14 @@ const ActivityPage = () => {
     switch (action) {
       case "post_commented":
       case "blog_commented":
-        return <MessageCircle size={16} className="text-accent" />;
+        return <MessageCircle size={16} className="text-[#5CA1FC]" />;
       case "post_liked":
       case "blog_liked":
         return <Heart size={16} className="text-error" />;
       case "comment_liked":
         return <Heart size={16} className="text-error" />;
       case "comment_disliked":
-        return <ThumbsDown size={16} className="text-accent" />;
+        return <ThumbsDown size={16} className="text-[#5CA1FC]" />;
       default:
         return <Activity size={16} className="text-muted" />;
     }
@@ -138,7 +138,6 @@ const ActivityPage = () => {
       case "blog":
         return `/blogs/${subject.id}`;
       case "comment":
-        // إذا كان التعليق على بوست أو بلوغ، نستخدم الـ meta
         if (activity.meta?.post_id) {
           return `/posts/${activity.meta.post_id}`;
         }
@@ -182,7 +181,7 @@ const ActivityPage = () => {
           <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Try Again
           </button>
@@ -195,7 +194,7 @@ const ActivityPage = () => {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <Activity size={48} className="text-muted mx-auto mb-3" />
+          <Activity size={48} className="text-[#5CA1FC]/30 mx-auto mb-3" />
           <p className="text-muted text-lg">No activity yet</p>
           <p className="text-label text-sm mt-1">
             Your activity will appear here
@@ -207,8 +206,9 @@ const ActivityPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4">
+      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Activity size={28} className="text-accent" />
+        <Activity size={28} className="text-[#5CA1FC]" />
         <h1 className="gradient-title text-2xl font-bold">Activity</h1>
       </div>
 
@@ -221,12 +221,12 @@ const ActivityPage = () => {
             <div
               key={activity.id}
               className={`glass-card p-4 transition-all duration-200 ${
-                isClickable ? "hover:border-accent/50 cursor-pointer" : ""
+                isClickable ? "hover:border-[#5CA1FC]/40 cursor-pointer" : ""
               }`}
             >
               {isClickable ? (
                 <Link to={link} className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center">
                     {getActivityIcon(activity.action)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -247,7 +247,7 @@ const ActivityPage = () => {
                 </Link>
               ) : (
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center">
                     {getActivityIcon(activity.action)}
                   </div>
                   <div className="flex-1 min-w-0">

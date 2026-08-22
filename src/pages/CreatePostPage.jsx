@@ -252,9 +252,12 @@ const CreatePostPage = () => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-muted hover:text-accent transition-colors"
+          className="flex items-center gap-2 text-muted hover:text-[#5CA1FC] transition-colors group"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           <span>Back to Home</span>
         </button>
         <h1 className="gradient-title text-2xl font-bold">Create New Post</h1>
@@ -265,7 +268,7 @@ const CreatePostPage = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Error message */}
         {error && (
-          <div className="p-3 bg-error/20 border border-error/50 rounded-lg">
+          <div className="p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
             <p className="text-error text-sm text-center">{error}</p>
           </div>
         )}
@@ -280,7 +283,7 @@ const CreatePostPage = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What's the title of your post?"
-            className="input-field"
+            className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
           />
         </div>
 
@@ -294,7 +297,7 @@ const CreatePostPage = () => {
             onChange={(e) => setBody(e.target.value)}
             placeholder="Write your post content here..."
             rows="8"
-            className="input-field resize-none"
+            className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
           />
         </div>
 
@@ -303,7 +306,7 @@ const CreatePostPage = () => {
           <button
             type="button"
             onClick={() => setShowCodeBlock(!showCodeBlock)}
-            className="flex items-center gap-2 text-sm text-muted hover:text-accent transition-colors"
+            className="flex items-center gap-2 text-sm text-muted hover:text-[#5CA1FC] transition-colors"
           >
             <Code size={16} />
             {showCodeBlock ? "Hide code block" : "Add code block"}
@@ -312,7 +315,7 @@ const CreatePostPage = () => {
 
         {/* Code Block */}
         {showCodeBlock && (
-          <div className="space-y-3 p-4 glass-card">
+          <div className="space-y-3 p-4 glass-card border border-[#5CA1FC]/10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-label mb-1">
@@ -323,7 +326,7 @@ const CreatePostPage = () => {
                   value={codeLanguage}
                   onChange={(e) => setCodeLanguage(e.target.value)}
                   placeholder="e.g., javascript, python, php"
-                  className="input-field"
+                  className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 />
               </div>
             </div>
@@ -336,7 +339,7 @@ const CreatePostPage = () => {
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="Paste your code here..."
                 rows="6"
-                className="input-field font-mono text-sm"
+                className="input-field font-mono text-sm focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               />
             </div>
           </div>
@@ -353,7 +356,7 @@ const CreatePostPage = () => {
                 {selectedTags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full"
                   >
                     #{tag.name}
                     <button
@@ -379,7 +382,7 @@ const CreatePostPage = () => {
                 }}
                 onFocus={() => setShowTagDropdown(true)}
                 placeholder="Search tags..."
-                className="input-field"
+                className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               />
               <Tag
                 size={16}
@@ -422,7 +425,7 @@ const CreatePostPage = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={photoUploading}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 hover:text-[#5CA1FC]"
             >
               <ImageIcon size={18} />
               {photoUploading ? "Uploading..." : "Upload Images"}
@@ -472,7 +475,7 @@ const CreatePostPage = () => {
               onClick={() => setIsPublished(true)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isPublished
-                  ? "bg-accent text-white shadow-accent-sm"
+                  ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   : "bg-white/5 text-muted hover:text-white"
               }`}
             >
@@ -484,7 +487,7 @@ const CreatePostPage = () => {
               onClick={() => setIsPublished(false)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 !isPublished
-                  ? "bg-accent text-white shadow-accent-sm"
+                  ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   : "bg-white/5 text-muted hover:text-white"
               }`}
             >
@@ -504,7 +507,7 @@ const CreatePostPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-accent-sm"
+            className="flex-1 py-3 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)]"
           >
             {submitting ? (
               <>
@@ -523,7 +526,7 @@ const CreatePostPage = () => {
               type="button"
               onClick={handleSaveDraft}
               disabled={submitting}
-              className="px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-all duration-200 disabled:opacity-50"
+              className="px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-all duration-200 disabled:opacity-50 hover:text-[#5CA1FC]"
             >
               Save as Draft
             </button>

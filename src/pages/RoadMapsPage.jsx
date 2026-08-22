@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, BookOpen, ArrowRight } from "lucide-react";
+import { MapPin, BookOpen, ArrowRight, Sparkles } from "lucide-react";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
@@ -41,7 +41,7 @@ const RoadMapsPage = () => {
           <p className="text-error mb-3">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-accent hover:bg-accentHover text-white rounded-lg font-semibold transition-colors"
+            className="px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
           >
             Try Again
           </button>
@@ -52,12 +52,16 @@ const RoadMapsPage = () => {
 
   if (roadmaps.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <BookOpen size={48} className="text-muted mx-auto mb-3" />
-          <p className="text-muted text-lg">No roadmaps available</p>
-          <p className="text-label text-sm mt-1">
-            Check back later for new learning paths
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 mx-auto mb-6 bg-[#5CA1FC]/10 rounded-full flex items-center justify-center pulse-ring">
+            <BookOpen size={48} className="text-[#5CA1FC]/60" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            No Roadmaps Available
+          </h2>
+          <p className="text-muted text-sm">
+            Check back later for new learning paths to boost your skills! 🚀
           </p>
         </div>
       </div>
@@ -66,8 +70,11 @@ const RoadMapsPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-4">
+      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <MapPin size={28} className="text-accent" />
+        <div className="p-2 rounded-lg bg-[#5CA1FC]/10">
+          <MapPin size={24} className="text-[#5CA1FC]" />
+        </div>
         <h1 className="gradient-title text-2xl font-bold">Learning Roadmaps</h1>
       </div>
 
@@ -76,17 +83,27 @@ const RoadMapsPage = () => {
           <Link
             key={roadmap.id}
             to={`/roadmaps/${roadmap.id}`}
-            className="glass-card-hover p-5 group"
+            className="glass-card p-5 hover:border-[#5CA1FC]/40 hover:shadow-[0_4px_20px_rgba(92,161,252,0.15)] transition-all duration-300 group"
           >
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-accent transition-colors">
-              {roadmap.title}
-            </h3>
-            <p className="text-muted text-sm mb-3 line-clamp-3">
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-lg font-bold text-white group-hover:text-[#5CA1FC] transition-colors line-clamp-2">
+                {roadmap.title}
+              </h3>
+              <Sparkles
+                size={16}
+                className="text-[#5CA1FC]/50 flex-shrink-0 ml-2 mt-1"
+              />
+            </div>
+            <p className="text-muted text-sm mb-4 line-clamp-3">
               {roadmap.description}
             </p>
-            <div className="flex items-center justify-end text-xs text-muted">
-              <span className="flex items-center gap-1 text-accent group-hover:gap-2 transition-all">
-                View Roadmap <ArrowRight size={14} />
+            <div className="flex items-center justify-end text-xs">
+              <span className="flex items-center gap-1 text-[#5CA1FC] group-hover:gap-2 transition-all duration-300 font-medium">
+                View Roadmap{" "}
+                <ArrowRight
+                  size={14}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
               </span>
             </div>
           </Link>

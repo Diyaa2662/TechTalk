@@ -142,7 +142,6 @@ const CreateBlogPage = () => {
       return;
     }
     const newSections = sections.filter((_, i) => i !== index);
-    // إعادة ترتيب الأوردر
     newSections.forEach((section, idx) => {
       section.order = idx + 1;
     });
@@ -190,7 +189,6 @@ const CreateBlogPage = () => {
       return;
     }
 
-    // التحقق من السكشنات
     for (let i = 0; i < sections.length; i++) {
       if (!sections[i].content.trim()) {
         setError(`Section ${i + 1} content is required.`);
@@ -209,14 +207,12 @@ const CreateBlogPage = () => {
       formData.append("cover_image", coverImage);
     }
 
-    // إضافة التاجات بشكل صحيح
     if (selectedTags.length > 0) {
       selectedTags.forEach((tag) => {
         formData.append("tags[]", tag.id);
       });
     }
 
-    // إضافة السكشنات مع الأوردر
     sections.forEach((section, index) => {
       const order = index + 1;
       formData.append(`sections[${index}][title]`, section.title || "");
@@ -227,10 +223,8 @@ const CreateBlogPage = () => {
       }
     });
 
-    // ✅ طباعة محتويات FormData للتحقق
     console.log("===== FormData Debug =====");
     for (let pair of formData.entries()) {
-      // إذا كانت القيمة ملف، نطبع اسم الملف بدلاً من المحتوى
       if (pair[1] instanceof File) {
         console.log(pair[0], `[File: ${pair[1].name}, ${pair[1].size} bytes]`);
       } else {
@@ -247,7 +241,6 @@ const CreateBlogPage = () => {
     } catch (err) {
       console.error("❌ Error creating blog:", err);
 
-      // ✅ طباعة تفاصيل الخطأ كاملة
       if (err.response) {
         console.error("🔴 Response status:", err.response.status);
         console.error("🔴 Response data:", err.response.data);
@@ -255,12 +248,9 @@ const CreateBlogPage = () => {
         console.error("🔴 Full response:", err.response);
       }
 
-      // عرض رسائل الخطأ بشكل مفهوم
       if (err.response?.data?.errors) {
         const errors = err.response.data.errors;
         let errorMessages = [];
-
-        // جمع كل رسائل الخطأ
         Object.keys(errors).forEach((key) => {
           if (Array.isArray(errors[key])) {
             errors[key].forEach((msg) => {
@@ -270,8 +260,6 @@ const CreateBlogPage = () => {
             errorMessages.push(`${key}: ${errors[key]}`);
           }
         });
-
-        // عرض أول خطأ
         if (errorMessages.length > 0) {
           setError(errorMessages[0]);
         } else {
@@ -293,9 +281,12 @@ const CreateBlogPage = () => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate("/blogs")}
-          className="flex items-center gap-2 text-muted hover:text-accent transition-colors"
+          className="flex items-center gap-2 text-muted hover:text-[#5CA1FC] transition-colors group"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           <span>Back to Blogs</span>
         </button>
         <h1 className="gradient-title text-2xl font-bold">Create New Blog</h1>
@@ -306,7 +297,7 @@ const CreateBlogPage = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Error message */}
         {error && (
-          <div className="p-3 bg-error/20 border border-error/50 rounded-lg">
+          <div className="p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
             <p className="text-error text-sm text-center">{error}</p>
           </div>
         )}
@@ -321,7 +312,7 @@ const CreateBlogPage = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What's the title of your blog?"
-            className="input-field"
+            className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
           />
         </div>
 
@@ -335,7 +326,7 @@ const CreateBlogPage = () => {
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder="A short description of your blog"
-            className="input-field"
+            className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
           />
         </div>
 
@@ -346,11 +337,11 @@ const CreateBlogPage = () => {
           </label>
           <div className="relative">
             {coverPreview ? (
-              <div className="relative">
+              <div className="relative rounded-lg overflow-hidden">
                 <img
                   src={coverPreview}
                   alt="Cover"
-                  className="w-full h-48 object-cover rounded-lg border border-panelEdge"
+                  className="w-full h-48 object-cover border border-panelEdge"
                 />
                 <button
                   type="button"
@@ -361,7 +352,7 @@ const CreateBlogPage = () => {
                 </button>
               </div>
             ) : (
-              <div className="w-full h-32 bg-panel/50 border-2 border-dashed border-panelEdge rounded-lg flex items-center justify-center">
+              <div className="w-full h-32 bg-panel/50 border-2 border-dashed border-panelEdge rounded-lg flex items-center justify-center hover:border-[#5CA1FC]/30 transition-colors">
                 <div className="text-center">
                   <ImageIcon size={32} className="text-muted mx-auto mb-2" />
                   <p className="text-muted text-sm">Upload cover image</p>
@@ -380,7 +371,7 @@ const CreateBlogPage = () => {
               />
               <label
                 htmlFor="cover-upload"
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2 hover:text-[#5CA1FC]"
               >
                 <ImageIcon size={18} />
                 {coverPreview ? "Change Cover" : "Upload Cover"}
@@ -400,7 +391,7 @@ const CreateBlogPage = () => {
                 {selectedTags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full"
                   >
                     #{tag.name}
                     <button
@@ -424,7 +415,7 @@ const CreateBlogPage = () => {
               }}
               onFocus={() => setShowTagDropdown(true)}
               placeholder="Search tags..."
-              className="input-field"
+              className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
             />
             {showTagDropdown && tagSearch && filteredTags.length > 0 && (
               <div className="absolute z-10 w-full mt-1 bg-panel border border-panelEdge rounded-lg shadow-panel max-h-48 overflow-y-auto">
@@ -459,7 +450,7 @@ const CreateBlogPage = () => {
             <button
               type="button"
               onClick={addSection}
-              className="flex items-center gap-1 text-sm text-accent hover:text-accent/80 transition-colors"
+              className="flex items-center gap-1 text-sm text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors"
             >
               <Plus size={16} />
               Add Section
@@ -468,7 +459,10 @@ const CreateBlogPage = () => {
 
           <div className="space-y-4">
             {sections.map((section, index) => (
-              <div key={index} className="glass-card p-4">
+              <div
+                key={index}
+                className="glass-card p-4 hover:border-[#5CA1FC]/20 transition-all duration-300"
+              >
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-white font-medium">
                     Section {index + 1}
@@ -494,7 +488,7 @@ const CreateBlogPage = () => {
                         updateSection(index, "title", e.target.value)
                       }
                       placeholder="Section title"
-                      className="input-field"
+                      className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                     />
                   </div>
 
@@ -509,7 +503,7 @@ const CreateBlogPage = () => {
                       }
                       placeholder="Write your section content..."
                       rows="4"
-                      className="input-field resize-none"
+                      className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                     />
                   </div>
 
@@ -519,7 +513,7 @@ const CreateBlogPage = () => {
                     </label>
                     {section.image && (
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs text-accent">
+                        <span className="text-xs text-[#5CA1FC]">
                           Image attached
                         </span>
                         <button
@@ -540,7 +534,7 @@ const CreateBlogPage = () => {
                     />
                     <label
                       htmlFor={`section-image-${index}`}
-                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-sm"
+                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-sm hover:text-[#5CA1FC]"
                     >
                       <ImageIcon size={14} />
                       {section.image ? "Change Image" : "Upload Image"}
@@ -563,7 +557,7 @@ const CreateBlogPage = () => {
               onClick={() => setIsPublished(true)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isPublished
-                  ? "bg-accent text-white shadow-accent-sm"
+                  ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   : "bg-white/5 text-muted hover:text-white"
               }`}
             >
@@ -575,7 +569,7 @@ const CreateBlogPage = () => {
               onClick={() => setIsPublished(false)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 !isPublished
-                  ? "bg-accent text-white shadow-accent-sm"
+                  ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   : "bg-white/5 text-muted hover:text-white"
               }`}
             >
@@ -602,7 +596,7 @@ const CreateBlogPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 px-4 py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-accent-sm"
+            className="flex-1 px-4 py-3 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)]"
           >
             {submitting ? (
               <>

@@ -305,7 +305,6 @@ const EditBlogPage = () => {
     formData.append("subtitle", subtitle.trim() || "");
     formData.append("is_published", isPublished ? 1 : 0);
 
-    // ✅ إضافة التاجات كـ array
     if (selectedTags.length > 0) {
       selectedTags.forEach((tag) => {
         formData.append("tags[]", tag.id);
@@ -320,7 +319,6 @@ const EditBlogPage = () => {
       formData.append("remove_cover_image", "true");
     }
 
-    // ✅ طباعة للdebug
     console.log("===== Edit FormData =====");
     for (let pair of formData.entries()) {
       if (pair[1] instanceof File) {
@@ -332,7 +330,6 @@ const EditBlogPage = () => {
     console.log("========================");
 
     try {
-      // ✅ استخدام الـ endpoint الجديد /updateblog/:id مع POST
       const response = await api.post(`/updateblog/${id}`, formData);
       console.log("✅ Update response:", response.data);
 
@@ -394,9 +391,12 @@ const EditBlogPage = () => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate(`/blogs/${id}`)}
-          className="flex items-center gap-2 text-muted hover:text-accent transition-colors"
+          className="flex items-center gap-2 text-muted hover:text-[#5CA1FC] transition-colors group"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           <span>Back to Blog</span>
         </button>
         <h1 className="gradient-title text-2xl font-bold">Edit Blog</h1>
@@ -407,12 +407,12 @@ const EditBlogPage = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Error & Success messages */}
         {error && (
-          <div className="p-3 bg-error/20 border border-error/50 rounded-lg">
+          <div className="p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
             <p className="text-error text-sm text-center">{error}</p>
           </div>
         )}
         {success && (
-          <div className="p-3 bg-success/20 border border-success/50 rounded-lg">
+          <div className="p-3 bg-success/20 border border-success/30 rounded-lg slide-up">
             <p className="text-success text-sm text-center">{success}</p>
           </div>
         )}
@@ -427,7 +427,7 @@ const EditBlogPage = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Blog title"
-            className="input-field"
+            className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
           />
         </div>
 
@@ -441,7 +441,7 @@ const EditBlogPage = () => {
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder="Blog subtitle"
-            className="input-field"
+            className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
           />
         </div>
 
@@ -452,7 +452,7 @@ const EditBlogPage = () => {
           </label>
           <div className="relative">
             {coverPreview ? (
-              <div className="relative">
+              <div className="relative rounded-lg overflow-hidden">
                 <img
                   key={coverPreview || "no-cover"}
                   src={
@@ -461,7 +461,7 @@ const EditBlogPage = () => {
                       : `${BASE_URL}${coverPreview}`
                   }
                   alt="Cover"
-                  className="w-full h-48 object-cover rounded-lg border border-panelEdge"
+                  className="w-full h-48 object-cover border border-panelEdge"
                 />
                 <button
                   type="button"
@@ -472,7 +472,7 @@ const EditBlogPage = () => {
                 </button>
               </div>
             ) : (
-              <div className="w-full h-32 bg-panel/50 border-2 border-dashed border-panelEdge rounded-lg flex items-center justify-center">
+              <div className="w-full h-32 bg-panel/50 border-2 border-dashed border-panelEdge rounded-lg flex items-center justify-center hover:border-[#5CA1FC]/30 transition-colors">
                 <div className="text-center">
                   <ImageIcon size={32} className="text-muted mx-auto mb-2" />
                   <p className="text-muted text-sm">No cover image</p>
@@ -490,7 +490,7 @@ const EditBlogPage = () => {
               />
               <label
                 htmlFor="cover-upload"
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-2 hover:text-[#5CA1FC]"
               >
                 <ImageIcon size={18} />
                 {coverPreview ? "Change Cover" : "Upload Cover"}
@@ -510,7 +510,7 @@ const EditBlogPage = () => {
                 {selectedTags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full"
                   >
                     #{tag.name}
                     <button
@@ -534,7 +534,7 @@ const EditBlogPage = () => {
               }}
               onFocus={() => setShowTagDropdown(true)}
               placeholder="Search tags..."
-              className="input-field"
+              className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
             />
             {showTagDropdown && tagSearch && filteredTags.length > 0 && (
               <div className="absolute z-10 w-full mt-1 bg-panel border border-panelEdge rounded-lg shadow-panel max-h-48 overflow-y-auto">
@@ -568,7 +568,7 @@ const EditBlogPage = () => {
               onClick={() => setIsPublished(true)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isPublished
-                  ? "bg-accent text-white shadow-accent-sm"
+                  ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   : "bg-white/5 text-muted hover:text-white"
               }`}
             >
@@ -579,7 +579,7 @@ const EditBlogPage = () => {
               onClick={() => setIsPublished(false)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 !isPublished
-                  ? "bg-accent text-white shadow-accent-sm"
+                  ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   : "bg-white/5 text-muted hover:text-white"
               }`}
             >
@@ -597,7 +597,7 @@ const EditBlogPage = () => {
             <button
               type="button"
               onClick={addSection}
-              className="flex items-center gap-1 text-sm text-accent hover:text-accent/80 transition-colors"
+              className="flex items-center gap-1 text-sm text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors"
             >
               <Plus size={16} /> Add Section
             </button>
@@ -605,7 +605,10 @@ const EditBlogPage = () => {
 
           <div className="space-y-4">
             {sections.map((section, index) => (
-              <div key={section.id || index} className="glass-card p-4">
+              <div
+                key={section.id || index}
+                className="glass-card p-4 hover:border-[#5CA1FC]/20 transition-all duration-300"
+              >
                 {editingSection === section.id ? (
                   <div className="space-y-3">
                     <div>
@@ -616,7 +619,7 @@ const EditBlogPage = () => {
                         type="text"
                         defaultValue={section.title}
                         placeholder="Section title"
-                        className="input-field"
+                        className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                         ref={(el) => {
                           if (el) {
                             el.value = section.title || "";
@@ -635,7 +638,7 @@ const EditBlogPage = () => {
                         defaultValue={section.content}
                         placeholder="Section content"
                         rows="3"
-                        className="input-field resize-none"
+                        className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                         ref={(el) => {
                           if (el) {
                             el.value = section.content;
@@ -663,7 +666,7 @@ const EditBlogPage = () => {
                           handleEditSectionAPI(section.id, updatedData);
                         }}
                         disabled={sectionLoading}
-                        className="px-3 py-1 bg-accent hover:bg-accentHover text-white rounded-lg text-sm"
+                        className="px-3 py-1 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg text-sm shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                       >
                         Save
                       </button>
@@ -702,11 +705,11 @@ const EditBlogPage = () => {
                       <button
                         type="button"
                         onClick={() => setEditingSection(section.id)}
-                        className="p-1 hover:text-accent transition-colors"
+                        className="p-1 hover:text-[#5CA1FC] transition-colors"
                       >
                         <Edit
                           size={14}
-                          className="text-muted hover:text-accent"
+                          className="text-muted hover:text-[#5CA1FC]"
                         />
                       </button>
                       <button
@@ -728,7 +731,7 @@ const EditBlogPage = () => {
 
           {/* Add Section Form */}
           {showAddSection && (
-            <div className="mt-4 p-4 glass-card">
+            <div className="mt-4 p-4 glass-card border border-[#5CA1FC]/10">
               <h4 className="text-white font-medium mb-3">New Section</h4>
               <div className="space-y-3">
                 <input
@@ -738,7 +741,7 @@ const EditBlogPage = () => {
                     setNewSection({ ...newSection, title: e.target.value })
                   }
                   placeholder="Section title (optional)"
-                  className="input-field"
+                  className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 />
                 <textarea
                   value={newSection.content}
@@ -747,7 +750,7 @@ const EditBlogPage = () => {
                   }
                   placeholder="Section content *"
                   rows="3"
-                  className="input-field resize-none"
+                  className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 />
                 <input
                   type="file"
@@ -761,12 +764,12 @@ const EditBlogPage = () => {
                 />
                 <label
                   htmlFor="new-section-image"
-                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-sm"
+                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-sm hover:text-[#5CA1FC]"
                 >
                   <ImageIcon size={14} /> Add Image
                 </label>
                 {newSection.image && (
-                  <div className="flex items-center gap-2 text-xs text-accent">
+                  <div className="flex items-center gap-2 text-xs text-[#5CA1FC]">
                     <span>Image attached</span>
                     <button
                       type="button"
@@ -784,7 +787,7 @@ const EditBlogPage = () => {
                     type="button"
                     onClick={handleAddSectionAPI}
                     disabled={sectionLoading}
-                    className="px-4 py-1.5 bg-accent hover:bg-accentHover text-white rounded-lg text-sm"
+                    className="px-4 py-1.5 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white rounded-lg text-sm shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                   >
                     {sectionLoading ? (
                       <Loader2 size={16} className="animate-spin" />
@@ -808,7 +811,7 @@ const EditBlogPage = () => {
             <button
               type="button"
               onClick={() => setShowAddSection(true)}
-              className="mt-3 text-sm text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
+              className="mt-3 text-sm text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors flex items-center gap-1"
             >
               <Plus size={16} /> Add New Section
             </button>
@@ -827,7 +830,7 @@ const EditBlogPage = () => {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 px-4 py-3 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-accent-sm"
+            className="flex-1 px-4 py-3 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)]"
           >
             {saving ? (
               <>

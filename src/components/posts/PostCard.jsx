@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   Heart,
   MessageCircle,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import api from "../../services/api";
 import CommentsModal from "../comments/CommentsModal";
+import ImageViewer from "../common/ImageViewer";
 
 const PostCard = ({
   post,
@@ -23,7 +25,7 @@ const PostCard = ({
   onCommentUpdate,
   onPostUpdate,
   onPostDelete,
-  isContentOwner = false, // ✅ مالك البوست
+  isContentOwner = false,
 }) => {
   const [isLiked, setIsLiked] = useState(post.is_liked_by_user || false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
@@ -34,6 +36,8 @@ const PostCard = ({
   const [saving, setSaving] = useState(false);
   const [viewRecorded, setViewRecorded] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
   const menuRef = useRef(null);
 
   // Edit states
@@ -57,7 +61,7 @@ const PostCard = ({
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const isOwner = post.user?.id === currentUser?.id;
 
-  // تسجيل مشاهدة البوست (يبقى sessionStorage لمنع التكرار فقط)
+  // تسجيل مشاهدة البوست
   useEffect(() => {
     const recordView = async () => {
       const viewedKey = `post_viewed_${post.id}`;
@@ -259,7 +263,7 @@ const PostCard = ({
     }
   };
 
-  // مودال التعديل (نفسه ما تغير)
+  // مودال التعديل
   if (isEditing) {
     const filteredEditTags = allTags.filter(
       (tag) =>
@@ -346,7 +350,7 @@ const PostCard = ({
                     {editTags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-accent/10 text-accent rounded-full"
+                        className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full"
                       >
                         #{tag.name}
                         <button
@@ -415,10 +419,13 @@ const PostCard = ({
                     </button>
                   </div>
                 ))}
-                <label className="w-20 h-20 rounded-lg border-2 border-dashed border-panelEdge flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors">
+                <label className="w-20 h-20 rounded-lg border-2 border-dashed border-panelEdge flex items-center justify-center cursor-pointer hover:border-[#5CA1FC]/50 transition-colors">
                   <div className="flex flex-col items-center">
                     {uploadingPhoto ? (
-                      <Loader2 size={24} className="text-accent animate-spin" />
+                      <Loader2
+                        size={24}
+                        className="text-[#5CA1FC] animate-spin"
+                      />
                     ) : (
                       <>
                         <span className="text-2xl text-muted">+</span>
@@ -447,7 +454,7 @@ const PostCard = ({
                   onClick={() => setEditIsPublished(true)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     editIsPublished
-                      ? "bg-accent text-white shadow-accent-sm"
+                      ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                       : "bg-white/5 text-muted hover:text-white"
                   }`}
                 >
@@ -458,7 +465,7 @@ const PostCard = ({
                   onClick={() => setEditIsPublished(false)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     !editIsPublished
-                      ? "bg-accent text-white shadow-accent-sm"
+                      ? "bg-[#5CA1FC] text-white shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
                       : "bg-white/5 text-muted hover:text-white"
                   }`}
                 >
@@ -481,7 +488,7 @@ const PostCard = ({
             <button
               onClick={handleEditSubmit}
               disabled={editing}
-              className="flex-1 px-4 py-2 bg-accent hover:bg-accentHover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-[#5CA1FC] hover:bg-[#4A8BE8] text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)]"
             >
               {editing ? (
                 <Loader2 size={18} className="animate-spin" />
@@ -500,7 +507,10 @@ const PostCard = ({
       <div className="glass-card-hover p-5">
         {/* Header - معلومات المستخدم */}
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
+          <Link
+            to={`/profile/${post.user.username}`}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
             <img
               src={post.user.avatar_url}
               alt={post.user.name}
@@ -508,10 +518,10 @@ const PostCard = ({
             />
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="text-white font-semibold hover:text-accent transition-colors cursor-pointer">
+                <h4 className="text-white font-semibold hover:text-[#5CA1FC] transition-colors">
                   {post.user.name}
                 </h4>
-                <span className="text-xs px-2 py-0.5 bg-accent/15 text-accent rounded-full">
+                <span className="text-xs px-2 py-0.5 bg-[#5CA1FC]/15 text-[#5CA1FC] rounded-full">
                   {post.user.badge}
                 </span>
               </div>
@@ -521,16 +531,14 @@ const PostCard = ({
                 <span>{formatDate(post.created_at)}</span>
               </div>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-2">
-            {/* Views count - نستخدم views_count من الـ API مباشرة */}
             <div className="flex items-center gap-1 text-xs text-muted">
               <Eye size={14} />
               <span>{post.views_count || 0}</span>
             </div>
 
-            {/* 3 Dots Menu - للمالك فقط */}
             {isOwner && (
               <div className="relative" ref={menuRef}>
                 <button
@@ -567,26 +575,25 @@ const PostCard = ({
           </div>
         </div>
 
-        {/* Title */}
-        <h3 className="text-xl font-bold text-white mb-2 hover:text-accent transition-colors cursor-pointer">
-          {post.title}
-        </h3>
+        <Link to={`/posts/${post.id}`}>
+          <h3 className="text-xl font-bold text-white mb-2 hover:text-[#5CA1FC] transition-colors cursor-pointer">
+            {post.title}
+          </h3>
+        </Link>
 
-        {/* Body */}
         <p className="text-muted mb-3 leading-relaxed">
           {post.body && post.body.length > 200
             ? `${post.body.substring(0, 200)}...`
             : post.body}
         </p>
 
-        {/* Code Block */}
         {post.code && (
           <div className="mb-3 bg-bg/50 rounded-lg overflow-hidden border border-panelEdge">
             <div className="flex items-center justify-between px-3 py-2 bg-panel/50 border-b border-panelEdge">
               <span className="text-xs text-muted">
                 {post.code_language || "code"}
               </span>
-              <button className="text-muted hover:text-accent transition-colors">
+              <button className="text-muted hover:text-[#5CA1FC] transition-colors">
                 <Code size={14} />
               </button>
             </div>
@@ -596,29 +603,36 @@ const PostCard = ({
           </div>
         )}
 
-        {/* Photos */}
         {post.photos && post.photos.length > 0 && (
           <div
             className={`grid gap-2 mb-3 ${post.photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
           >
             {post.photos.map((photo, idx) => (
-              <img
+              <div
                 key={photo.id || idx}
-                src={photo.url || photo}
-                alt={`Post ${idx + 1}`}
-                className="rounded-lg w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              />
+                className="relative rounded-lg overflow-hidden bg-panel/50"
+                style={{ aspectRatio: "4/3" }}
+              >
+                <img
+                  src={photo.url || photo}
+                  alt={`Post ${idx + 1}`}
+                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity hover:scale-[1.02]"
+                  onClick={() => {
+                    setViewerIndex(idx);
+                    setViewerOpen(true);
+                  }}
+                />
+              </div>
             ))}
           </div>
         )}
 
-        {/* Tags */}
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {post.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full hover:bg-accent/20 transition-colors cursor-pointer"
+                className="text-xs px-2 py-1 bg-[#5CA1FC]/10 text-[#5CA1FC] rounded-full hover:bg-[#5CA1FC]/20 transition-colors cursor-pointer"
               >
                 #{tag.name}
               </span>
@@ -626,9 +640,7 @@ const PostCard = ({
           </div>
         )}
 
-        {/* Actions Buttons */}
         <div className="flex items-center justify-around pt-3 border-t border-panelEdge">
-          {/* Like Button */}
           <button
             onClick={handleLike}
             disabled={liking}
@@ -647,41 +659,46 @@ const PostCard = ({
             <span className="text-sm">{likesCount}</span>
           </button>
 
-          {/* Comment Button - فتح المودال */}
           <button
             onClick={() => setIsCommentsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10 transition-all duration-200"
           >
             <MessageCircle size={18} />
             <span className="text-sm">{commentsCount}</span>
           </button>
 
-          {/* Save Button */}
           <button
             onClick={handleSave}
             disabled={saving}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all duration-200 ${
               isSaved
-                ? "text-accent bg-accent/10"
-                : "text-muted hover:text-accent hover:bg-accent/10"
+                ? "text-[#5CA1FC] bg-[#5CA1FC]/10"
+                : "text-muted hover:text-[#5CA1FC] hover:bg-[#5CA1FC]/10"
             } ${saving ? "scale-90" : "scale-100"} active:scale-75`}
           >
             <Bookmark
               size={18}
-              className={`${isSaved ? "fill-accent" : ""} transition-all duration-200`}
+              className={`${isSaved ? "fill-[#5CA1FC]" : ""} transition-all duration-200`}
             />
           </button>
         </div>
       </div>
 
-      {/* Comments Modal */}
+      {viewerOpen && (
+        <ImageViewer
+          images={post.photos}
+          initialIndex={viewerIndex}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
+
       <CommentsModal
         isOpen={isCommentsModalOpen}
         onClose={() => setIsCommentsModalOpen(false)}
         postId={post.id}
         type="post"
         onCommentAdded={handleCommentAdded}
-        isContentOwner={isContentOwner} // ✅ تمرير مالك البوست للمودال
+        isContentOwner={isContentOwner}
       />
     </>
   );
