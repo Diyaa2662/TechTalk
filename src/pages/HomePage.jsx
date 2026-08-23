@@ -20,6 +20,7 @@ import CommentsModal from "../components/comments/CommentsModal";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import PostCard from "../components/posts/PostCard";
 import ChatBot from "../components/chat/ChatBot";
+import ProfileCompletionBanner from "../components/common/ProfileCompletionBanner";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -232,8 +233,10 @@ const HomePage = () => {
   }
 
   return (
-    // ✅ تغيير max-w-3xl إلى max-w-4xl
     <div className="max-w-4xl mx-auto py-6 px-4">
+      {/* ✅ Profile Completion Banner */}
+      <ProfileCompletionBanner />
+
       {/* Header - مع العنوان الجديد */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="gradient-title text-2xl font-bold">For You</h1>

@@ -127,9 +127,6 @@ const ChatBot = ({ isOpen, onClose }) => {
             <span className="font-semibold text-white text-sm truncate">
               TechTalk AI
             </span>
-            <span className="text-xs px-2 py-0.5 bg-[#5CA1FC]/20 text-[#5CA1FC] rounded-full flex-shrink-0">
-              Gemini
-            </span>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <button
