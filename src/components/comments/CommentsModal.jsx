@@ -22,6 +22,27 @@ import {
 } from "lucide-react";
 import api from "../../services/api";
 
+// ✅ إضافة BASE_URL
+const BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+
+// ✅ دالة للحصول على الرابط الصحيح للصور
+const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `${BASE_URL}${url}`;
+};
+
+// ✅ دالة خاصة للحصول على رابط الـ avatar من الـ suggestions
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return null;
+  if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
+    return avatar;
+  }
+  return `${BASE_URL}/storage/avatars/${avatar}`;
+};
+
 const CommentsModal = ({
   isOpen,
   onClose,
@@ -982,8 +1003,13 @@ const CommentsModal = ({
           <div className="absolute -left-1 top-0 bottom-0 w-1 bg-[#5CA1FC] rounded-full"></div>
         )}
 
-        <div className="w-8 h-8 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center flex-shrink-0">
-          <User size={16} className="text-[#5CA1FC]" />
+        {/* ✅ صورة المستخدم - مع getImageUrl */}
+        <div className="flex-shrink-0">
+          <img
+            src={getImageUrl(comment.avatar_url) || "/default-avatar.png"}
+            alt={comment.user_name}
+            className="w-8 h-8 rounded-full object-cover"
+          />
         </div>
 
         <div className="flex-1">
@@ -1371,10 +1397,10 @@ const CommentsModal = ({
                 selectedSuggestionIndex === idx ? "bg-white/5" : ""
               }`}
             >
-              <div className="w-6 h-6 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {user.avatar ? (
                   <img
-                    src={user.avatar}
+                    src={getAvatarUrl(user.avatar)}
                     alt={user.name}
                     className="w-6 h-6 rounded-full object-cover"
                   />
