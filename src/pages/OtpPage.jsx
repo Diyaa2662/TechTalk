@@ -7,6 +7,7 @@ import {
   Sparkles,
   CheckCircle,
   RotateCcw,
+  AlertCircle,
 } from "lucide-react";
 import logo from "/src/assets/logo.png";
 import api from "../services/api";
@@ -19,7 +20,9 @@ const OtpPage = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
@@ -44,6 +47,16 @@ const OtpPage = () => {
     return () => clearTimeout(timer);
   }, [countdown, canResend]);
 
+  // إخفاء رسالة النجاح بعد 3 ثواني
+  useEffect(() => {
+    if (resendSuccess) {
+      const timer = setTimeout(() => {
+        setResendSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendSuccess]);
+
   const handleCodeChange = (index, value) => {
     if (value.length > 1) return;
 
@@ -67,10 +80,11 @@ const OtpPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
 
     const otpCode = code.join("");
     if (otpCode.length !== 6) {
-      setError("Please enter the 6-digit verification code");
+      setError("Please enter the full 6-digit verification code.");
       return;
     }
 
@@ -91,16 +105,32 @@ const OtpPage = () => {
         localStorage.removeItem("temp_email");
         localStorage.removeItem("temp_user_id");
 
-        navigate("/");
+        setSuccess(true);
+
+        // ✅ انتظر نصف ثانية قبل التوجيه للـ Home
+        setTimeout(() => {
+          navigate("/");
+        }, 500);
       }
     } catch (err) {
       console.error("OTP verification error:", err);
 
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
+      if (err.response?.status === 401) {
+        setError("Invalid verification code. Please check and try again.");
+      } else if (err.response?.data?.message) {
+        const translated = translateErrorMessage(err.response.data.message);
+        setError(translated);
+      } else if (err.code === "ERR_NETWORK") {
+        setError(
+          "Unable to connect to the server. Please check your internet connection.",
+        );
       } else {
-        setError("Invalid verification code. Please try again.");
+        setError("Something went wrong. Please try again.");
       }
+
+      // ✅ مسح الكود عند الخطأ عشان المستخدم يعيد الإدخال
+      setCode(["", "", "", "", "", ""]);
+      document.getElementById("otp-input-0")?.focus();
     } finally {
       setLoading(false);
     }
@@ -109,6 +139,7 @@ const OtpPage = () => {
   const handleResendCode = async () => {
     setResendLoading(true);
     setError("");
+    setResendSuccess(false);
 
     try {
       await api.post("/otp/resend", { email });
@@ -116,24 +147,43 @@ const OtpPage = () => {
       setCountdown(60);
       setCanResend(false);
       setCode(["", "", "", "", "", ""]);
+      setResendSuccess(true);
 
       const firstInput = document.getElementById("otp-input-0");
       if (firstInput) firstInput.focus();
     } catch (err) {
       console.error("Resend error:", err);
-      setError(
-        err.response?.data?.message ||
-          "Failed to resend code. Please try again.",
-      );
+
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === "ERR_NETWORK") {
+        setError("Unable to connect to the server. Please try again.");
+      } else {
+        setError("Failed to resend code. Please try again.");
+      }
     } finally {
       setResendLoading(false);
     }
   };
 
+  // ✅ دالة لترجمة رسائل الخطأ
+  const translateErrorMessage = (message) => {
+    if (message.includes("invalid")) {
+      return "Invalid verification code. Please check and try again.";
+    }
+    if (message.includes("expired")) {
+      return "Verification code has expired. Please request a new one.";
+    }
+    if (message.includes("already verified")) {
+      return "This email is already verified. Please login.";
+    }
+    return message;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <LoadingSpinner size="lg" text="Verifying..." />
+        <LoadingSpinner size="lg" text="Verifying your code..." />
       </div>
     );
   }
@@ -144,7 +194,6 @@ const OtpPage = () => {
         <div className="flex flex-col md:flex-row">
           {/* Left Side - Platform Info */}
           <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg via-bg to-[#5CA1FC]/5 relative overflow-hidden">
-            {/* Glow Effects */}
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#5CA1FC]/10 rounded-full blur-3xl"></div>
             <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#5CA1FC]/5 rounded-full blur-3xl"></div>
 
@@ -229,9 +278,60 @@ const OtpPage = () => {
               </p>
             </div>
 
+            {/* ✅ رسالة النجاح */}
+            {success && (
+              <div className="mb-4 p-4 bg-success/20 border border-success/30 rounded-lg slide-up">
+                <div className="flex items-center gap-3">
+                  <CheckCircle
+                    size={20}
+                    className="text-success flex-shrink-0"
+                  />
+                  <div>
+                    <p className="text-success text-sm font-medium">
+                      Email verified successfully! 🎉
+                    </p>
+                    <p className="text-success/80 text-xs mt-0.5">
+                      Redirecting you to the homepage...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ✅ رسالة نجاح إعادة الإرسال */}
+            {resendSuccess && (
+              <div className="mb-4 p-3 bg-success/20 border border-success/30 rounded-lg slide-up">
+                <div className="flex items-center gap-3">
+                  <CheckCircle
+                    size={16}
+                    className="text-success flex-shrink-0"
+                  />
+                  <p className="text-success text-sm">
+                    New verification code sent successfully! 📧
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ✅ رسالة الخطأ المحسّنة */}
             {error && (
-              <div className="mb-4 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
-                <p className="text-error text-sm text-center">{error}</p>
+              <div className="mb-4 p-4 bg-error/20 border border-error/30 rounded-lg slide-up">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-error/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <AlertCircle size={14} className="text-error" />
+                  </div>
+                  <div>
+                    <p className="text-error text-sm font-medium">
+                      {error.includes("Please") ? error : `Oops! ${error}`}
+                    </p>
+                    {error.includes("code") && (
+                      <p className="text-error/70 text-xs mt-0.5">
+                        Tip: Check your email inbox (and spam folder) for the
+                        verification code.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -257,13 +357,18 @@ const OtpPage = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || success}
                 className="w-full py-3 mb-4 gradient-button text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(92,161,252,0.25)] hover:shadow-[0_8px_32px_rgba(92,161,252,0.35)] active:scale-[0.98]"
               >
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     Verifying...
+                  </>
+                ) : success ? (
+                  <>
+                    <CheckCircle size={18} />
+                    Verified!
                   </>
                 ) : (
                   <>

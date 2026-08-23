@@ -37,10 +37,20 @@ api.interceptors.response.use(
     if (error.response) {
       const { status } = error.response;
 
+      // هل كان الطلب أصلاً مرسل مع توكن (Authorization header)؟
+      const hadToken = Boolean(error.config?.headers?.Authorization);
+
       if (status === 401) {
-        console.error("Session expired - Please login again");
-        localStorage.removeItem("authToken");
-        window.location.href = "/login";
+        if (hadToken) {
+          // كان في جلسة فعلية (توكن موجود) وانتهت صلاحيتها أثناء الاستخدام
+          console.error("Session expired - Please login again");
+          localStorage.removeItem("authToken");
+          window.location.href = "/login";
+        } else {
+          // ما كان في توكن أصلاً (مثلاً طلب /login بكلمة سر غلط)
+          // ما لازم نعمل ريدايركت هون، خلي الكومبوننت يعرض رسالة الخطأ
+          console.error("Login failed - Invalid credentials");
+        }
       } else if (status === 403) {
         console.error("No permission to access this resource");
       } else if (status === 404) {

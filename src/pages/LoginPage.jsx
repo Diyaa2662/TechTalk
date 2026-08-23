@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Code,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import logo from "/src/assets/logo.png";
 import api from "../services/api";
@@ -22,12 +23,45 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const translateErrorMessage = (message) => {
+    if (message.includes("invalid credentials")) {
+      return "Invalid email or password. Please check your credentials and try again.";
+    }
+    if (message.includes("account not found")) {
+      return "No account found with this email. Please sign up first.";
+    }
+    if (message.includes("account is locked")) {
+      return "Your account has been temporarily locked due to multiple failed attempts. Please try again later.";
+    }
+    if (message.includes("verify your email")) {
+      return "Please verify your email address before logging in. Check your inbox for the verification code.";
+    }
+    if (message.includes("too many attempts")) {
+      return "Too many failed login attempts. Please wait a few minutes before trying again.";
+    }
+    return message;
+  };
+
+  const handleSubmit = async () => {
     setError("");
 
-    if (!email || !password) {
-      setError("Please fill in all fields");
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
       return;
     }
 
@@ -35,7 +69,7 @@ const LoginPage = () => {
 
     try {
       const response = await api.post("/login", {
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
@@ -44,15 +78,24 @@ const LoginPage = () => {
       if (response.data.data?.access_token) {
         localStorage.setItem("authToken", response.data.data.access_token);
         localStorage.setItem("user", JSON.stringify(response.data.data.user));
+        localStorage.setItem("last_login", new Date().toISOString());
         navigate("/");
       }
     } catch (err) {
       console.error("Login error:", err);
 
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
+      if (err.response?.status === 401) {
+        setError(
+          "Invalid email or password. Please double-check your credentials.",
+        );
+      } else if (err.response?.data?.message) {
+        setError(translateErrorMessage(err.response.data.message));
+      } else if (err.code === "ERR_NETWORK") {
+        setError(
+          "Unable to connect to the server. Please check your internet connection and try again.",
+        );
       } else {
-        setError("Invalid email or password. Please try again.");
+        setError("Something went wrong. Please try again later.");
       }
     } finally {
       setLoading(false);
@@ -65,7 +108,6 @@ const LoginPage = () => {
         <div className="flex flex-col md:flex-row">
           {/* Left Side - Platform Info */}
           <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg via-bg to-[#5CA1FC]/5 relative overflow-hidden">
-            {/* Glow Effects */}
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#5CA1FC]/10 rounded-full blur-3xl"></div>
             <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#5CA1FC]/5 rounded-full blur-3xl"></div>
 
@@ -161,19 +203,45 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
-                <p className="text-error text-sm text-center">{error}</p>
+              <div className="mb-4 p-4 bg-error/20 border border-error/30 rounded-lg slide-up">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-error/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <AlertCircle size={14} className="text-error" />
+                  </div>
+                  <div>
+                    <p className="text-error text-sm font-medium">
+                      {error.includes("Please") ? error : `Oops! ${error}`}
+                    </p>
+                    {error.includes("email") && (
+                      <p className="text-error/70 text-xs mt-0.5">
+                        Tip: Make sure you're using the email you registered
+                        with.
+                      </p>
+                    )}
+                    {error.includes("password") && (
+                      <p className="text-error/70 text-xs mt-0.5">
+                        Tip: Passwords are case-sensitive. Check your caps lock.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Email */}
+            <form
+              className="space-y-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSubmit();
+              }}
+            >
               <div>
                 <label
                   htmlFor="email"
                   className="block text-sm font-medium text-label mb-1"
                 >
-                  Email Address
+                  Email Address <span className="text-error">*</span>
                 </label>
                 <input
                   id="email"
@@ -184,17 +252,16 @@ const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="hello@example.com"
-                  className="input-field"
+                  className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                 />
               </div>
 
-              {/* Password with eye icon */}
               <div>
                 <label
                   htmlFor="password"
                   className="block text-sm font-medium text-label mb-1"
                 >
-                  Password
+                  Password <span className="text-error">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -206,7 +273,7 @@ const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="input-field pr-11"
+                    className="input-field pr-11 focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                   />
                   <button
                     type="button"
@@ -216,9 +283,11 @@ const LoginPage = () => {
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
+                <p className="text-xs text-muted mt-1">
+                  Password is case-sensitive. Make sure caps lock is off.
+                </p>
               </div>
 
-              {/* Forgot Password Link */}
               <div className="flex justify-end">
                 <Link
                   to="/forgot-password"
@@ -228,7 +297,6 @@ const LoginPage = () => {
                 </Link>
               </div>
 
-              {/* Sign In Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -251,7 +319,6 @@ const LoginPage = () => {
               </button>
             </form>
 
-            {/* Sign Up link */}
             <div className="mt-6 text-center">
               <p className="text-sm text-muted">
                 Don't have an account?{" "}

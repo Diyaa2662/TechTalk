@@ -8,6 +8,7 @@ import {
   Shield,
   Sparkles,
   RotateCcw,
+  AlertCircle,
 } from "lucide-react";
 import logo from "/src/assets/logo.png";
 import api from "../services/api";
@@ -24,16 +25,24 @@ const ForgotPasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
 
-    if (!email) {
-      setError("Please enter your email address");
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      setError("Please enter a valid email address.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await api.post("/forgot-password", { email });
+      const response = await api.post("/forgot-password", {
+        email: email.trim().toLowerCase(),
+      });
 
       console.log("Forgot password response:", response.data);
 
@@ -41,20 +50,43 @@ const ForgotPasswordPage = () => {
     } catch (err) {
       console.error("Forgot password error:", err);
 
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
+      if (err.response?.status === 404) {
+        setError(
+          "No account found with this email address. Please sign up first.",
+        );
+      } else if (err.response?.data?.message) {
+        const translated = translateErrorMessage(err.response.data.message);
+        setError(translated);
+      } else if (err.code === "ERR_NETWORK") {
+        setError(
+          "Unable to connect to the server. Please check your internet connection.",
+        );
       } else {
-        setError("Something went wrong. Please try again.");
+        setError("Something went wrong. Please try again later.");
       }
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ دالة لترجمة رسائل الخطأ
+  const translateErrorMessage = (message) => {
+    if (message.includes("not found")) {
+      return "No account found with this email address. Please sign up first.";
+    }
+    if (message.includes("invalid")) {
+      return "Please enter a valid email address.";
+    }
+    if (message.includes("rate limit") || message.includes("too many")) {
+      return "Too many requests. Please wait a few minutes before trying again.";
+    }
+    return message;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <LoadingSpinner size="lg" text="Sending..." />
+        <LoadingSpinner size="lg" text="Sending reset link..." />
       </div>
     );
   }
@@ -65,7 +97,6 @@ const ForgotPasswordPage = () => {
         <div className="flex flex-col md:flex-row">
           {/* Left Side - Platform Info */}
           <div className="md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-bg via-bg to-[#5CA1FC]/5 relative overflow-hidden">
-            {/* Glow Effects */}
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#5CA1FC]/10 rounded-full blur-3xl"></div>
             <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#5CA1FC]/5 rounded-full blur-3xl"></div>
 
@@ -158,14 +189,35 @@ const ForgotPasswordPage = () => {
               </p>
             </div>
 
+            {/* ✅ رسالة الخطأ المحسّنة */}
             {error && (
-              <div className="mb-4 p-3 bg-error/20 border border-error/30 rounded-lg slide-up">
-                <p className="text-error text-sm text-center">{error}</p>
+              <div className="mb-4 p-4 bg-error/20 border border-error/30 rounded-lg slide-up">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-error/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <AlertCircle size={14} className="text-error" />
+                  </div>
+                  <div>
+                    <p className="text-error text-sm font-medium">
+                      {error.includes("Please") ? error : `Oops! ${error}`}
+                    </p>
+                    {error.includes("email") && (
+                      <p className="text-error/70 text-xs mt-0.5">
+                        Tip: Make sure you're using the email you registered
+                        with.
+                      </p>
+                    )}
+                    {error.includes("account") && (
+                      <p className="text-error/70 text-xs mt-0.5">
+                        Tip: If you don't have an account, please sign up first.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
             {success ? (
-              // رسالة النجاح
+              // ✅ رسالة النجاح المحسّنة
               <div className="slide-up">
                 <div className="mb-6 p-6 bg-success/10 border border-success/30 rounded-xl text-center">
                   <div className="flex items-center justify-center mb-3">
@@ -174,11 +226,15 @@ const ForgotPasswordPage = () => {
                     </div>
                   </div>
                   <h4 className="text-white font-semibold text-lg mb-2">
-                    Check Your Email
+                    Check Your Email 📧
                   </h4>
                   <p className="text-success text-sm">
                     If your email exists in our system, a password reset link
                     has been sent.
+                  </p>
+                  <p className="text-success/70 text-xs mt-2">
+                    Please check your inbox (and spam folder) for the reset
+                    link.
                   </p>
                 </div>
 
@@ -194,14 +250,20 @@ const ForgotPasswordPage = () => {
                 </button>
               </div>
             ) : (
-              <form className="space-y-5" onSubmit={handleSubmit}>
-                {/* Email */}
+              <form
+                className="space-y-5"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit(e);
+                }}
+              >
                 <div>
                   <label
                     htmlFor="email"
                     className="block text-sm font-medium text-label mb-1"
                   >
-                    Email Address
+                    Email Address <span className="text-error">*</span>
                   </label>
                   <input
                     id="email"
@@ -212,11 +274,10 @@ const ForgotPasswordPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="hello@example.com"
-                    className="input-field"
+                    className="input-field focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
                   />
                 </div>
 
-                {/* Send Reset Link Button */}
                 <button
                   type="submit"
                   disabled={loading}
