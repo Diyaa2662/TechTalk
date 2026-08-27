@@ -31,7 +31,6 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
 
-// ✅ دالة للحصول على الرابط الصحيح
 const getImageUrl = (url) => {
   if (!url) return null;
   if (url.startsWith("http://") || url.startsWith("https://")) {
@@ -40,7 +39,6 @@ const getImageUrl = (url) => {
   return `${BASE_URL}${url}`;
 };
 
-// أيقونات SVG لوسائل التواصل
 const GithubIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -106,21 +104,18 @@ const UserProfilePage = () => {
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
 
-  // Posts states
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsPage, setPostsPage] = useState(1);
   const [postsHasMore, setPostsHasMore] = useState(false);
   const [postsLoadingMore, setPostsLoadingMore] = useState(false);
 
-  // Blogs states
   const [blogs, setBlogs] = useState([]);
   const [blogsLoading, setBlogsLoading] = useState(false);
   const [blogsPage, setBlogsPage] = useState(1);
   const [blogsHasMore, setBlogsHasMore] = useState(false);
   const [blogsLoadingMore, setBlogsLoadingMore] = useState(false);
 
-  // Report states
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
@@ -128,7 +123,7 @@ const UserProfilePage = () => {
 
   const isLoadingRef = useRef(false);
 
-  // جلب بيانات المستخدم
+  // ✅ دالة موحدة لجلب البروفايل + البوستات/المقالات
   const fetchProfile = async () => {
     try {
       setLoading(true);
@@ -153,6 +148,17 @@ const UserProfilePage = () => {
           console.error("Error recording view:", error);
         }
       }
+
+      // ✅ بعد جلب البروفايل، نجيب البوستات حسب التاب النشط
+      if (activeTab === "posts") {
+        setPosts([]);
+        setPostsPage(1);
+        await fetchUserPosts(1, false);
+      } else if (activeTab === "blogs") {
+        setBlogs([]);
+        setBlogsPage(1);
+        await fetchUserBlogs(1, false);
+      }
     } catch (err) {
       console.error("Error fetching profile:", err);
       setError("User not found");
@@ -161,7 +167,6 @@ const UserProfilePage = () => {
     }
   };
 
-  // جلب بوستات المستخدم
   const fetchUserPosts = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -189,7 +194,6 @@ const UserProfilePage = () => {
     }
   };
 
-  // جلب مقالات المستخدم
   const fetchUserBlogs = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -217,27 +221,28 @@ const UserProfilePage = () => {
     }
   };
 
+  // ✅ عند تغيير التاب، نجيب البيانات الجديدة
+  useEffect(() => {
+    if (!profile) return;
+
+    if (activeTab === "posts") {
+      setPosts([]);
+      setPostsPage(1);
+      fetchUserPosts(1, false);
+    } else if (activeTab === "blogs") {
+      setBlogs([]);
+      setBlogsPage(1);
+      fetchUserBlogs(1, false);
+    }
+  }, [activeTab, profile?.id]);
+
+  // ✅ عند تحميل الصفحة، نجيب كلشي
   useEffect(() => {
     if (username) {
       fetchProfile();
     }
   }, [username]);
 
-  useEffect(() => {
-    if (username && profile) {
-      if (activeTab === "posts") {
-        setPosts([]);
-        setPostsPage(1);
-        fetchUserPosts(1, false);
-      } else if (activeTab === "blogs") {
-        setBlogs([]);
-        setBlogsPage(1);
-        fetchUserBlogs(1, false);
-      }
-    }
-  }, [activeTab, username, profile?.id]);
-
-  // متابعة المستخدم
   const handleFollow = async () => {
     if (followingLoading) return;
     setFollowingLoading(true);
@@ -256,7 +261,6 @@ const UserProfilePage = () => {
     }
   };
 
-  // إلغاء متابعة المستخدم
   const handleUnfollow = async () => {
     if (followingLoading) return;
     setFollowingLoading(true);
@@ -275,7 +279,6 @@ const UserProfilePage = () => {
     }
   };
 
-  // حظر المستخدم
   const handleBlock = async () => {
     if (blockLoading) return;
     setBlockLoading(true);
@@ -303,7 +306,6 @@ const UserProfilePage = () => {
     }
   };
 
-  // التبليغ عن مستخدم
   const handleReport = async () => {
     if (!reportReason.trim()) {
       alert("Please provide a reason for reporting.");
@@ -335,7 +337,6 @@ const UserProfilePage = () => {
     }
   };
 
-  // تحميل المزيد
   const loadMore = () => {
     if (activeTab === "posts") {
       if (postsLoadingMore || !postsHasMore) return;

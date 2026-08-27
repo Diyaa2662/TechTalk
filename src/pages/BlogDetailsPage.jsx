@@ -115,27 +115,15 @@ const BlogDetailsPage = () => {
     }
   }, [showMenu]);
 
-  // جمع كل الصور من المقال (الغلاف + صور السكشنات)
+  // ✅ جمع الصور - فقط صورة الغلاف (بدون صور السكشنات)
   const getAllImages = () => {
     const images = [];
 
-    // إضافة صورة الغلاف
+    // إضافة صورة الغلاف فقط
     if (blog?.cover_image_url) {
       images.push({
         url: `${BASE_URL}${blog.cover_image_url}`,
         title: blog.title,
-      });
-    }
-
-    // إضافة صور السكشنات
-    if (blog?.sections) {
-      blog.sections.forEach((section) => {
-        if (section.image_url) {
-          images.push({
-            url: `${BASE_URL}${section.image_url}`,
-            title: section.title || "Section image",
-          });
-        }
       });
     }
 
@@ -383,7 +371,6 @@ const BlogDetailsPage = () => {
               {showMenu && (
                 <div className="absolute right-0 mt-1 w-44 bg-panel border border-panelEdge rounded-lg shadow-panel z-10 py-1">
                   {isOwner ? (
-                    // ✅ للمالك: Edit + Delete فقط
                     <>
                       <button
                         onClick={() => {
@@ -405,7 +392,6 @@ const BlogDetailsPage = () => {
                       </button>
                     </>
                   ) : (
-                    // ✅ للمستخدمين الآخرين: Report فقط
                     <button
                       onClick={() => {
                         setShowMenu(false);
@@ -437,51 +423,22 @@ const BlogDetailsPage = () => {
           </div>
         )}
 
-        {/* Sections (Blog Content) - مع ImageViewer للصور */}
+        {/* ✅ Sections (Blog Content) - بدون صور */}
         <div className="space-y-8 mb-8">
           {blog.sections &&
-            // eslint-disable-next-line no-unused-vars
-            blog.sections.map((section, index) => {
-              // حساب index الصورة في مصفوفة الصور الكاملة
-              const getImageIndex = () => {
-                const images = getAllImages();
-                return images.findIndex(
-                  (img) => img.url === `${BASE_URL}${section.image_url}`,
-                );
-              };
-
-              return (
-                <div
-                  key={section.id}
-                  className="glass-card p-6 hover:border-[#5CA1FC]/20 transition-all duration-300"
-                >
-                  {section.title && (
-                    <h2 className="text-xl font-bold text-white mb-3">
-                      {section.title}
-                    </h2>
-                  )}
-                  {section.image_url && (
-                    <div
-                      className="w-full rounded-lg overflow-hidden mb-4 bg-panel/50 cursor-pointer hover:opacity-95 transition-opacity"
-                      style={{ aspectRatio: "16/9" }}
-                      onClick={() => {
-                        const idx = getImageIndex();
-                        openImageViewer(idx >= 0 ? idx : 0);
-                      }}
-                    >
-                      <img
-                        src={`${BASE_URL}${section.image_url}`}
-                        alt={section.title || "Section image"}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  )}
-                  <p className="text-muted leading-relaxed">
-                    {section.content}
-                  </p>
-                </div>
-              );
-            })}
+            blog.sections.map((section) => (
+              <div
+                key={section.id}
+                className="glass-card p-6 hover:border-[#5CA1FC]/20 transition-all duration-300"
+              >
+                {section.title && (
+                  <h2 className="text-xl font-bold text-white mb-3">
+                    {section.title}
+                  </h2>
+                )}
+                <p className="text-muted leading-relaxed">{section.content}</p>
+              </div>
+            ))}
         </div>
 
         {/* Actions Buttons */}
@@ -524,7 +481,7 @@ const BlogDetailsPage = () => {
         </div>
       </div>
 
-      {/* Image Viewer */}
+      {/* Image Viewer - للغلاف فقط */}
       {viewerOpen && (
         <ImageViewer
           images={viewerImages.map((img) => img.url)}

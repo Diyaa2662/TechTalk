@@ -13,7 +13,6 @@ import {
   Loader2,
   Trash2,
   Edit,
-  GripVertical,
 } from "lucide-react";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -45,7 +44,7 @@ const EditBlogPage = () => {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [loadingTags, setLoadingTags] = useState(false);
 
-  // Sections
+  // Sections - بدون صور
   const [sections, setSections] = useState([]);
   const [editingSection, setEditingSection] = useState(null);
   const [showAddSection, setShowAddSection] = useState(false);
@@ -53,10 +52,8 @@ const EditBlogPage = () => {
     title: "",
     content: "",
     order: 1,
-    image: null,
   });
   const [sectionLoading, setSectionLoading] = useState(false);
-  const [reordering, setReordering] = useState(false);
 
   const tagInputRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -101,6 +98,7 @@ const EditBlogPage = () => {
   useEffect(() => {
     fetchBlog();
     fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   // إغلاق قائمة التاجات
@@ -234,9 +232,6 @@ const EditBlogPage = () => {
     formData.append("title", newSection.title || "");
     formData.append("content", newSection.content);
     formData.append("order", sections.length + 1);
-    if (newSection.image) {
-      formData.append("image", newSection.image);
-    }
 
     try {
       const response = await api.post(`/blogs/${id}/sections`, formData);
@@ -245,7 +240,6 @@ const EditBlogPage = () => {
         title: "",
         content: "",
         order: sections.length + 2,
-        image: null,
       });
       setShowAddSection(false);
       setSuccess("Section added successfully!");
@@ -276,7 +270,7 @@ const EditBlogPage = () => {
     }
   };
 
-  // ✅ تعديل سكشن - مع دعم remove_image كـ string
+  // ✅ تعديل سكشن - بدون صور
   const handleUpdateSection = async (sectionId, updatedData) => {
     setSectionLoading(true);
     setError("");
@@ -288,16 +282,8 @@ const EditBlogPage = () => {
       formData.append("content", updatedData.content);
     if (updatedData.order !== undefined)
       formData.append("order", updatedData.order);
-    if (updatedData.image) formData.append("image", updatedData.image);
-    // ✅ مهم: remove_image لازم يكون string "true" أو "false"
-    if (updatedData.remove_image !== undefined) {
-      formData.append(
-        "remove_image",
-        updatedData.remove_image ? "true" : "false",
-      );
-    }
 
-    // ✅ مهم: تجاوز الـ Method Spoofing
+    // ✅ Method Spoofing
     formData.append("_method", "PUT");
 
     try {
@@ -320,33 +306,6 @@ const EditBlogPage = () => {
     }
   };
 
-  // ✅ إعادة ترتيب السكشنات - مؤقتاً مخفي
-  const handleReorderSections = async () => {
-    setError(
-      "Reorder feature is currently unavailable. Please try again later.",
-    );
-    setTimeout(() => setError(""), 3000);
-    return;
-  };
-
-  // ✅ رفع صورة سكشن - مؤقت محلي
-  const handleSectionImageChange = (index, e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const newSections = [...sections];
-    newSections[index]._imageFile = file;
-    setSections(newSections);
-    setError("");
-  };
-
-  // ✅ إزالة صورة سكشن
-  const removeSectionImage = (index) => {
-    const newSections = [...sections];
-    newSections[index]._imageFile = null;
-    newSections[index]._removeImage = true;
-    setSections(newSections);
-  };
-
   // ✅ تحديث حقل في سكشن (بدون إرسال للـ API)
   const updateSection = (index, field, value) => {
     const newSections = [...sections];
@@ -362,7 +321,6 @@ const EditBlogPage = () => {
         id: `temp-${Date.now()}`,
         title: "",
         content: "",
-        image: null,
         order: sections.length + 1,
         is_new: true,
       },
@@ -632,14 +590,7 @@ const EditBlogPage = () => {
             Sections{" "}
             <span className="text-sm text-muted">({sections.length})</span>
           </h2>
-          {/* ✅ فقط زر إضافة سكشن واحد */}
-          {/* <button
-            type="button"
-            onClick={addSectionLocal}
-            className="flex items-center gap-1 text-sm text-[#5CA1FC] hover:text-[#4A8BE8] transition-colors"
-          >
-            <Plus size={16} /> Add Section
-          </button> */}
+          {/* ✅ زر إضافة سكشن - موجود فقط تحت السكشنات */}
         </div>
 
         <div className="space-y-4">
@@ -649,7 +600,7 @@ const EditBlogPage = () => {
               className="glass-card p-4 hover:border-[#5CA1FC]/20 transition-all duration-300"
             >
               {editingSection === section.id ? (
-                // ✅ Edit Mode
+                // ✅ Edit Mode - بدون صور
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-label mb-1">
@@ -690,72 +641,6 @@ const EditBlogPage = () => {
                     />
                   </div>
 
-                  {/* ✅ صورة السكشن - مع دعم remove_image كـ string */}
-                  <div>
-                    <label className="block text-xs font-medium text-label mb-1">
-                      Section Image
-                    </label>
-                    {section.image_url && !section._removeImage && (
-                      <div className="mb-2">
-                        <img
-                          src={`${BASE_URL}${section.image_url}`}
-                          alt="Section"
-                          className="w-32 h-20 object-cover rounded-lg"
-                        />
-                      </div>
-                    )}
-                    <div className="flex gap-2 flex-wrap">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const newSections = [...sections];
-                            const idx = newSections.findIndex(
-                              (s) => s.id === section.id,
-                            );
-                            if (idx !== -1) {
-                              newSections[idx]._imageFile = file;
-                              newSections[idx]._removeImage = false;
-                              setSections(newSections);
-                            }
-                          }
-                        }}
-                        className="hidden"
-                        id={`section-image-edit-${section.id}`}
-                      />
-                      <label
-                        htmlFor={`section-image-edit-${section.id}`}
-                        className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-sm hover:text-[#5CA1FC]"
-                      >
-                        <ImageIcon size={14} />
-                        {section.image_url || section._imageFile
-                          ? "Change Image"
-                          : "Add Image"}
-                      </label>
-                      {(section.image_url || section._imageFile) && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newSections = [...sections];
-                            const idx = newSections.findIndex(
-                              (s) => s.id === section.id,
-                            );
-                            if (idx !== -1) {
-                              newSections[idx]._removeImage = true;
-                              newSections[idx]._imageFile = null;
-                              setSections(newSections);
-                            }
-                          }}
-                          className="px-3 py-1.5 bg-error/20 hover:bg-error/30 text-error rounded-lg text-sm"
-                        >
-                          Remove Image
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -770,12 +655,6 @@ const EditBlogPage = () => {
                               ? section._editContent
                               : section.content,
                         };
-                        if (section._imageFile) {
-                          updatedData.image = section._imageFile;
-                        }
-                        if (section._removeImage) {
-                          updatedData.remove_image = section._removeImage;
-                        }
                         handleUpdateSection(section.id, updatedData);
                       }}
                       disabled={sectionLoading}
@@ -837,15 +716,6 @@ const EditBlogPage = () => {
                     <p className="text-muted text-sm line-clamp-2 mt-1">
                       {section.content}
                     </p>
-                    {section.image_url && !section._removeImage && (
-                      <div className="mt-2">
-                        <img
-                          src={`${BASE_URL}${section.image_url}`}
-                          alt={section.title || "Section image"}
-                          className="w-32 h-20 object-cover rounded-lg"
-                        />
-                      </div>
-                    )}
                   </div>
                   <div className="flex gap-1 ml-2 flex-shrink-0">
                     <button
@@ -912,36 +782,6 @@ const EditBlogPage = () => {
                 rows="3"
                 className="input-field resize-none focus:ring-[#5CA1FC] focus:border-[#5CA1FC]"
               />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) setNewSection({ ...newSection, image: file });
-                }}
-                className="hidden"
-                id="new-section-image"
-              />
-              <label
-                htmlFor="new-section-image"
-                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-sm hover:text-[#5CA1FC]"
-              >
-                <ImageIcon size={14} /> Add Image
-              </label>
-              {newSection.image && (
-                <div className="flex items-center gap-2 text-xs text-[#5CA1FC]">
-                  <span>Image attached</span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNewSection({ ...newSection, image: null })
-                    }
-                    className="text-error"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
               <div className="flex gap-2">
                 <button
                   type="button"

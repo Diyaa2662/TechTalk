@@ -37,9 +37,9 @@ const CreateBlogPage = () => {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [loadingTags, setLoadingTags] = useState(false);
 
-  // Sections
+  // Sections - بدون صور
   const [sections, setSections] = useState([
-    { title: "", content: "", image: null, order: 1 },
+    { title: "", content: "", order: 1 },
   ]);
 
   // UI states
@@ -131,7 +131,7 @@ const CreateBlogPage = () => {
   const addSection = () => {
     setSections([
       ...sections,
-      { title: "", content: "", image: null, order: sections.length + 1 },
+      { title: "", content: "", order: sections.length + 1 },
     ]);
   };
 
@@ -153,24 +153,6 @@ const CreateBlogPage = () => {
   const updateSection = (index, field, value) => {
     const newSections = [...sections];
     newSections[index][field] = value;
-    setSections(newSections);
-  };
-
-  // رفع صورة للسكشن
-  const handleSectionImageChange = (index, e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const newSections = [...sections];
-    newSections[index].image = file;
-    setSections(newSections);
-    setError("");
-  };
-
-  // إزالة صورة السكشن
-  const removeSectionImage = (index) => {
-    const newSections = [...sections];
-    newSections[index].image = null;
     setSections(newSections);
   };
 
@@ -213,14 +195,12 @@ const CreateBlogPage = () => {
       });
     }
 
+    // ✅ إضافة السكشنات بدون صور
     sections.forEach((section, index) => {
       const order = index + 1;
       formData.append(`sections[${index}][title]`, section.title || "");
       formData.append(`sections[${index}][content]`, section.content);
       formData.append(`sections[${index}][order]`, order);
-      if (section.image) {
-        formData.append(`sections[${index}][image]`, section.image);
-      }
     });
 
     console.log("===== FormData Debug =====");
@@ -441,7 +421,7 @@ const CreateBlogPage = () => {
           </p>
         </div>
 
-        {/* Sections */}
+        {/* Sections - بدون صور */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <label className="block text-sm font-medium text-label">
@@ -507,39 +487,7 @@ const CreateBlogPage = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-label mb-1">
-                      Section Image (optional)
-                    </label>
-                    {section.image && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs text-[#5CA1FC]">
-                          Image attached
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeSectionImage(index)}
-                          className="text-xs text-error hover:text-error/80"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleSectionImageChange(index, e)}
-                      className="hidden"
-                      id={`section-image-${index}`}
-                    />
-                    <label
-                      htmlFor={`section-image-${index}`}
-                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-sm hover:text-[#5CA1FC]"
-                    >
-                      <ImageIcon size={14} />
-                      {section.image ? "Change Image" : "Upload Image"}
-                    </label>
-                  </div>
+                  {/* ❌ تم إزالة قسم رفع الصورة */}
                 </div>
               </div>
             ))}
