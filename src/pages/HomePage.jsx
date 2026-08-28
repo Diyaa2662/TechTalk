@@ -46,7 +46,9 @@ const HomePage = () => {
 
     try {
       console.log(`Fetching posts page ${pageNum}...`);
-      const response = await api.get(`/posts?page=${pageNum}&per_page=20`);
+      const response = await api.get(
+        `/posts/recommended?page=${pageNum}&per_page=20`,
+      );
       const newPosts = response.data.data;
       const pagination = response.data.pagination;
 
