@@ -16,6 +16,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "/src/assets/logo.png";
 import api from "../../services/api";
+import eventBus from "../../services/eventBus";
 
 const navItems = [
   { name: "Home", icon: HomeIcon, href: "/" },
@@ -35,7 +36,7 @@ const Sidebar = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [toolsOpen, setToolsOpen] = useState(true); // ✅ مفتوحة افتراضياً
+  const [toolsOpen, setToolsOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -49,11 +50,36 @@ const Sidebar = () => {
     }
   };
 
-  // جلب العداد عند تحميل المكون وكل 30 ثانية
+  // ✅ الاستماع لتحديثات الإشعارات الفورية
   useEffect(() => {
     fetchUnreadCount();
+
+    // ✅ زيادة العداد عند إشعار جديد
+    const unsubscribeNew = eventBus.subscribe(
+      "new-notification-received",
+      () => {
+        setUnreadCount((prev) => prev + 1);
+      },
+    );
+
+    // ✅ تحديث العداد من السيرفر
+    const unsubscribeUpdate = eventBus.subscribe("update-unread-count", () => {
+      fetchUnreadCount();
+    });
+
+    // ✅ تصفير العداد
+    const unsubscribeReset = eventBus.subscribe("reset-unread-count", () => {
+      setUnreadCount(0);
+    });
+
     const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
+
+    return () => {
+      clearInterval(interval);
+      unsubscribeNew();
+      unsubscribeUpdate();
+      unsubscribeReset();
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -89,10 +115,7 @@ const Sidebar = () => {
     }
   };
 
-  // التحقق من الرابط النشط
   const isActive = (href) => location.pathname === href;
-
-  // التحقق من وجود رابط نشط في الأدوات
   const isToolsActive = toolsItems.some(
     (item) => location.pathname === item.href,
   );
@@ -154,7 +177,6 @@ const Sidebar = () => {
                           : "group-hover:text-[#5CA1FC]"
                       }`}
                     />
-                    {/* عداد الإشعارات غير المقروءة */}
                     {item.name === "Notifications" && unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-error text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-0.5 flex items-center justify-center">
                         {unreadCount > 9 ? "9+" : unreadCount}
@@ -177,7 +199,6 @@ const Sidebar = () => {
 
           {/* Tools Section */}
           <div className="mt-4 pt-4 border-t border-panelEdge/50">
-            {/* Tools Header */}
             <button
               onClick={() => isHovered && setToolsOpen(!toolsOpen)}
               className={`
@@ -213,7 +234,6 @@ const Sidebar = () => {
               )}
             </button>
 
-            {/* Tools Items */}
             <div
               className={`
               overflow-hidden transition-all duration-300 ease-out

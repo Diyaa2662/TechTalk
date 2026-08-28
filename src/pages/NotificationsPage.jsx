@@ -15,6 +15,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import pusher, { getUserChannel } from "../services/pusher";
+import eventBus from "../services/eventBus";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -29,8 +31,12 @@ const NotificationsPage = () => {
 
   const isLoadingRef = useRef(false);
   const currentPageRef = useRef(1);
+  const channelRef = useRef(null);
+  const isSubscribed = useRef(false);
+  const receivedNotificationIds = useRef(new Set());
 
-  // جلب عدد الإشعارات غير المقروءة
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
   const fetchUnreadCount = async () => {
     try {
       const response = await api.get("/notifications/unread-count");
@@ -40,7 +46,6 @@ const NotificationsPage = () => {
     }
   };
 
-  // جلب الإشعارات
   const fetchNotifications = async (pageNum = 1, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -70,7 +75,108 @@ const NotificationsPage = () => {
     }
   };
 
-  // تحميل أول صفحة
+  const subscribeToChannel = useCallback(() => {
+    if (!currentUser?.id) return;
+    if (isSubscribed.current) return;
+
+    const channelName = getUserChannel(currentUser.id);
+
+    if (pusher.connection.state !== "connected") return;
+
+    const channel = pusher.subscribe(channelName);
+    channelRef.current = channel;
+    isSubscribed.current = true;
+
+    channel.bind("pusher:subscription_succeeded", () => {
+      console.log("✅ Pusher subscription succeeded");
+    });
+
+    channel.bind("pusher:subscription_error", (error) => {
+      console.error("❌ Pusher subscription error:", error);
+      isSubscribed.current = false;
+    });
+
+    channel.bind_global((eventName, data) => {
+      if (eventName === "pusher:subscription_succeeded") return;
+
+      const isNotificationEvent =
+        eventName &&
+        (eventName.includes("notification") ||
+          eventName.includes("notify") ||
+          eventName.includes("BroadcastNotificationCreated") ||
+          eventName.includes("BroadcastNotification"));
+
+      if (isNotificationEvent && data?.title && data?.body) {
+        const notificationId = data.id || `notif-${Date.now()}`;
+
+        if (receivedNotificationIds.current.has(notificationId)) return;
+        receivedNotificationIds.current.add(notificationId);
+
+        const newNotification = {
+          id: notificationId,
+          title: data.title,
+          body: data.body,
+          type: data.type || "default",
+          created_at: new Date().toISOString(),
+          read_at: null,
+          context: data.context || {},
+          entity: data.entity || {},
+          actor: data.actor || {},
+        };
+
+        setNotifications((prev) => [newNotification, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+
+        eventBus.emit("new-notification-received");
+
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(data.title, {
+            body: data.body,
+            icon: "/vite.svg",
+          });
+        }
+      }
+    });
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    if (pusher.connection.state === "connected") {
+      subscribeToChannel();
+    } else {
+      const connectHandler = () => {
+        setTimeout(() => {
+          subscribeToChannel();
+        }, 500);
+      };
+
+      pusher.connection.bind("connected", connectHandler);
+
+      return () => {
+        pusher.connection.unbind("connected", connectHandler);
+      };
+    }
+
+    return () => {
+      if (channelRef.current) {
+        const channelName = getUserChannel(currentUser.id);
+        channelRef.current.unbind_global();
+        channelRef.current.unbind("pusher:subscription_succeeded");
+        channelRef.current.unbind("pusher:subscription_error");
+        pusher.unsubscribe(channelName);
+        channelRef.current = null;
+        isSubscribed.current = false;
+      }
+    };
+  }, [currentUser?.id, subscribeToChannel]);
+
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
   useEffect(() => {
     currentPageRef.current = 1;
     setPage(1);
@@ -81,7 +187,6 @@ const NotificationsPage = () => {
     fetchUnreadCount();
   }, []);
 
-  // تحميل المزيد عند التمرير
   const loadMore = useCallback(() => {
     if (loadingMore || isLoadingRef.current || !hasMore) return;
 
@@ -92,7 +197,6 @@ const NotificationsPage = () => {
     fetchNotifications(nextPage, true);
   }, [loadingMore, hasMore, page]);
 
-  // كشف التمرير لأسفل الصفحة
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -108,7 +212,6 @@ const NotificationsPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMore]);
 
-  // تحديث إشعار واحد إلى مقروء
   const markAsRead = async (notificationId) => {
     try {
       await api.patch("/notifications/read", {
@@ -123,12 +226,13 @@ const NotificationsPage = () => {
         ),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
+
+      eventBus.emit("update-unread-count");
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
 
-  // تحديث كل الإشعارات إلى مقروءة
   const markAllAsRead = async () => {
     if (markingAll) return;
     setMarkingAll(true);
@@ -140,6 +244,8 @@ const NotificationsPage = () => {
         prev.map((notif) => ({ ...notif, read_at: new Date().toISOString() })),
       );
       setUnreadCount(0);
+
+      eventBus.emit("reset-unread-count");
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
     } finally {
@@ -147,11 +253,9 @@ const NotificationsPage = () => {
     }
   };
 
-  // ✅ الحصول على رابط حسب نوع الإشعار (محسّن)
   const getNotificationLink = (notification) => {
     const { entity, context } = notification;
 
-    // إذا كان الإشعار عن تعليق
     if (entity?.type === "comment") {
       if (context?.post_id) {
         return `/posts/${context.post_id}`;
@@ -160,22 +264,18 @@ const NotificationsPage = () => {
       }
     }
 
-    // إذا كان الإشعار عن بوست
     if (entity?.type === "post") {
       return `/posts/${entity.id}`;
     }
 
-    // إذا كان الإشعار عن بلوق
     if (entity?.type === "blog") {
       return `/blogs/${entity.id}`;
     }
 
-    // إذا كان الإشعار عن متابعة (يودي لبروفايل المستخدم)
     if (notification.type === "follow") {
       return `/profile/${context?.follower_username || entity?.username}`;
     }
 
-    // إذا كان الإشعار عن إعجاب أو عدم إعجاب
     if (notification.type === "like" || notification.type === "dislike") {
       if (context?.post_id) {
         return `/posts/${context.post_id}`;
@@ -187,7 +287,6 @@ const NotificationsPage = () => {
     return "#";
   };
 
-  // معالجة الضغط على الإشعار
   const handleNotificationClick = async (notification) => {
     const link = getNotificationLink(notification);
 
@@ -200,7 +299,6 @@ const NotificationsPage = () => {
     }
   };
 
-  // تنسيق التاريخ
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -216,7 +314,6 @@ const NotificationsPage = () => {
     return date.toLocaleDateString();
   };
 
-  // الحصول على أيقونة حسب نوع الإشعار
   const getNotificationIcon = (type) => {
     switch (type) {
       case "comment_verified":
@@ -260,7 +357,6 @@ const NotificationsPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -286,7 +382,6 @@ const NotificationsPage = () => {
         )}
       </div>
 
-      {/* Notifications List */}
       {notifications.length === 0 ? (
         <div className="text-center py-12 glass-card">
           <Bell size={48} className="text-muted mx-auto mb-3" />
@@ -313,12 +408,10 @@ const NotificationsPage = () => {
                 } ${hasLink ? "cursor-pointer" : "cursor-default"}`}
               >
                 <div className="flex gap-4">
-                  {/* Icon */}
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#5CA1FC]/15 flex items-center justify-center">
                     {getNotificationIcon(notification.type)}
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -358,7 +451,6 @@ const NotificationsPage = () => {
                   </div>
                 </div>
 
-                {/* Unread indicator dot */}
                 {!isRead && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#5CA1FC] rounded-r-full"></div>
                 )}
@@ -368,14 +460,12 @@ const NotificationsPage = () => {
         </div>
       )}
 
-      {/* Loading More */}
       {loadingMore && (
         <div className="flex justify-center my-6">
           <LoadingSpinner size="md" text={null} />
         </div>
       )}
 
-      {/* End of list */}
       {!hasMore && notifications.length > 0 && (
         <p className="text-center text-muted text-sm py-6">
           You've seen all notifications! 🎉

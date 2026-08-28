@@ -11,8 +11,11 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const isFormData = config.data instanceof FormData;
+    const isUrlEncoded =
+      config.headers["Content-Type"] === "application/x-www-form-urlencoded";
 
-    if (!isFormData) {
+    // ✅ إذا كانت البيانات FormData أو URLEncoded، لا نغير الـ Content-Type
+    if (!isFormData && !isUrlEncoded) {
       config.headers["Content-Type"] = "application/json";
     }
 
@@ -37,18 +40,14 @@ api.interceptors.response.use(
     if (error.response) {
       const { status } = error.response;
 
-      // هل كان الطلب أصلاً مرسل مع توكن (Authorization header)؟
       const hadToken = Boolean(error.config?.headers?.Authorization);
 
       if (status === 401) {
         if (hadToken) {
-          // كان في جلسة فعلية (توكن موجود) وانتهت صلاحيتها أثناء الاستخدام
           console.error("Session expired - Please login again");
           localStorage.removeItem("authToken");
           window.location.href = "/login";
         } else {
-          // ما كان في توكن أصلاً (مثلاً طلب /login بكلمة سر غلط)
-          // ما لازم نعمل ريدايركت هون، خلي الكومبوننت يعرض رسالة الخطأ
           console.error("Login failed - Invalid credentials");
         }
       } else if (status === 403) {
