@@ -39,22 +39,22 @@ const HomePage = () => {
   // جلب المستخدم الحالي
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // جلب البوستات
+  // جلب البوستات الموصى بها
   const fetchPosts = useCallback(async (pageNum, append = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
 
     try {
-      console.log(`Fetching posts page ${pageNum}...`);
+      console.log(`Fetching recommended posts page ${pageNum}...`);
       const response = await api.get(
         `/posts/recommended?page=${pageNum}&per_page=20`,
       );
-      const newPosts = response.data.data;
-      const pagination = response.data.pagination;
+      const newPosts = response.data.data || [];
 
-      console.log(
-        `Got ${newPosts.length} posts, has_more: ${pagination?.has_more_pages || false}`,
-      );
+      // ✅ إذا عدد البوستات أقل من 20، معناته هاي آخر صفحة
+      const hasMorePages = newPosts.length === 20;
+
+      console.log(`Got ${newPosts.length} posts, has_more: ${hasMorePages}`);
 
       if (append) {
         setPosts((prev) => [...prev, ...newPosts]);
@@ -62,10 +62,10 @@ const HomePage = () => {
         setPosts(newPosts);
       }
 
-      setHasMore(pagination?.has_more_pages === true);
+      setHasMore(hasMorePages);
       setError("");
     } catch (err) {
-      console.error("Error fetching posts:", err);
+      console.error("Error fetching recommended posts:", err);
 
       if (
         err.response?.status === 404 ||
