@@ -99,7 +99,6 @@ const ProfileCompletionBanner = () => {
     }, 10000); // ✅ 10 ثواني عشان المستخدم يقرأ
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   if (!visible) return null;
